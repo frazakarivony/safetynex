@@ -1,0 +1,59 @@
+LOCAL_PATH := $(call my-dir)
+#FRMBND_PATH := bin
+FRMBND_PATH := ../jniLibs/armeabi
+FRMBND_NAME := NavFramework5241
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := gnustl_shared
+LOCAL_SRC_FILES :=$(FRMBND_PATH)/libgnustl_shared.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := sivl3-mt
+LOCAL_SRC_FILES :=$(FRMBND_PATH)/libsivl3-mt.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := freetype
+LOCAL_SRC_FILES :=$(FRMBND_PATH)/libfreetype.so 
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := png14
+LOCAL_SRC_FILES :=$(FRMBND_PATH)/libpng14.so 
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := crypto
+LOCAL_SRC_FILES :=$(FRMBND_PATH)/libcrypto_1_1.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := ssl
+LOCAL_SRC_FILES :=$(FRMBND_PATH)/libssl_1_1.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := curl
+LOCAL_SRC_FILES :=$(FRMBND_PATH)/libcurl.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := $(FRMBND_NAME)
+LOCAL_SRC_FILES :=$(FRMBND_PATH)/lib$(FRMBND_NAME).so 
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := DllBNDInterface
+LOCAL_SRC_FILES :=$(FRMBND_PATH)/libDllBNDInterface.so 
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := DllNxSafety
+LOCAL_SRC_FILES :=$(FRMBND_PATH)/libDllNxSafety.so 
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := JNDKSafetyNex
+LOCAL_SRC_FILES :=$(FRMBND_PATH)/libJNDKSafetyNex.so 
+include $(PREBUILT_SHARED_LIBRARY)
