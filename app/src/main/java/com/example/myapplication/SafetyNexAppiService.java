@@ -1,15 +1,10 @@
 package com.example.myapplication;
 
-import android.app.AlertDialog;
 import android.app.Application;
-import android.app.Service;
-import android.content.Intent;
 import android.os.Handler;
-import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.nexiad.safetynexappsample.CNxDemoData;
 import com.nexiad.safetynexappsample.CNxInputAPI;
@@ -23,7 +18,7 @@ import com.nexyad.jndksafetynex.JNDKSafetyNex;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class SafetyNexAppiService extends Service {
+public class SafetyNexAppiService {
 
     public boolean mIsRunning;
     public CNxDemoData mData;
@@ -105,11 +100,6 @@ public class SafetyNexAppiService extends Service {
                 doNextStep();
             }
         };
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
     }
 
     public void initAPI() {
@@ -201,10 +191,10 @@ public class SafetyNexAppiService extends Service {
             //Update Output
             if (CurrEhorizon != null) {
                 mMessage = getMessageCustomer(CurrEhorizon);
-                if(this.previousAlertValue != this.mNxRisk.m_TAlert.m_iNxAlertValue) {
+                /*if(this.previousAlertValue != this.mNxRisk.m_TAlert.m_iNxAlertValue) {
                     this.previousAlertValue = this.mNxRisk.m_TAlert.m_iNxAlertValue;
                     Toast.makeText(SafetyNexAppiService.this, mMessage, Toast.LENGTH_LONG).show();
-                }
+                }*/
                  this.writeDatas(mMessage);
             } else {
                 mMessage = "Count " + (this.mCount+1)
@@ -215,14 +205,6 @@ public class SafetyNexAppiService extends Service {
                     + "; Invalid line of data";
         }
         this.mCount++;
-    }
-
-    void alertMessage(String title, String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(title);
-        builder.setMessage(message);
-        builder.setNeutralButton("OK", null);
-        builder.create().show();
     }
 
     private void doNextStep() {
@@ -253,4 +235,8 @@ public class SafetyNexAppiService extends Service {
     public void writeMessageAlert(String mMessage, TextView view){
         view.setText(mMessage);
     }*/
+
+    public void stop(){
+        this.mIsRunning=false;
+    }
 }

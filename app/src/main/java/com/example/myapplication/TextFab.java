@@ -3,8 +3,6 @@ package com.example.myapplication;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
-import android.view.MotionEvent;
-
 import com.andremion.counterfab.CounterFab;
 
 public class TextFab extends CounterFab {

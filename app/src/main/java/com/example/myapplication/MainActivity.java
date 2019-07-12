@@ -76,25 +76,25 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        clearReferences();
+        // clearReferences();
         super.onDestroy();
     }
 
     @Override
     protected void onResume() {
-        clearReferences();
+        // clearReferences();
         super.onResume();
     }
 
     @Override
     protected void onPostResume() {
-        clearReferences();
+        //clearReferences();
         super.onPostResume();
     }
 
     @Override
     protected void onPause() {
-        clearReferences();
+        //clearReferences();
         super.onPause();
 
 

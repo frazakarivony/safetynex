@@ -3,7 +3,9 @@ package com.example.myapplication;
 import android.app.Activity;
 import android.app.Application;
 
-public class MainApp extends Application {
+import java.io.Serializable;
+
+public class MainApp extends Application implements Serializable {
 
     private boolean firstRun = true;
     private Activity mCurrentActivity = null;
