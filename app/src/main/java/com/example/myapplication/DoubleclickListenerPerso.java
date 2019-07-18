@@ -22,17 +22,15 @@ class DoubleclickListenerPerso implements GestureDetector.OnGestureListener, Vie
     private Intent intentFloatingService;
     private MainApp mainApp;
     private SafetyNexAppiService safetyNexAppiService;
-    public View mOverlayView;
 
-    public DoubleclickListenerPerso(Context context, WindowManager.LayoutParams params, WindowManager windowManager, Intent intent, MainApp mainApp,View view){
+    DoubleclickListenerPerso(Context context, WindowManager.LayoutParams params, WindowManager windowManager, Intent intent, MainApp mainApp, View view){
         this.context = context;
         this.mainApp = mainApp;
         this.params = params;
         this.mWindowManager = windowManager;
         this.intentFloatingService = intent;
         gestureDetector = new GestureDetector(context, this);
-        this.mOverlayView = view;
-        this.safetyNexAppiService = new SafetyNexAppiService(this.mainApp,this.mOverlayView);
+        this.safetyNexAppiService = new SafetyNexAppiService(this.mainApp, view);
         this.safetyNexAppiService.initAPI();
     }
 
@@ -101,7 +99,6 @@ class DoubleclickListenerPerso implements GestureDetector.OnGestureListener, Vie
                                     msg="";
                                     break;
                             }
-            //((TextFab)v.findViewById(R.id.fabHead)).setText("");
          Log.v("DoubleClickListener" , msg);
         ((TextView)v.findViewById(R.id.fabHeadMsg)).setText(msg);
         return this.gestureDetector.onTouchEvent(event);

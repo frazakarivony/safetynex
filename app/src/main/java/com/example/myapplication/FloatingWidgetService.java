@@ -12,15 +12,9 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
-import java.io.Serializable;
 
-/**
- * Created by anupamchugh on 01/08/17.
- */
-
-public class FloatingWidgetService extends Service implements Serializable {
+public class FloatingWidgetService extends Service {
 
 
     private WindowManager mWindowManager;
@@ -28,7 +22,6 @@ public class FloatingWidgetService extends Service implements Serializable {
     int mWidth;
     TextFab counterFab;
     boolean activity_background;
-
 
 
     public FloatingWidgetService() {
@@ -39,7 +32,6 @@ public class FloatingWidgetService extends Service implements Serializable {
     public IBinder onBind(Intent intent) {
         return null;
     }
-
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -52,7 +44,6 @@ public class FloatingWidgetService extends Service implements Serializable {
 
             mOverlayView = LayoutInflater.from(this).inflate(R.layout.overlay_layout, null);
 
-
             final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                     WindowManager.LayoutParams.WRAP_CONTENT,
                     WindowManager.LayoutParams.WRAP_CONTENT,
@@ -60,26 +51,22 @@ public class FloatingWidgetService extends Service implements Serializable {
                     WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                     PixelFormat.TRANSLUCENT);
 
-
             //Specify the view position
             params.gravity = Gravity.TOP | Gravity.LEFT;        //Initially view will be added to top-left corner
             params.x = 0;
             params.y = 100;
 
             mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-            mWindowManager.addView(mOverlayView, params);
-
-            Display display = mWindowManager.getDefaultDisplay();
             final Point size = new Point();
-            display.getSize(size);
+            if (mWindowManager != null) {
+                mWindowManager.addView(mOverlayView, params);
+                Display display = mWindowManager.getDefaultDisplay();
+                display.getSize(size);
+            }
 
+            counterFab = mOverlayView.findViewById(R.id.fabHead);
 
-            counterFab = (TextFab) mOverlayView.findViewById(R.id.fabHead);
-           // counterFab.setCount(1);
-
-
-            final RelativeLayout layout = (RelativeLayout) mOverlayView.findViewById(R.id.layout);
-            final TextView msgTextView = (TextView) mOverlayView.findViewById(R.id.fabHeadMsg);
+            final RelativeLayout layout = mOverlayView.findViewById(R.id.layout);
 
             ViewTreeObserver vto = layout.getViewTreeObserver();
             vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -97,15 +84,10 @@ public class FloatingWidgetService extends Service implements Serializable {
             DoubleclickListenerPerso doubleclickListenerPerso = new DoubleclickListenerPerso(getApplicationContext(),params, mWindowManager, intent, ((MainApp)getApplication()),mOverlayView);
                 mOverlayView.setOnTouchListener(doubleclickListenerPerso);
             } else {
-
                 counterFab.increase();
-
             }
 
-
             return super.onStartCommand(intent, flags, startId);
-
-
         }
 
         @Override
@@ -116,7 +98,6 @@ public class FloatingWidgetService extends Service implements Serializable {
 
         @Override
         public void onDestroy() {
-
             super.onDestroy();
             if (mOverlayView != null){
                 mWindowManager.removeView(mOverlayView);
