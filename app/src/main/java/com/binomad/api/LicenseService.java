@@ -1,4 +1,5 @@
 package com.binomad.api;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -12,19 +13,33 @@ import org.ksoap2.transport.HttpsTransportSE;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AppelService extends AsyncTask {
+public class LicenseService extends AsyncTask {
 
     private static final String NAMESPACE = "bnd:licenseWSDL";
     private static final String METHOD_NAME = "NewLicenseEx";
     private static final String SOAP_ACTION = "bnd:licenseWSDL#NewLicenseEx";
+    private OnEventListener<String> mCallBack;
+    private Context mContext;
+    public Exception mException;
 
-    private String licenseEx;
+    public LicenseService(Context context, OnEventListener callback) {
+        mCallBack = callback;
+        mContext = context;
+    }
 
     @Override
     protected Object doInBackground(Object[] objects) {
-        this.licenseEx = newLicenseEx(3550, "357330074843194" );
+
+        try {
+            return newLicenseEx(3550, "357330074843194" );
+
+        } catch (Exception e) {
+            mException = e;
+        }
+
         return null;
     }
+
 
     private String newLicenseEx(int orderId, String imei) {
         try {
@@ -40,8 +55,8 @@ public class AppelService extends AsyncTask {
             headers.add(new HeaderProperty("Authorization", "Basic "+ Base64.encode("softeam-data:vgHHmV4hXai".getBytes())));
 
 
-            HttpsTransportSE androidHttpTransport = new HttpsTransportSE("licensing.benomad.com", 443, "/licensing/licenseService.php", 10000);
-            androidHttpTransport.call(SOAP_ACTION, envelope, headers);
+            HttpsTransportSE androidHttpsTransport = new HttpsTransportSE("licensing.benomad.com", 443, "/licensing/licenseService.php", 10000);
+            androidHttpsTransport.call(SOAP_ACTION, envelope, headers);
             SoapObject objetSOAP = (SoapObject)envelope.getResponse();
             return this.parserObjet(objetSOAP);
 
@@ -52,12 +67,24 @@ public class AppelService extends AsyncTask {
     }
 
     private String parserObjet(SoapObject objet) {
-        SoapObject licenseExObjet = (SoapObject)objet.getProperty("TBRetLicenseRequest");
-        return licenseExObjet.getProperty("return").toString();
+        if(objet.getProperty("errorCode").toString().equals("0")){
+            return objet.getProperty("licenseContent").toString();
+            //todo  decode 64
+        }
+        else{
+            return "bla";
+        }
     }
 
-    public String getLicenseEx() {
-        return licenseEx;
+    @Override
+    protected void onPostExecute(Object o){
+        // your stuff
+        if (mCallBack != null) {
+            if (mException == null) {
+                mCallBack.onSuccess(o.toString());
+            } else {
+                mCallBack.onFailure(mException);
+            }
+        }
     }
-
 }

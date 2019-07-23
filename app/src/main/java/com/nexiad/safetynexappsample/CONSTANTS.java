@@ -8,6 +8,7 @@ public class CONSTANTS {
 	public static final String DEMO_OUT_FILE_NAME = "WorkDirSampleLicense/DataSafetyTooShort_OUT.csv";
 	//	public static final String  DEMO_MAP_SUB_PATH = "YOUR CHOICE";
 	public static final String DEMO_MAP_SUB_PATH = "FR_CARDIn";
+	public static final String MAP_SUB_PATH = "hybrid_europe";
 	//	public static final String  DEMO_LICENSE_FILE = "YOUR CHOICE";
 	public static final String DEMO_LICENSE_FILE = "License/benomadAll.lic";
 	//	public static final String  DEMO_LICENSE_FILE_NEXYAD = "YOUR CHOICE";
