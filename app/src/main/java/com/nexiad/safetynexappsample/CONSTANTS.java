@@ -8,11 +8,13 @@ public class CONSTANTS {
 	public static final String DEMO_OUT_FILE_NAME = "WorkDirSampleLicense/DataSafetyTooShort_OUT.csv";
 	//	public static final String  DEMO_MAP_SUB_PATH = "YOUR CHOICE";
 	public static final String DEMO_MAP_SUB_PATH = "FR_CARDIn";
-	public static final String MAP_SUB_PATH = "hybrid_europe";
+	public static final String MAP_SUB_PATH = "EU_CARDIn";
 	//	public static final String  DEMO_LICENSE_FILE = "YOUR CHOICE";
 	public static final String DEMO_LICENSE_FILE = "License/benomadAll.lic";
 	//	public static final String  DEMO_LICENSE_FILE_NEXYAD = "YOUR CHOICE";
 	public static final String DEMO_LICENSE_FILE_NEXYAD = "License/Nexyad_SafetyNex.lic";
+	//	public static final String  DEMO_CERTIFICATE_FILE_NEXYAD = "YOUR CHOICE";
+	public static final String DEMO_CERTIFICATE_FILE_NEXYAD = "License/nexyad.cer";
 	//	public static final String  DEMO_UNLOCK_KEY = "PROVIDED BY BENOMAD";
 	public static final String DEMO_UNLOCK_KEY = "58KJ1bsd";
 	//	public static final String  DEMO_LANGUAGE = "YOUR LANGUAGE INT VALUE (1;2;3)";

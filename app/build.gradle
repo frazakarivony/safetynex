@@ -36,4 +36,6 @@ dependencies {
     implementation files('src/main/libs/JNDKSafetyNex.jar')
     implementation files('src/main/libs/bndandroid-1_1_2.jar')
     api 'com.haotek.ksoap2:ksoap2-android-assembly:3.3.0'
+    api 'com.android.volley:volley:1.1.1'
+
 }

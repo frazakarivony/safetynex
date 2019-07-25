@@ -1,12 +1,15 @@
 package com.example.myapplication;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -14,11 +17,6 @@ import android.widget.Toast;
 
 import com.binomad.api.LicenseService;
 import com.binomad.api.OnEventListener;
-import com.nexiad.safetynexappsample.CONSTANTS;
-
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,23 +25,36 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(getApplicationContext().TELEPHONY_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        String imei = telephonyManager.getDeviceId();
+
         setContentView(R.layout.activity_main);
 
         LicenseService licenseService= new LicenseService(getApplicationContext(), new OnEventListener() {
             @Override
             public void onSuccess(Object o) {
                 Toast.makeText(getApplicationContext(), "SUCCESS: "+o.toString(), Toast.LENGTH_LONG).show();
-                writeToFile(o.toString() );
             }
 
             @Override
             public void onFailure(Exception e) {
                 Toast.makeText(getApplicationContext(), "ERROR: " + e.getMessage(), Toast.LENGTH_LONG).show();
             }
-        });
+        }, imei);
         licenseService.execute();
 
-
+        //System.exit(0);
         Button button = (Button) findViewById(R.id.button);
         TextView textView = (TextView) findViewById(R.id.textView);
         Button close = (Button) findViewById(R.id.close);
@@ -88,18 +99,6 @@ public class MainActivity extends AppCompatActivity {
     private void initializeView() {
         startService(new Intent(MainActivity.this, FloatingWidgetService.class));
         finish();
-    }
-
-    private void writeToFile(String data) {
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream(CONSTANTS.DEMO_WORKING_PATH.concat(CONSTANTS.DEMO_LICENSE_FILE));
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream);
-            outputStreamWriter.write(data);
-            outputStreamWriter.close();
-        }
-        catch (IOException e) {
-            Log.e("Exception", "File write failed: " + e.toString());
-        }
     }
 }
 
