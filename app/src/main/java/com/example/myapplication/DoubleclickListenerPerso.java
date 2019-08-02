@@ -7,7 +7,6 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.TextView;
 
 class DoubleclickListenerPerso implements GestureDetector.OnGestureListener, View.OnTouchListener {
 
@@ -71,36 +70,33 @@ class DoubleclickListenerPerso implements GestureDetector.OnGestureListener, Vie
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         String msg = "";
+        msg = "Mouvement vers : ";
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    msg += "bas detecté " ;
+                    //remember the initial position.
+                    initialX = params.x;
+                    initialY = params.y;
 
-        ((TextFab)v.findViewById(R.id.fabHead)).setCount(((TextFab)v.findViewById(R.id.fabHead)).getCount()+1);
-                             msg = "Mouvement vers : ";
-                            switch (event.getAction()) {
-                                case MotionEvent.ACTION_DOWN:
-                                    msg += "bas detecté " + ((TextFab)v.findViewById(R.id.fabHead)).getCount();
-                                    //remember the initial position.
-                                    initialX = params.x;
-                                    initialY = params.y;
+                    //get the touch location
+                    initialTouchX = event.getRawX();
+                    initialTouchY = event.getRawY();
 
-                                    //get the touch location
-                                    initialTouchX = event.getRawX();
-                                    initialTouchY = event.getRawY();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    msg += "indéterminé detecté ";
+                    //Calculate the X and Y coordinates of the view.
+                    params.x = initialX + (int) (event.getRawX() - initialTouchX);
+                    params.y = initialY + (int) (event.getRawY() - initialTouchY);
 
-                                    break;
-                                case MotionEvent.ACTION_MOVE:
-                                    msg += "indéterminé detecté " + ((TextFab)v.findViewById(R.id.fabHead)).getCount();
-                                    //Calculate the X and Y coordinates of the view.
-                                    params.x = initialX + (int) (event.getRawX() - initialTouchX);
-                                    params.y = initialY + (int) (event.getRawY() - initialTouchY);
-
-                                    //Update the layout with new X & Y coordinates
-                                    mWindowManager.updateViewLayout(v, params);
-                                    break;
-                                case MotionEvent.ACTION_UP:
-                                    msg="";
-                                    break;
-                            }
-         Log.v("DoubleClickListener" , msg);
-        ((TextView)v.findViewById(R.id.fabHeadMsg)).setText(msg);
+                    //Update the layout with new X & Y coordinates
+                    mWindowManager.updateViewLayout(v, params);
+                    break;
+                case MotionEvent.ACTION_UP:
+                    msg="";
+                    break;
+            }
+            Log.v("DoubleClickListener" , msg);
         return this.gestureDetector.onTouchEvent(event);
     }
 

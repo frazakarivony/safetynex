@@ -1,7 +1,14 @@
 package com.example.myapplication;
 
+import android.Manifest;
 import android.app.Application;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -18,7 +25,7 @@ import com.nexyad.jndksafetynex.JNDKSafetyNex;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class SafetyNexAppiService {
+class SafetyNexAppiService {
 
     private boolean mIsRunning;
     private CNxDemoData mData;
@@ -37,6 +44,8 @@ public class SafetyNexAppiService {
     private Runnable mTimerRunnable;
     private MainApp app;
     private View mView;
+    private static final long LOCATION_REFRESH_TIME = 0;
+    private static final float LOCATION_REFRESH_DISTANCE = 0;
 
     SafetyNexAppiService(Application app, View view) {
         this.TAG  = "SafetyNexService";
@@ -49,7 +58,6 @@ public class SafetyNexAppiService {
         LicenseFileNx = workingPath + CONSTANTS.DEMO_LICENSE_FILE_NEXYAD;
         MapSubPath = workingPath + CONSTANTS.MAP_SUB_PATH;
         UnlockKey = CONSTANTS.DEMO_UNLOCK_KEY;
-
         Language = 0;
 
         try {
@@ -66,13 +74,13 @@ public class SafetyNexAppiService {
         mInpuAPI = new CNxInputAPI();
         mNxRisk = new CNxRisk();
         mTimerHandler = new Handler();
-        mTimerRunnable = new Runnable() {
+        /*mTimerRunnable = new Runnable() {
             @Override
             public void run() {
                 updateRisk();
                 doNextStep();
             }
-        };
+        };*/
     }
 
     void initAPI() {
@@ -185,7 +193,7 @@ public class SafetyNexAppiService {
 
     private void writeDatas(String mMessage){
         this.mData.WriteData(mMessage);
-        ((TextView)this.mView.findViewById(R.id.fabHeadMsg)).setText(mMessage);
+//        ((TextView)this.mView.findViewById(R.id.fabHeadMsg)).setText(mMessage);
     }
 
     void stop(){

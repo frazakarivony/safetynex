@@ -132,7 +132,7 @@ public class LicenseService extends AsyncTask {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        byte[] data = response.getBytes(StandardCharsets.UTF_16);
+                        byte[] data = response.getBytes(StandardCharsets.UTF_8);
                         //String base64 = android.util.Base64.encodeToString(data, android.util.Base64.DEFAULT);
                         writeToFile(certificateNxtPathFile, android.util.Base64.encodeToString(data, android.util.Base64.DEFAULT));
                         // todo find the good encoding or another methode to store the certificate
