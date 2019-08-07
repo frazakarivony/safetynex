@@ -1,14 +1,16 @@
 package com.nexiad.safetynexappsample;
 public class CNxInputAPI {
-	public float mTime;
-	public float mAccelX;
-	public float mAccelY;
-	public float mAccelZ;
-	public float mLat;
-	public float mLon;
-	public float mSpeed;
-	public float mCap;
-	public float mTimeDiffGPS;
+	private float mTime;
+	private float mAccelX;
+	private float mAccelY;
+	private float mAccelZ;
+	private float mLat;
+	private float mLon;
+	private float mSpeed;
+	private float mCap;
+	private float mTimeDiffGPS;
+	private int nbOfSat;
+
 	public boolean ParseData(String prmLine) {
 		boolean isData = false;
 	    	if(prmLine != null) {
@@ -31,5 +33,89 @@ public class CNxInputAPI {
 		    	}
 	    	}
     	return isData;
+	}
+	public void setDataFromGps(){
+
+	}
+
+	public float getmTime() {
+		return mTime;
+	}
+
+	public void setmTime(float mTime) {
+		this.mTime = mTime;
+	}
+
+	public float getmAccelX() {
+		return mAccelX;
+	}
+
+	public void setmAccelX(float mAccelX) {
+		this.mAccelX = mAccelX;
+	}
+
+	public float getmAccelY() {
+		return mAccelY;
+	}
+
+	public void setmAccelY(float mAccelY) {
+		this.mAccelY = mAccelY;
+	}
+
+	public float getmAccelZ() {
+		return mAccelZ;
+	}
+
+	public void setmAccelZ(float mAccelZ) {
+		this.mAccelZ = mAccelZ;
+	}
+
+	public float getmLat() {
+		return mLat;
+	}
+
+	public void setmLat(float mLat) {
+		this.mLat = mLat;
+	}
+
+	public float getmLon() {
+		return mLon;
+	}
+
+	public void setmLon(float mLon) {
+		this.mLon = mLon;
+	}
+
+	public float getmSpeed() {
+		return mSpeed;
+	}
+
+	public void setmSpeed(float mSpeed) {
+		this.mSpeed = mSpeed;
+	}
+
+	public float getmCap() {
+		return mCap;
+	}
+
+	public void setmCap(float mCap) {
+		this.mCap = mCap;
+	}
+
+	public float getmTimeDiffGPS() {
+		return mTimeDiffGPS;
+	}
+
+	public void setmTimeDiffGPS(float mTimeDiffGPS) {
+		this.mTimeDiffGPS = mTimeDiffGPS;
+	}
+
+
+	public int getNbOfSat() {
+		return nbOfSat;
+	}
+
+	public void setNbOfSat(int nbOfSat) {
+		this.nbOfSat = nbOfSat;
 	}
 } 

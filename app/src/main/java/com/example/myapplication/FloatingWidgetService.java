@@ -1,4 +1,5 @@
 package com.example.myapplication;
+
 import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -8,6 +9,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -25,8 +30,11 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.widget.TextView;
 
+import com.nexiad.safetynexappsample.CNxInputAPI;
 
-public class FloatingWidgetService extends Service {
+import java.util.Objects;
+
+public class FloatingWidgetService extends Service implements SensorEventListener {
 
     private final String TAG = "FloatingWidgetService";
     private WindowManager mWindowManager;
@@ -36,10 +44,10 @@ public class FloatingWidgetService extends Service {
     private static final float LOCATION_REFRESH_DISTANCE = 0;
     private LocationManager mLocationManager;
     private LocationListener mLocationListener;
+    private long lastUpdate = 0;
+    private float last_x, last_y, last_z;
+    private static final int SHAKE_THRESHOLD = 600;
 
-
-    public FloatingWidgetService() {
-    }
 
     @Nullable
     @Override
@@ -49,8 +57,6 @@ public class FloatingWidgetService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-        addListenerLocation();
 
         if (mOverlayView == null) {
 
@@ -94,12 +100,14 @@ public class FloatingWidgetService extends Service {
             DoubleclickListenerPerso doubleclickListenerPerso = new DoubleclickListenerPerso(getApplicationContext(),params, mWindowManager, intent, ((MainApp)getApplication()),mOverlayView);
             mOverlayView.setOnTouchListener(doubleclickListenerPerso);
 
+            addListenerLocation(doubleclickListenerPerso);
         }
             return super.onStartCommand(intent, flags, startId);
         }
 
-    private void addListenerLocation() {
+    private void addListenerLocation(final DoubleclickListenerPerso doubleclickListenerPerso) {
         mLocationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
+
         if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -110,16 +118,24 @@ public class FloatingWidgetService extends Service {
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
+
         mLocationListener = new LocationListener() {
             @Override
             public void onLocationChanged(final Location location) {
-                Log.i("Position Latitude : ", String.valueOf(location.getLatitude()));
-                Log.i("Position Longitude : ", String.valueOf(location.getLongitude()));
-                Log.i("Position Speed : ", String.valueOf(location.getSpeed()));
-                Log.i("Position Accuracy : ", String.valueOf(location.getAccuracy()));
+                CNxInputAPI mInpuAPI = new CNxInputAPI();
+                mInpuAPI.setmLat((float)location.getLatitude());
+                mInpuAPI.setmLon((float)location.getLongitude());
+                mInpuAPI.setmTime(location.getTime());
+                mInpuAPI.setmTimeDiffGPS(System.currentTimeMillis() - location.getTime());
+                mInpuAPI.setNbOfSat(location.getExtras().getInt("satellites"));
+                mInpuAPI.setmCap(location.getBearing());
+                mInpuAPI.setmSpeed(location.getSpeed());
+                mInpuAPI.setmAccelZ(last_z);
+                mInpuAPI.setmAccelY(last_y);
+                mInpuAPI.setmAccelX(last_x);
 
                 final TextView text = mOverlayView.findViewById(R.id.textView2);
-                text.setText(String.valueOf(location.getLatitude()));
+                text.setText(doubleclickListenerPerso.safetyNexAppiService.getRisk(mInpuAPI));
             }
 
             @Override
@@ -148,6 +164,10 @@ public class FloatingWidgetService extends Service {
         startForeground(12345678, getNotification());
         setTheme(R.style.AppTheme);
         Log.i(TAG, "onCreate");
+
+        SensorManager senSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        Sensor senAccelerometer = Objects.requireNonNull(senSensorManager).getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
@@ -161,10 +181,12 @@ public class FloatingWidgetService extends Service {
     }
 
     private Notification getNotification() {
-        NotificationChannel channel = new NotificationChannel("test","test2",NotificationManager.IMPORTANCE_DEFAULT);
+        NotificationChannel channel = new NotificationChannel("channel_1","SafetyNext",NotificationManager.IMPORTANCE_DEFAULT);
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
-        notificationManager.createNotificationChannel(channel);
-        Notification.Builder builder = new Notification.Builder(getApplicationContext(),"test")
+        if (notificationManager != null) {
+            notificationManager.createNotificationChannel(channel);
+        }
+        Notification.Builder builder = new Notification.Builder(getApplicationContext(),"channel_1")
                 .setContentTitle("SafetyNext")
                 .setContentText("SafetyNext")
                 .setSmallIcon(R.drawable.ic_launcher_foreground);
@@ -172,6 +194,34 @@ public class FloatingWidgetService extends Service {
         return builder.build();
     }
 
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        Sensor mySensor = sensorEvent.sensor;
 
+        if (mySensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            float x = sensorEvent.values[0];
+            float y = sensorEvent.values[1];
+            float z = sensorEvent.values[2];
 
+            long curTime = System.currentTimeMillis();
+
+            if ((curTime - lastUpdate) > 100) {
+                long diffTime = (curTime - lastUpdate);
+                lastUpdate = curTime;
+
+                float speed = Math.abs(x + y + z - last_x - last_y - last_z)/ diffTime * 10000;
+
+                if (speed > SHAKE_THRESHOLD) {
+
+                }
+                last_x = x;
+                last_y = y;
+                last_z = z;
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
 }

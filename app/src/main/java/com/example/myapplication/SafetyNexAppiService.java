@@ -77,7 +77,7 @@ class SafetyNexAppiService {
         /*mTimerRunnable = new Runnable() {
             @Override
             public void run() {
-                updateRisk();
+                updateRiskFromFile();
                 doNextStep();
             }
         };*/
@@ -106,7 +106,7 @@ class SafetyNexAppiService {
         String TempMessage;
         if (prmCurrEhorizon != null && prmCurrEhorizon.length > 4) {
             TempMessage = "Count " + this.mCount
-                    + "; Speed " + Math.round(this.mInpuAPI.mSpeed) + "km/h"
+                    + "; Speed " + Math.round(this.mInpuAPI.getmSpeed()) + "km/h"
                     + "; State " + this.mNxRisk.m_iSafetyNexEngineState
                     + "; Risk " + Math.round(this.mNxRisk.m_fRisk * 100) + "%"
                     + "; TTS:" +this.mNxRisk.m_TAlert.m_sTextToSpeech
@@ -114,7 +114,7 @@ class SafetyNexAppiService {
                     + "; len :" +  prmCurrEhorizon[1];
         } else {
             TempMessage = "Count " + this.mCount
-                    + "; Speed " + Math.round(this.mInpuAPI.mSpeed) + "km/h"
+                    + "; Speed " + Math.round(this.mInpuAPI.getmSpeed()) + "km/h"
                     + "; State " + this.mNxRisk.m_iSafetyNexEngineState
                     + "; Risk " + Math.round(this.mNxRisk.m_fRisk * 100) + "%"
                     + "; TTS:" +this.mNxRisk.m_TAlert.m_sTextToSpeech
@@ -145,16 +145,15 @@ class SafetyNexAppiService {
         this.mJniFunction.Death();
     }
 
-    private void updateRisk() {
-        Log.v(TAG, "upDateRisk");
-        //Read data
+    private void updateRiskFromFile() {
+        Log.v(TAG, "updateRiskFromFile");
 
         String lineFull = this.mData.ReadNextData();
         if(this.mInpuAPI.ParseData(lineFull)) {
             //Set GPS
-            this.mJniFunction.SetGPSData(this.mInpuAPI.mLat, this.mInpuAPI.mLon, 7, this.mInpuAPI.mCap, this.mInpuAPI.mSpeed, this.mInpuAPI.mTimeDiffGPS);
+            this.mJniFunction.SetGPSData(this.mInpuAPI.getmLat(), this.mInpuAPI.getmLon(), 7, this.mInpuAPI.getmCap(), this.mInpuAPI.getmSpeed(), this.mInpuAPI.getmTimeDiffGPS());
             //Set Accel and get Risk
-            this.mJniFunction.GetAccelDataWithRisk(this.mInpuAPI.mAccelX, this.mInpuAPI.mAccelY, this.mInpuAPI.mAccelZ, this.mNxRisk);
+            this.mJniFunction.GetAccelDataWithRisk(this.mInpuAPI.getmAccelX(), this.mInpuAPI.getmAccelY(), this.mInpuAPI.getmAccelZ(), this.mNxRisk);
             long [] CurrEhorizon = this.mJniFunction.GetCurrEHorizon();
             //Update Output
             if (CurrEhorizon != null) {
@@ -194,6 +193,26 @@ class SafetyNexAppiService {
     private void writeDatas(String mMessage){
         this.mData.WriteData(mMessage);
 //        ((TextView)this.mView.findViewById(R.id.fabHeadMsg)).setText(mMessage);
+    }
+
+    public String getRisk(CNxInputAPI cNxInputAPI){
+        Log.v(TAG, "getRisk");
+        //Set GPS
+        this.mJniFunction.SetGPSData(cNxInputAPI.getmLat(), cNxInputAPI.getmLon(), cNxInputAPI.getNbOfSat(), cNxInputAPI.getmCap(), cNxInputAPI.getmSpeed(), cNxInputAPI.getmTimeDiffGPS());
+        //Set Accel and get Risk
+        this.mJniFunction.GetAccelDataWithRisk(cNxInputAPI.getmAccelX(), cNxInputAPI.getmAccelY(), cNxInputAPI.getmAccelZ(), this.mNxRisk);
+        long [] CurrEhorizon = this.mJniFunction.GetCurrEHorizon();
+        //Update Output
+        if (CurrEhorizon != null) {
+            mMessage = getMessageCustomer(CurrEhorizon);
+            this.writeDatas(mMessage);
+        } else {
+
+            mMessage = "Count " + (this.mCount+1)
+                    + "; No e-Horizon";
+        }
+        this.mCount++;
+        return mMessage;
     }
 
     void stop(){

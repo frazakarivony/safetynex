@@ -20,7 +20,7 @@ class DoubleclickListenerPerso implements GestureDetector.OnGestureListener, Vie
     private WindowManager.LayoutParams params;
     private Intent intentFloatingService;
     private MainApp mainApp;
-    private SafetyNexAppiService safetyNexAppiService;
+    public SafetyNexAppiService safetyNexAppiService;
 
     DoubleclickListenerPerso(Context context, WindowManager.LayoutParams params, WindowManager windowManager, Intent intent, MainApp mainApp, View view){
         this.context = context;
@@ -99,6 +99,4 @@ class DoubleclickListenerPerso implements GestureDetector.OnGestureListener, Vie
             Log.v("DoubleClickListener" , msg);
         return this.gestureDetector.onTouchEvent(event);
     }
-
-
 }
