@@ -2,4 +2,6 @@
     <string name="app_name">My Application</string>
     <string name="text_bubulle">Je suis une bubulle</string>
     <string name="bubbleText">Vous allez trop vite comme d\'hab</string>
+    <string name="add_floating_button">ADD FLOATING BUTTON</string>
+    <string name="close_app">CLOSE APP</string>
 </resources>

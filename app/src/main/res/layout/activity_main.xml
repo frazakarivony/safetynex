@@ -25,7 +25,7 @@
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:layout_margin="16dp"
-            android:text="ADD FLOATING BUTTON" />
+            android:text="@string/add_floating_button" />
 
         <Button
             android:id="@+id/close"
@@ -34,7 +34,8 @@
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:layout_margin="16dp"
-            android:text="CLOSE APP" />
+            android:text="@string/close_app" />
+
     </android.support.v7.widget.LinearLayoutCompat>
 
 </android.support.constraint.ConstraintLayout>

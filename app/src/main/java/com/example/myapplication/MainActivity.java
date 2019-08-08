@@ -112,26 +112,5 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         Log.i(TAG, "onDestroy");
     }
-
-//    private void createNotificationBar(){
-//        createNotificationChannel();
-//
-//        Intent intent = new Intent(this, MainActivity.class);
-//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-//
-//        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-//                .setSmallIcon(R.drawable.ic_launcher_foreground)
-//                .setContentTitle("zblaaa")
-//                .setContentText("zbliii")
-//                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-//                .setContentIntent(pendingIntent)
-//                .setAutoCancel(true);
-//
-//        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-//
-//        // notificationId is a unique int for each notification that you must define
-//        notificationManager.notify(1, builder.build());
-//    }
 }
 

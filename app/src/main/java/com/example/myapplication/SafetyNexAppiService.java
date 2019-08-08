@@ -1,17 +1,9 @@
 package com.example.myapplication;
 
-import android.Manifest;
 import android.app.Application;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 
 import com.nexiad.safetynexappsample.CNxDemoData;
 import com.nexiad.safetynexappsample.CNxInputAPI;
@@ -24,6 +16,8 @@ import com.nexyad.jndksafetynex.JNDKSafetyNex;
 
 import java.util.Timer;
 import java.util.TimerTask;
+
+import static com.nexyad.jndksafetynex.CNxRisk.CNxAlert.TONE_ALERT;
 
 class SafetyNexAppiService {
 
@@ -44,8 +38,6 @@ class SafetyNexAppiService {
     private Runnable mTimerRunnable;
     private MainApp app;
     private View mView;
-    private static final long LOCATION_REFRESH_TIME = 0;
-    private static final float LOCATION_REFRESH_DISTANCE = 0;
 
     SafetyNexAppiService(Application app, View view) {
         this.TAG  = "SafetyNexService";
@@ -102,11 +94,11 @@ class SafetyNexAppiService {
         this.mJniFunction.UserStart();
     }
 
-    private String getMessageCustomer(long [] prmCurrEhorizon) {
+    private String getMessageCustomer(long [] prmCurrEhorizon, CNxInputAPI mInpuAPI) {
         String TempMessage;
         if (prmCurrEhorizon != null && prmCurrEhorizon.length > 4) {
             TempMessage = "Count " + this.mCount
-                    + "; Speed " + Math.round(this.mInpuAPI.getmSpeed()) + "km/h"
+                    + "; Speed " + Math.round(mInpuAPI.getmSpeed()) + "km/h"
                     + "; State " + this.mNxRisk.m_iSafetyNexEngineState
                     + "; Risk " + Math.round(this.mNxRisk.m_fRisk * 100) + "%"
                     + "; TTS:" +this.mNxRisk.m_TAlert.m_sTextToSpeech
@@ -114,7 +106,7 @@ class SafetyNexAppiService {
                     + "; len :" +  prmCurrEhorizon[1];
         } else {
             TempMessage = "Count " + this.mCount
-                    + "; Speed " + Math.round(this.mInpuAPI.getmSpeed()) + "km/h"
+                    + "; Speed " + Math.round(mInpuAPI.getmSpeed()) + "km/h"
                     + "; State " + this.mNxRisk.m_iSafetyNexEngineState
                     + "; Risk " + Math.round(this.mNxRisk.m_fRisk * 100) + "%"
                     + "; TTS:" +this.mNxRisk.m_TAlert.m_sTextToSpeech
@@ -143,31 +135,6 @@ class SafetyNexAppiService {
                 + "; duration =" + duration
                 + "; distance =" + distance;
         this.mJniFunction.Death();
-    }
-
-    private void updateRiskFromFile() {
-        Log.v(TAG, "updateRiskFromFile");
-
-        String lineFull = this.mData.ReadNextData();
-        if(this.mInpuAPI.ParseData(lineFull)) {
-            //Set GPS
-            this.mJniFunction.SetGPSData(this.mInpuAPI.getmLat(), this.mInpuAPI.getmLon(), 7, this.mInpuAPI.getmCap(), this.mInpuAPI.getmSpeed(), this.mInpuAPI.getmTimeDiffGPS());
-            //Set Accel and get Risk
-            this.mJniFunction.GetAccelDataWithRisk(this.mInpuAPI.getmAccelX(), this.mInpuAPI.getmAccelY(), this.mInpuAPI.getmAccelZ(), this.mNxRisk);
-            long [] CurrEhorizon = this.mJniFunction.GetCurrEHorizon();
-            //Update Output
-            if (CurrEhorizon != null) {
-                mMessage = getMessageCustomer(CurrEhorizon);
-                 this.writeDatas(mMessage);
-            } else {
-                mMessage = "Count " + (this.mCount+1)
-                        + "; No e-Horizon";
-            }
-        } else {
-            mMessage = "Count " + (this.mCount+1)
-                    + "; Invalid line of data";
-        }
-        this.mCount++;
     }
 
     private void doNextStep() {
@@ -201,10 +168,11 @@ class SafetyNexAppiService {
         this.mJniFunction.SetGPSData(cNxInputAPI.getmLat(), cNxInputAPI.getmLon(), cNxInputAPI.getNbOfSat(), cNxInputAPI.getmCap(), cNxInputAPI.getmSpeed(), cNxInputAPI.getmTimeDiffGPS());
         //Set Accel and get Risk
         this.mJniFunction.GetAccelDataWithRisk(cNxInputAPI.getmAccelX(), cNxInputAPI.getmAccelY(), cNxInputAPI.getmAccelZ(), this.mNxRisk);
+        updateRiskInfo();
         long [] CurrEhorizon = this.mJniFunction.GetCurrEHorizon();
         //Update Output
         if (CurrEhorizon != null) {
-            mMessage = getMessageCustomer(CurrEhorizon);
+            mMessage = getMessageCustomer(CurrEhorizon, cNxInputAPI);
             this.writeDatas(mMessage);
         } else {
 
@@ -217,5 +185,53 @@ class SafetyNexAppiService {
 
     void stop(){
         this.mIsRunning=false;
+    }
+
+    private void updateRiskInfo(){
+        switch (mNxRisk.m_iSafetyNexEngineState) {
+            case CNxRisk.RISK_AVAILABLE:
+                if (mNxRisk.m_TAlert.m_iVisualAlert == CNxRisk.CNxAlert.VISUAL_ALERT_1 ){
+
+                }
+                /*Risk higher than THRESHOLD_ALERT1*/
+                if (mNxRisk.m_TAlert.m_iVisualAlert == CNxRisk.CNxAlert.VISUAL_ALERT_2){
+                    /*Do SomeThing*/
+                }
+                /*Risk higher than THRESHOLD_ALERT2*/
+                if (mNxRisk.m_TAlert.m_iVisualAlert == CNxRisk.CNxAlert.VISUAL_ALERT_3){
+                    /*Do SomeThing*/
+                }
+                if (mNxRisk.m_TAlert.m_iTonesRiskAlert == TONE_ALERT){
+                    /*Do SomeThing*/
+                }
+                if (mNxRisk.m_TAlert.m_sTextToSpeech != ""){
+                    /*Do SomeThing*/
+                }
+                if (mNxRisk.m_SpeedAlert.m_iSpeedLimitPanel <=20){
+                    /*Do SomeThing*/
+                }
+                if (mNxRisk.m_SpeedAlert.m_iSpeedLimitTone == CNxRisk.CNxSpeedAlert.SPEED_TONE){
+                    /*Do SomeThing*/
+                }
+            break;
+            case CNxRisk.UPDATING_HORIZ:
+                /*Do SomeThing*/
+                break;
+            case CNxRisk.CAR_STOPPED:
+                /*Do SomeThing*/
+                break;
+            case CNxRisk.GPS_LOST:
+                /*Do SomeThing*/
+                break;
+            case CNxRisk.RISK_BUG:
+                /*Do SomeThing*/
+                break;
+            case CNxRisk.STOP_PROLOG:
+                /*Do SomeThing*/
+                break;
+            default:
+                /*default*/
+                break;
+        };
     }
 }

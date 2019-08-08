@@ -30,7 +30,9 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.widget.TextView;
 
+import com.nexiad.safetynexappsample.CNxDemoData;
 import com.nexiad.safetynexappsample.CNxInputAPI;
+import com.nexiad.safetynexappsample.CONSTANTS;
 
 import java.util.Objects;
 
@@ -45,8 +47,12 @@ public class FloatingWidgetService extends Service implements SensorEventListene
     private LocationManager mLocationManager;
     private LocationListener mLocationListener;
     private long lastUpdate = 0;
-    private float last_x, last_y, last_z;
+    private float last_x, last_y, last_z=0;
     private static final int SHAKE_THRESHOLD = 600;
+    private CNxDemoData mData;
+    private String workingPath = CONSTANTS.DEMO_WORKING_PATH;
+    private String inputFile = workingPath + CONSTANTS.DEMO_IN_FILE_NAME;
+    private String outputFile = workingPath + CONSTANTS.DEMO_OUT_FILE_NAME;
 
 
     @Nullable
@@ -123,19 +129,29 @@ public class FloatingWidgetService extends Service implements SensorEventListene
             @Override
             public void onLocationChanged(final Location location) {
                 CNxInputAPI mInpuAPI = new CNxInputAPI();
-                mInpuAPI.setmLat((float)location.getLatitude());
-                mInpuAPI.setmLon((float)location.getLongitude());
-                mInpuAPI.setmTime(location.getTime());
-                mInpuAPI.setmTimeDiffGPS(System.currentTimeMillis() - location.getTime());
-                mInpuAPI.setNbOfSat(location.getExtras().getInt("satellites"));
-                mInpuAPI.setmCap(location.getBearing());
-                mInpuAPI.setmSpeed(location.getSpeed());
-                mInpuAPI.setmAccelZ(last_z);
-                mInpuAPI.setmAccelY(last_y);
-                mInpuAPI.setmAccelX(last_x);
+
+                if(CONSTANTS.DEMO_DATA_TEST){
+                    String lineFull = mData.ReadNextData();
+                    mInpuAPI.ParseData(lineFull);
+                    mInpuAPI.setNbOfSat(7);
+                }else{
+                    mInpuAPI.setmLat((float)location.getLatitude());
+                    mInpuAPI.setmLon((float)location.getLongitude());
+                    mInpuAPI.setmTime(location.getTime());
+                    mInpuAPI.setmTimeDiffGPS(System.currentTimeMillis() - location.getTime());
+                    mInpuAPI.setNbOfSat(location.getExtras().getInt("satellites"));
+                    mInpuAPI.setmCap(location.getBearing());
+                    mInpuAPI.setmSpeed(location.getSpeed());
+                    mInpuAPI.setmAccelZ(last_z);
+                    mInpuAPI.setmAccelY(last_y);
+                    mInpuAPI.setmAccelX(last_x);
+                }
+
+
 
                 final TextView text = mOverlayView.findViewById(R.id.textView2);
                 text.setText(doubleclickListenerPerso.safetyNexAppiService.getRisk(mInpuAPI));
+                //text.setText(String.valueOf(mInpuAPI.getmSpeed()));
             }
 
             @Override
@@ -164,6 +180,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
         startForeground(12345678, getNotification());
         setTheme(R.style.AppTheme);
         Log.i(TAG, "onCreate");
+        mData = new CNxDemoData(inputFile, outputFile);
 
         SensorManager senSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         Sensor senAccelerometer = Objects.requireNonNull(senSensorManager).getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
