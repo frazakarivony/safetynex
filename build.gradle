@@ -25,3 +25,10 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+task unzip(type: Copy) {
+        println("unzip")
+        from zipTree('app/src/main/libs/SVS_V10-EUR-NT-2019_1-UTF8-FULL-LK-DTM-RDF-EH-HYBRID.zip')
+        into 'app/src/main/maps/EU_CARDIn'
+        println("end unzip")
+}
