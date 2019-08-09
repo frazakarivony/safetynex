@@ -91,7 +91,7 @@ public class LicenseService extends AsyncTask {
     private String newLicenseNx(String imei){
 
         // Instantiate the RequestQueue.
-        String url ="https://nexyadsafetynexlicensingprod.azurewebsites.net/api/NexyadLicence?imei=".concat(this.imei).concat("&orderId=").concat(this.imei);
+        String url =CONSTANTS.NEXYAD_LICENSING_URI+BinomadLicensingParams.IMEI.getRequestParam().concat(this.imei).concat("&").concat(BinomadLicensingParams.OREDERID.getRequestParam()).concat(this.imei);
         // Request a string response from the provided URL.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
@@ -100,6 +100,7 @@ public class LicenseService extends AsyncTask {
                         try {
                             JSONObject jsonObject= new JSONObject(response);
                             writeToFile(licenseNxPathFile, jsonObject.getString("Content"));
+                            //TODO vérifier la validité du certificat. si le certificat n'existe pas ou s'il est périmé
                             if(!fileExist(certificateNxtPathFile)){
                                 getCertificate(jsonObject.getString("KeyStoreFileUri"));
                             }
