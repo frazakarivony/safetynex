@@ -48,7 +48,7 @@ class SafetyNexAppiService {
         String outputFile = workingPath + CONSTANTS.DEMO_OUT_FILE_NAME;
         LicenseFileBnd = workingPath + CONSTANTS.DEMO_LICENSE_FILE;
         LicenseFileNx = workingPath + CONSTANTS.DEMO_LICENSE_FILE_NEXYAD;
-        MapSubPath = workingPath + CONSTANTS.MAP_SUB_PATH;
+        MapSubPath = "app/src/main/maps/EU_CARDIn/";//workingPath + CONSTANTS.MAP_SUB_PATH;
         UnlockKey = CONSTANTS.DEMO_UNLOCK_KEY;
         Language = 0;
 
