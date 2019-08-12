@@ -1,6 +1,8 @@
 package com.example.myapplication;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.res.AssetManager;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
@@ -14,6 +16,14 @@ import com.nexyad.jndksafetynex.CNxRisk;
 import com.nexyad.jndksafetynex.CNxUserStat;
 import com.nexyad.jndksafetynex.JNDKSafetyNex;
 
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -30,6 +40,7 @@ class SafetyNexAppiService {
     private String LicenseFileBnd;
     private String LicenseFileNx;
     private String MapSubPath;
+    private String ResMapSubPath;
     private String UnlockKey;
     private int Language;
     private String TAG;
@@ -44,11 +55,13 @@ class SafetyNexAppiService {
         this.app = (MainApp)app;
         this.mView = view;
         String workingPath = CONSTANTS.DEMO_WORKING_PATH;
+        String resPath = CONSTANTS.APP_ASSETS_MAPS_PATH;
         String inputFile = workingPath + CONSTANTS.DEMO_IN_FILE_NAME;
         String outputFile = workingPath + CONSTANTS.DEMO_OUT_FILE_NAME;
         LicenseFileBnd = workingPath + CONSTANTS.DEMO_LICENSE_FILE;
         LicenseFileNx = workingPath + CONSTANTS.DEMO_LICENSE_FILE_NEXYAD;
-        MapSubPath = "app/src/main/maps/EU_CARDIn/";//workingPath + CONSTANTS.MAP_SUB_PATH;
+        MapSubPath = workingPath + CONSTANTS.MAP_SUB_PATH;
+        ResMapSubPath = resPath + CONSTANTS.MAP_SUB_PATH;
         UnlockKey = CONSTANTS.DEMO_UNLOCK_KEY;
         Language = 0;
 
@@ -82,6 +95,7 @@ class SafetyNexAppiService {
         mTimerHandler.postDelayed(mTimerRunnable, CONSTANTS.DEMO_FIRST_DELAY);
         this.mJniFunction = JNDKSafetyNex.GetInstance(this.app.getApplicationContext());
         CNxLicenseInfo tempLicInfo = new CNxLicenseInfo();
+        this.copyMapsOnDeviceStorage();
         boolean isLicOK = this.mJniFunction.Birth(this.LicenseFileBnd, this.MapSubPath, this.UnlockKey, this.Language, this.LicenseFileNx, tempLicInfo);
         if(!isLicOK) {
             new Timer().schedule(new TimerTask() {
@@ -137,6 +151,37 @@ class SafetyNexAppiService {
         this.mJniFunction.Death();
     }
 
+    private void copyMapsOnDeviceStorage(){
+       File externalFilesDir =  new File(MapSubPath);
+        AssetManager assetManager = this.app.getAssets();
+
+        try {
+            if(!externalFilesDir.exists()){
+                externalFilesDir.mkdir();
+
+                String[] li = assetManager.list(CONSTANTS.MAP_SUB_PATH);
+                for(String f : li){
+                  InputStream in = assetManager.open(CONSTANTS.MAP_SUB_PATH+File.separator+f);
+                  String path = externalFilesDir.getAbsolutePath()+File.separator+f;
+                  File fil = new File(path);
+                  fil.createNewFile();
+                    OutputStream out = new FileOutputStream(path);
+
+                    // Copy the bits from instream to outstream
+                    byte[] buf = new byte[1024];
+                    int len;
+                    while ((len = in.read(buf)) > 0) {
+                        out.write(buf, 0, len);
+                    }
+                    in.close();
+                    out.close();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void doNextStep() {
         upDateHMI();
         if(this.mIsRunning) {
@@ -163,7 +208,7 @@ class SafetyNexAppiService {
     }
 
     public String getRisk(CNxInputAPI cNxInputAPI){
-        Log.v(TAG, "getRisk");
+        Log.v(TAG, "getRisk "+printCNxInputAPI(cNxInputAPI));
         //Set GPS
         this.mJniFunction.SetGPSData(cNxInputAPI.getmLat(), cNxInputAPI.getmLon(), cNxInputAPI.getNbOfSat(), cNxInputAPI.getmCap(), cNxInputAPI.getmSpeed(), cNxInputAPI.getmTimeDiffGPS());
         //Set Accel and get Risk
@@ -183,11 +228,16 @@ class SafetyNexAppiService {
         return mMessage;
     }
 
+    private String printCNxInputAPI(CNxInputAPI cNxInputAPI){
+        return "NB Sat : "+cNxInputAPI.getNbOfSat()+" X: "+cNxInputAPI.getmAccelX()+" Y: "+cNxInputAPI.getmAccelY()+" Z: "+cNxInputAPI.getmAccelZ()+" speed: "+cNxInputAPI.getmSpeed()*3.6;
+    }
+
     void stop(){
         this.mIsRunning=false;
     }
 
     private void updateRiskInfo(){
+        Log.v(TAG, " updateRiskInfo : "+mNxRisk.m_iSafetyNexEngineState);
         switch (mNxRisk.m_iSafetyNexEngineState) {
             case CNxRisk.RISK_AVAILABLE:
                 if (mNxRisk.m_TAlert.m_iVisualAlert == CNxRisk.CNxAlert.VISUAL_ALERT_1 ){

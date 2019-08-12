@@ -101,6 +101,7 @@ public class LicenseService extends AsyncTask {
                             JSONObject jsonObject= new JSONObject(response);
                             writeToFile(licenseNxPathFile, jsonObject.getString("Content"));
                             //TODO vérifier la validité du certificat. si le certificat n'existe pas ou s'il est périmé
+                            Log.e("NxLicense", jsonObject.getString("Content") + " uri : "+jsonObject.getString("KeyStoreFileUri"));
                             if(!fileExist(certificateNxtPathFile)){
                                 getCertificate(jsonObject.getString("KeyStoreFileUri"));
                             }

@@ -46,6 +46,8 @@ public class FloatingWidgetService extends Service implements SensorEventListene
     private static final float LOCATION_REFRESH_DISTANCE = 0;
     private LocationManager mLocationManager;
     private LocationListener mLocationListener;
+    private SensorManager mSensorManager;
+    private SensorEventListener mSensorListener;
     private long lastUpdate = 0;
     private float last_x, last_y, last_z=0;
     private static final int SHAKE_THRESHOLD = 600;
@@ -106,10 +108,36 @@ public class FloatingWidgetService extends Service implements SensorEventListene
             DoubleclickListenerPerso doubleclickListenerPerso = new DoubleclickListenerPerso(getApplicationContext(),params, mWindowManager, intent, ((MainApp)getApplication()),mOverlayView);
             mOverlayView.setOnTouchListener(doubleclickListenerPerso);
 
+            addListenerSensor();
             addListenerLocation(doubleclickListenerPerso);
         }
             return super.onStartCommand(intent, flags, startId);
-        }
+    }
+
+    private void addListenerSensor() {
+
+        mSensorManager = (SensorManager) getSystemService(getApplicationContext().SENSOR_SERVICE);
+        Sensor sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+
+        mSensorListener = new SensorEventListener() {
+            @Override
+            public void onSensorChanged(SensorEvent sensorEvent) {
+                last_x = sensorEvent.values[CONSTANTS.ACCELOROMETRE_X_INDIXE];
+                last_y = sensorEvent.values[CONSTANTS.ACCELOROMETRE_Y_INDIXE];
+                last_z = sensorEvent.values[CONSTANTS.ACCELOROMETRE_Z_INDIXE];
+
+            }
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int i) {
+
+            }
+        };
+
+        mSensorManager.registerListener(mSensorListener,
+                sensor,
+                SensorManager.SENSOR_DELAY_GAME);
+    }
 
     private void addListenerLocation(final DoubleclickListenerPerso doubleclickListenerPerso) {
         mLocationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
@@ -138,11 +166,11 @@ public class FloatingWidgetService extends Service implements SensorEventListene
                     mInpuAPI.setmLat((float)location.getLatitude());
                     mInpuAPI.setmLon((float)location.getLongitude());
                     mInpuAPI.setmTime(location.getTime());
-                    mInpuAPI.setmTimeDiffGPS(System.currentTimeMillis() - location.getTime());
+                    mInpuAPI.setmTimeDiffGPS(System.currentTimeMillis() - location.getTime());//TODO qu'est-ce que c'est?
                     mInpuAPI.setNbOfSat(location.getExtras().getInt("satellites"));
                     mInpuAPI.setmCap(location.getBearing());
-                    mInpuAPI.setmSpeed(location.getSpeed());
-                    mInpuAPI.setmAccelZ(last_z);
+                    mInpuAPI.setmSpeed(location.getSpeed()*CONSTANTS.SPEED_MS_TO_KH);
+                    mInpuAPI.setmAccelZ(last_x);
                     mInpuAPI.setmAccelY(last_y);
                     mInpuAPI.setmAccelX(last_x);
                 }

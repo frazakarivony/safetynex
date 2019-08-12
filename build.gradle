@@ -1,3 +1,5 @@
+import com.sun.org.apache.bcel.internal.classfile.ConstantString
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
@@ -23,13 +25,16 @@ allprojects {
 }
 
 task clean(type: Delete) {
-    delete rootProject.buildDir
+    delete rootProject.buildDir, 'app/src/main/maps', 'app/src/main/res/EU_CARDIn', 'app/src/main/assets/maps/EU_CARDIn', 'app/src/main/assets/EU_CARDIn'
 }
 
+task deleteMaprs(type: Delete) {
+    delete 'app/src/main/maps', 'app/src/main/res/EU_CARDIn', 'app/src/main/assets/EU_CARDIn'
+}
 
 task unzip(type: Copy) {
         println("unzip")
         from zipTree('app/src/main/libs/SVS_V10-EUR-NT-2019_1-UTF8-FULL-LK-DTM-RDF-EH-HYBRID.zip')
-        into 'app/src/main/maps/EU_CARDIn'
+        into 'app/src/main/assets/EU_CARDIn'
         println("end unzip")
 }

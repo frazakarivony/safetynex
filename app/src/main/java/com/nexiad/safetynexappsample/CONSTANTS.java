@@ -2,6 +2,7 @@ package com.nexiad.safetynexappsample;
 public class CONSTANTS {
 	//public static final String  DEMO_WORKING_PATH = "YOUR CHOICE";
 	public static final String DEMO_WORKING_PATH = "/storage/emulated/0/nexiad/";
+	public static final String APP_ASSETS_MAPS_PATH = "/app/src/main/assets/";
 	//	public static final String  DEMO_IN_FILE_NAME = "YOUR CHOICE";
 	public static final String DEMO_IN_FILE_NAME = "WorkDirSampleLicense/DataSafetyTooShort.csv";
 	//	public static final String  DEMO_OUT_FILE_NAME = "YOUR CHOICE";
@@ -22,6 +23,10 @@ public class CONSTANTS {
 	public static final int  DEMO_FIRST_DELAY = 2000; //wait 2 seconds to begin read data
 	public static final int  DEMO_EXIT_DELAY = 60000; //wait 60 seconds to exit app when license is not valid
 	public static final int  DEMO_RUN_DELAY = 50; //wait 50 milliseconds to read next data
-	public static final boolean DEMO_DATA_TEST = true;
+	public static final boolean DEMO_DATA_TEST = false;
 	public static final String NEXYAD_LICENSING_URI = "https://nexyadsafetynexlicensingprod.azurewebsites.net/api/NexyadLicence?";
+	public static final float SPEED_MS_TO_KH = 3.6f;
+	public static final int ACCELOROMETRE_X_INDIXE = 0;
+	public static final int ACCELOROMETRE_Y_INDIXE = 1;
+	public static final int ACCELOROMETRE_Z_INDIXE = 2;
 }
