@@ -181,7 +181,8 @@ public class FloatingWidgetService extends Service implements SensorEventListene
 
                 final TextView text = mOverlayView.findViewById(R.id.textView2);
                 text.setText(doubleclickListenerPerso.safetyNexAppiService.getRisk(mInpuAPI));
-                text.setBackground(getApplicationContext().getDrawable(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.getColorEnum().getBg())));
+                ((LinearLayout)text.getParent()).setBackground(getApplicationContext().getDrawable(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.getColorEnum().getBg())));
+                //text.setBackground(getApplicationContext().getDrawable(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.getColorEnum().getBg())));
                 text.setTextColor(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.getColorEnum().getTxt()));
                 //text.setText(String.valueOf(mInpuAPI.getmSpeed()));
             }
