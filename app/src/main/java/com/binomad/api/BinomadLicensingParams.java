@@ -3,7 +3,7 @@ package com.binomad.api;
 public enum BinomadLicensingParams {
     //Objets directement construits
     IMEI("imei", "imei="),
-    OREDERID("orderId", "orederId=");
+    OREDERID("orderId", "orderId=");
 
     private String name = "";
     private String requestParam = "";

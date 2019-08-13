@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.text.Layout;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
@@ -25,6 +26,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.location.Location;
 import android.location.LocationListener;
@@ -179,6 +181,8 @@ public class FloatingWidgetService extends Service implements SensorEventListene
 
                 final TextView text = mOverlayView.findViewById(R.id.textView2);
                 text.setText(doubleclickListenerPerso.safetyNexAppiService.getRisk(mInpuAPI));
+                text.setBackground(getApplicationContext().getDrawable(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.getColorEnum().getBg())));
+                text.setTextColor(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.getColorEnum().getTxt()));
                 //text.setText(String.valueOf(mInpuAPI.getmSpeed()));
             }
 
@@ -268,5 +272,36 @@ public class FloatingWidgetService extends Service implements SensorEventListene
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
+
+    private int getDrawableColor(String code){
+        int drawableId;
+        switch (code){
+            case "LOW":
+                drawableId = R.drawable.rounded_corner_low;
+                break;
+            case "MEDIUM":
+                drawableId = R.drawable.rounded_corner_medium;
+                break;
+            case "HIGH":
+                drawableId = R.drawable.rounded_corner_high;
+                break;
+            case "WARNING":
+                drawableId = R.drawable.rounded_corner_warning;
+                break;
+            case "ALERT":
+                drawableId = R.drawable.rounded_corner_alert;
+                break;
+            case "BLACK":
+                drawableId = R.color.colorNSXTxtBlack;
+                break;
+            case "WHITE":
+                drawableId = R.color.colorNSXTxtWhite;
+                break;
+            default:
+                drawableId = R.color.colorNSX;
+                break;
+        }
+        return drawableId;
     }
 }

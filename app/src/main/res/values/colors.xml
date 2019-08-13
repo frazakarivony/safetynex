@@ -2,6 +2,14 @@
 <resources>
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#4D79FF</color>
+    <color name="colorAccent">#4D79FF</color>#1E90FF
+    <color name="colorNSXBlue">#1E90FF</color>
     <color name="colorNSX">#4D79FF</color>
+    <color name="colorNSXBgLowOfLowLevel">#00FF40</color>
+    <color name="colorNSXBgMediumOfLowLevel">#FFFF00</color>
+    <color name="colorNSXBgHighOfLowLevel">#FF9900</color>
+    <color name="colorNSXBgWarningLevel">#FF6600</color>
+    <color name="colorNSXBgAlertLevel">#FF0000</color>
+    <color name="colorNSXTxtWhite">#FFFFFF</color>
+    <color name="colorNSXTxtBlack">#000000</color>
 </resources>

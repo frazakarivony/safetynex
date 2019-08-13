@@ -2,10 +2,12 @@ package com.example.myapplication;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import com.nexiad.safetynexappsample.CNxDemoData;
 import com.nexiad.safetynexappsample.CNxInputAPI;
@@ -49,6 +51,15 @@ class SafetyNexAppiService {
     private Runnable mTimerRunnable;
     private MainApp app;
     private View mView;
+    private static final Integer LOW_LOWLEVEL_RISK = 0;
+    private static final Integer MEDIUM_LOWLEVEL_RISK = 1;
+    private static final Integer HIGH_LOWLEVEL_RISK = 2;
+
+    public MainActivityColorEnum getColorEnum() {
+        return colorEnum;
+    }
+
+    private MainActivityColorEnum colorEnum;
 
     SafetyNexAppiService(Application app, View view) {
         this.TAG  = "SafetyNexService";
@@ -110,11 +121,13 @@ class SafetyNexAppiService {
 
     private String getMessageCustomer(long [] prmCurrEhorizon, CNxInputAPI mInpuAPI) {
         String TempMessage;
+        float risque = Math.round(this.mNxRisk.m_fRisk * 100);
+        risque = (risque < 0 ? 0 : risque);
         if (prmCurrEhorizon != null && prmCurrEhorizon.length > 4) {
             TempMessage = "Count " + this.mCount
                     + "; Speed " + Math.round(mInpuAPI.getmSpeed()) + "km/h"
                     + "; State " + this.mNxRisk.m_iSafetyNexEngineState
-                    + "; Risk " + Math.round(this.mNxRisk.m_fRisk * 100) + "%"
+                    + "; Risk " + risque + "%"
                     + "; TTS:" +this.mNxRisk.m_TAlert.m_sTextToSpeech
                     + "; NxAlert :" + this.mNxRisk.m_TAlert.m_iNxAlertValue
                     + "; len :" +  prmCurrEhorizon[1];
@@ -122,7 +135,7 @@ class SafetyNexAppiService {
             TempMessage = "Count " + this.mCount
                     + "; Speed " + Math.round(mInpuAPI.getmSpeed()) + "km/h"
                     + "; State " + this.mNxRisk.m_iSafetyNexEngineState
-                    + "; Risk " + Math.round(this.mNxRisk.m_fRisk * 100) + "%"
+                    + "; Risk " +risque + "%"
                     + "; TTS:" +this.mNxRisk.m_TAlert.m_sTextToSpeech
                     + "; NxAlert :" + this.mNxRisk.m_TAlert.m_iNxAlertValue;
         }
@@ -213,7 +226,7 @@ class SafetyNexAppiService {
         this.mJniFunction.SetGPSData(cNxInputAPI.getmLat(), cNxInputAPI.getmLon(), cNxInputAPI.getNbOfSat(), cNxInputAPI.getmCap(), cNxInputAPI.getmSpeed(), cNxInputAPI.getmTimeDiffGPS());
         //Set Accel and get Risk
         this.mJniFunction.GetAccelDataWithRisk(cNxInputAPI.getmAccelX(), cNxInputAPI.getmAccelY(), cNxInputAPI.getmAccelZ(), this.mNxRisk);
-        updateRiskInfo();
+        this.colorEnum = updateRiskInfo();
         long [] CurrEhorizon = this.mJniFunction.GetCurrEHorizon();
         //Update Output
         if (CurrEhorizon != null) {
@@ -236,20 +249,38 @@ class SafetyNexAppiService {
         this.mIsRunning=false;
     }
 
-    private void updateRiskInfo(){
-        Log.v(TAG, " updateRiskInfo : "+mNxRisk.m_iSafetyNexEngineState);
+    private MainActivityColorEnum updateRiskInfo(){
+        MainActivityColorEnum color = MainActivityColorEnum.LOW_OF_LOWLEVEL;
         switch (mNxRisk.m_iSafetyNexEngineState) {
             case CNxRisk.RISK_AVAILABLE:
+                /* risque faible à moyen
+                  0 à 30% ok vert
+                  30 à 50% ok orange claire
+                  50 à 70% ok mais orange ++
+                * */
                 if (mNxRisk.m_TAlert.m_iVisualAlert == CNxRisk.CNxAlert.VISUAL_ALERT_1 ){
-
+                    Integer risk = manageLowRiskLevel(mNxRisk.m_fRisk * 100);
+                    switch (risk){
+                        case 0 :
+                            color = MainActivityColorEnum.LOW_OF_LOWLEVEL;
+                            break;
+                        case 1 :
+                            color = MainActivityColorEnum.MEDIUM_OF_LOWLEVEL;
+                            break;
+                        default:
+                            color = MainActivityColorEnum.HIGH_OF_LOWLEVEL;
+                            break;
+                    }
                 }
-                /*Risk higher than THRESHOLD_ALERT1*/
+                /*Risk higher than THRESHOLD_ALERT1 70 à 90% warning*/
                 if (mNxRisk.m_TAlert.m_iVisualAlert == CNxRisk.CNxAlert.VISUAL_ALERT_2){
                     /*Do SomeThing*/
+                    color = MainActivityColorEnum.WARNING;
                 }
-                /*Risk higher than THRESHOLD_ALERT2*/
+                /*Risk higher than THRESHOLD_ALERT2 > 90% Danger*/
                 if (mNxRisk.m_TAlert.m_iVisualAlert == CNxRisk.CNxAlert.VISUAL_ALERT_3){
                     /*Do SomeThing*/
+                    color = MainActivityColorEnum.ALERT;
                 }
                 if (mNxRisk.m_TAlert.m_iTonesRiskAlert == TONE_ALERT){
                     /*Do SomeThing*/
@@ -283,5 +314,19 @@ class SafetyNexAppiService {
                 /*default*/
                 break;
         };
+        return color;
+    }
+
+    private Integer manageLowRiskLevel(float percentOfRisk){
+        Integer levelOflowlevelRisk = LOW_LOWLEVEL_RISK;
+
+        if(30 < percentOfRisk && percentOfRisk <= 50){
+           levelOflowlevelRisk  = MEDIUM_LOWLEVEL_RISK;
+        }
+        if( 50 < percentOfRisk){
+            levelOflowlevelRisk = HIGH_LOWLEVEL_RISK;
+        }
+
+        return levelOflowlevelRisk;
     }
 }

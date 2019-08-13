@@ -101,7 +101,6 @@ public class LicenseService extends AsyncTask {
                             JSONObject jsonObject= new JSONObject(response);
                             writeToFile(licenseNxPathFile, jsonObject.getString("Content"));
                             //TODO vérifier la validité du certificat. si le certificat n'existe pas ou s'il est périmé
-                            Log.e("NxLicense", jsonObject.getString("Content") + " uri : "+jsonObject.getString("KeyStoreFileUri"));
                             if(!fileExist(certificateNxtPathFile)){
                                 getCertificate(jsonObject.getString("KeyStoreFileUri"));
                             }
@@ -119,7 +118,7 @@ public class LicenseService extends AsyncTask {
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String>  params = new HashMap<String, String>();
                 params.put("Content-Type", "application/json");
-                params.put("Authorization", "Basic c29mdGVhbTpTRUZ6azY0ODlB");
+                params.put("Authorization", "Basic "+ Base64.encode("softeam:SEFzk6489A".getBytes()));
 
                 return params;
             }
@@ -135,8 +134,9 @@ public class LicenseService extends AsyncTask {
                     @Override
                     public void onResponse(String response) {
                         byte[] data = response.getBytes(StandardCharsets.UTF_8);
+                        writeByteArrayToFile(certificateNxtPathFile, data);
                         //String base64 = android.util.Base64.encodeToString(data, android.util.Base64.DEFAULT);
-                        writeToFile(certificateNxtPathFile, android.util.Base64.encodeToString(data, android.util.Base64.DEFAULT));
+                        //writeToFile(certificateNxtPathFile, android.util.Base64.encodeToString(data, android.util.Base64.DEFAULT));
                         // todo find the good encoding or another methode to store the certificate
                     }
                 }, new Response.ErrorListener() {
@@ -191,6 +191,18 @@ public class LicenseService extends AsyncTask {
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream);
             outputStreamWriter.write(content);
             outputStreamWriter.close();
+        }
+        catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e.toString());
+        }
+    }
+
+    private void writeByteArrayToFile(String filepath, byte[] content) {
+        try {
+            Log.i("writing file : ", filepath);
+            FileOutputStream fileOutputStream = new FileOutputStream(filepath);
+            fileOutputStream.write(content);
+            fileOutputStream.close();
         }
         catch (IOException e) {
             Log.e("Exception", "File write failed: " + e.toString());
