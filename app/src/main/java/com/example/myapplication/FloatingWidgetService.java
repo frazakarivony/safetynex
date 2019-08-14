@@ -182,6 +182,9 @@ public class FloatingWidgetService extends Service implements SensorEventListene
                 final TextView text = mOverlayView.findViewById(R.id.textView2);
                 text.setText(doubleclickListenerPerso.safetyNexAppiService.getRisk(mInpuAPI));
                 ((LinearLayout)text.getParent()).setBackground(getApplicationContext().getDrawable(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.getColorEnum().getBg())));
+                text.setCompoundDrawablesWithIntrinsicBounds(getTextIconDrawable(doubleclickListenerPerso.safetyNexAppiService.getColorEnum().getBg()) ,0,0,0);
+
+
                 //text.setBackground(getApplicationContext().getDrawable(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.getColorEnum().getBg())));
                 text.setTextColor(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.getColorEnum().getTxt()));
                 //text.setText(String.valueOf(mInpuAPI.getmSpeed()));
@@ -301,6 +304,31 @@ public class FloatingWidgetService extends Service implements SensorEventListene
                 break;
             default:
                 drawableId = R.color.colorNSX;
+                break;
+        }
+        return drawableId;
+    }
+
+    private int getTextIconDrawable(String code){
+        int drawableId;
+        switch (code){
+            case "LOW":
+                drawableId = R.drawable.ic_check_box_black_24dp;
+                break;
+            case "MEDIUM":
+                drawableId = R.drawable.ic_medium_level_warning_24dp;
+                break;
+            case "HIGH":
+                drawableId = R.drawable.ic_high_level_warning_24dp;
+                break;
+            case "WARNING":
+                drawableId = R.drawable.ic_warning_24dp;
+                break;
+            case "ALERT":
+                drawableId = R.drawable.ic_error_black_24dp;
+                break;
+            default:
+                drawableId = R.drawable.ic_check_box_black_24dp;
                 break;
         }
         return drawableId;
