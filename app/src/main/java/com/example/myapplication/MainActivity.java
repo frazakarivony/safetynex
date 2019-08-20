@@ -30,8 +30,6 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "onCreate");
         super.onCreate(savedInstanceState);
 
-        //createNotificationBar();
-
         TelephonyManager telephonyManager = (TelephonyManager) getSystemService(getApplicationContext().TELEPHONY_SERVICE);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
@@ -48,22 +46,6 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-      /*  LicenseService licenseService= new LicenseService(getApplicationContext(), new OnEventListener() {
-            @Override
-            public void onSuccess(Object o) {
-                Toast.makeText(getApplicationContext(), "SUCCESS: "+o.toString(), Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                Toast.makeText(getApplicationContext(), "ERROR: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        }, imei);*/
-        LicenseServiceFred licenseServiceFred = new LicenseServiceFred(imei);
-       // licenseServiceFred.execute();
-       // licenseService.execute();
-
-        //System.exit(0);
         Button button = (Button) findViewById(R.id.button);
         TextView textView = (TextView) findViewById(R.id.textView);
         Button close = (Button) findViewById(R.id.close);
@@ -99,10 +81,27 @@ public class MainActivity extends AppCompatActivity {
                 System.exit(0);
             }
         });
-        if( ((MainApp)getApplication()).isFirstRun()) {
-            button.callOnClick();
-            ((MainApp)getApplication()).setFirsRun(false);
-        }
+
+        LicenseServiceFred licenseServiceFred = new LicenseServiceFred(getApplicationContext(), new OnEventListener() {
+            @Override
+            public void onSuccess(Object object) {
+                if("ok".equals((String)object)) {
+                    if (((MainApp) getApplication()).isFirstRun()) {
+                        Button button = (Button) findViewById(R.id.button);
+                        button.callOnClick();
+                        ((MainApp) getApplication()).setFirsRun(false);
+                    }
+                }
+            }
+
+            public void onFailure(Exception e) {
+                Toast.makeText(getApplicationContext(), "ERROR: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                Button close = (Button) findViewById(R.id.close);
+                close.callOnClick();
+            }
+        },imei);
+        licenseServiceFred.execute();
+
     }
 
     private void initializeView() {

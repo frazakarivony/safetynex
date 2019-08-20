@@ -64,7 +64,9 @@ public class LicenseServiceFred extends AsyncTask{
     private String imei;
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36";
 
-    public LicenseServiceFred(String imei) {
+    public LicenseServiceFred(Context context, OnEventListener callback, String imei) {
+        this.mCallBack = callback;
+        this.mContext = context;
         this.licenseBndPathFile = CONSTANTS.DEMO_WORKING_PATH.concat(CONSTANTS.DEMO_LICENSE_FILE);
         this.licenseNxPathFile = CONSTANTS.DEMO_WORKING_PATH.concat(CONSTANTS.DEMO_LICENSE_FILE_NEXYAD);
         this.certificateNxtPathFile = CONSTANTS.DEMO_WORKING_PATH.concat(CONSTANTS.DEMO_CERTIFICATE_FILE_NEXYAD);
@@ -83,6 +85,8 @@ public class LicenseServiceFred extends AsyncTask{
             properties.put("Authorization", "Basic "+ Base64.encode("softeam:SEFzk6489A".getBytes()));
             getNexiadLicenceAndGetCertificate(surl, "GET",properties);
             getBenomadLicence(3550, this.imei);
+
+            this.mCallBack.onSuccess(new String("ok"));
 
         }catch (Exception e){
             e.printStackTrace();
@@ -140,18 +144,9 @@ public class LicenseServiceFred extends AsyncTask{
         if(objetSOAP != null && objetSOAP.getProperty("errorCode").toString().equals("0")) {
             writeStreamToFile(this.licenseBndPathFile, new ByteArrayInputStream(Base64.decode(objetSOAP.getProperty("licenseContent").toString())));
         }
-        //writeToFile(this.licenseBndPathFile, Objects.requireNonNull(this.parserObjet(objetSOAP)));
 
     }
 
-    private String parserObjet(SoapObject objet) {
-        if(objet.getProperty("errorCode").toString().equals("0")){
-            return objet.getProperty("licenseContent").toString();
-        }
-        else{
-            return null;
-        }
-    }
     private void getNexiadLicenceAndGetCertificate(String surl,String methode , Map<String, String> params) throws Exception{
 
         HttpsURLConnection httpsURLConnection = generateHttpsURLConnection(surl,methode,params);
