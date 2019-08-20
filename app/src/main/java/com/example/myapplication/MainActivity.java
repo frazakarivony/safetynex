@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.binomad.api.LicenseService;
+import com.binomad.api.LicenseServiceFred;
 import com.binomad.api.OnEventListener;
 
 public class MainActivity extends AppCompatActivity {
@@ -47,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        LicenseService licenseService= new LicenseService(getApplicationContext(), new OnEventListener() {
+      /*  LicenseService licenseService= new LicenseService(getApplicationContext(), new OnEventListener() {
             @Override
             public void onSuccess(Object o) {
                 Toast.makeText(getApplicationContext(), "SUCCESS: "+o.toString(), Toast.LENGTH_LONG).show();
@@ -57,8 +58,10 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(Exception e) {
                 Toast.makeText(getApplicationContext(), "ERROR: " + e.getMessage(), Toast.LENGTH_LONG).show();
             }
-        }, imei);
-        licenseService.execute();
+        }, imei);*/
+        LicenseServiceFred licenseServiceFred = new LicenseServiceFred(imei);
+       // licenseServiceFred.execute();
+       // licenseService.execute();
 
         //System.exit(0);
         Button button = (Button) findViewById(R.id.button);

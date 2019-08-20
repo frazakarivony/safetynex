@@ -104,7 +104,7 @@ class SafetyNexAppiService {
 
         this.mIsRunning = true;
         mTimerHandler.postDelayed(mTimerRunnable, CONSTANTS.DEMO_FIRST_DELAY);
-        this.mJniFunction = JNDKSafetyNex.GetInstance(this.app.getApplicationContext());
+       // this.mJniFunction = JNDKSafetyNex.GetInstance(this.app.getApplicationContext());
         CNxLicenseInfo tempLicInfo = new CNxLicenseInfo();
         this.copyMapsOnDeviceStorage();
         boolean isLicOK = this.mJniFunction.Birth(this.LicenseFileBnd, this.MapSubPath, this.UnlockKey, this.Language, this.LicenseFileNx, tempLicInfo);
@@ -231,6 +231,7 @@ class SafetyNexAppiService {
         //Update Output
         if (CurrEhorizon != null) {
             mMessage = getMessageCustomer(CurrEhorizon, cNxInputAPI);
+            mMessage += printCNxInputAPI(cNxInputAPI);
             this.writeDatas(mMessage);
         } else {
 
