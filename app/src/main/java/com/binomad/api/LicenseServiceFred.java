@@ -1,21 +1,11 @@
 package com.binomad.api;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.ArrayMap;
 import android.util.Log;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import com.exceptions.BenomadException;
 import com.nexiad.safetynexappsample.CONSTANTS;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.kobjects.base64.Base64;
 import org.ksoap2.HeaderProperty;
@@ -32,19 +22,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.StandardCopyOption;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
@@ -60,7 +43,6 @@ public class LicenseServiceFred extends AsyncTask{
     private String licenseBndPathFile;
     private String licenseNxPathFile;
     private String certificateNxtPathFile;
-    private RequestQueue queue;
     private String imei;
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36";
 
@@ -90,6 +72,7 @@ public class LicenseServiceFred extends AsyncTask{
 
         }catch (Exception e){
             e.printStackTrace();
+            this.mCallBack.onFailure(e);
         }
         return null;
     }
@@ -143,8 +126,9 @@ public class LicenseServiceFred extends AsyncTask{
         SoapObject objetSOAP = (SoapObject)envelope.getResponse();
         if(objetSOAP != null && objetSOAP.getProperty("errorCode").toString().equals("0")) {
             writeStreamToFile(this.licenseBndPathFile, new ByteArrayInputStream(Base64.decode(objetSOAP.getProperty("licenseContent").toString())));
+        }else{
+            throw new BenomadException("ERREUR de récupération de la licence Binomad");
         }
-
     }
 
     private void getNexiadLicenceAndGetCertificate(String surl,String methode , Map<String, String> params) throws Exception{

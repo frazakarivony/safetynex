@@ -18,7 +18,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.text.Layout;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
