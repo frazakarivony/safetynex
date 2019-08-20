@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
         Button close = (Button) findViewById(R.id.close);
 
 
+
         int badge_count = getIntent().getIntExtra("badge_count", 0);
 
         textView.setText(badge_count + " messages received previously");
@@ -88,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
                 if("ok".equals((String)object)) {
                     if (((MainApp) getApplication()).isFirstRun()) {
                         Button button = (Button) findViewById(R.id.button);
+                        button.setClickable(true);
                         button.callOnClick();
                         ((MainApp) getApplication()).setFirsRun(false);
                     }

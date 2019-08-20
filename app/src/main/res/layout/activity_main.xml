@@ -24,6 +24,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
+            android:clickable="false"
             android:layout_margin="16dp"
             android:text="@string/add_floating_button" />
 

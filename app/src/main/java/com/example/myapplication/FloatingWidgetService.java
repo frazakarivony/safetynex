@@ -231,6 +231,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
             mWindowManager.removeView(mOverlayView);
         }
         mLocationManager.removeUpdates(mLocationListener);
+        mSensorManager.unregisterListener(this.mSensorListener);
     }
 
     private Notification getNotification() {
