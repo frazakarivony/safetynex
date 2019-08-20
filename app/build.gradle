@@ -41,4 +41,5 @@ dependencies {
     api "commons-io:commons-io:+"
     api 'com.loopj.android:android-async-http:1.4.10'
     api 'org.json:json:20190722'
+    api group: 'me.tongfei', name: 'progressbar', version: '0.7.4'
 }

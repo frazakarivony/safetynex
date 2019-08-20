@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">My Application</string>
     <string name="text_bubulle">Je suis une bubulle</string>
-    <string name="bubbleText">Vous allez trop vite comme d\'hab</string>
+    <string name="bubbleText"></string>
     <string name="add_floating_button">ADD FLOATING BUTTON</string>
     <string name="close_app">CLOSE APP</string>
+    <string name="loading">Récupération des licences et des cartes... </string>
 </resources>
