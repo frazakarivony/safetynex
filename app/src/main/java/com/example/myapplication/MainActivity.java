@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
+import android.speech.tts.TextToSpeech;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,10 +21,17 @@ import com.binomad.api.LicenseService;
 import com.binomad.api.LicenseServiceFred;
 import com.binomad.api.OnEventListener;
 
-public class MainActivity extends AppCompatActivity {
+import org.w3c.dom.Text;
+
+import java.util.Locale;
+
+public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
 
     private static final int DRAW_OVER_OTHER_APP_PERMISSION = 123;
     private static final String TAG = "MainActivity";
+    private Intent checkIntent = new Intent();
+
+    private TextToSpeech  mTts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +39,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         TelephonyManager telephonyManager = (TelephonyManager) getSystemService(getApplicationContext().TELEPHONY_SERVICE);
+
+        mTts = new TextToSpeech(this, this);
+        mTts.speak(getResources().getString(R.string.init_app),TextToSpeech.QUEUE_FLUSH, null, null);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -54,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
 
         int badge_count = getIntent().getIntExtra("badge_count", 0);
 
-        textView.setText(badge_count + " messages received previously");
+        textView.setText(getResources().getString(R.string.init_app));
         ((MainApp)getApplication()).setCurrentActivity(this);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        getIntent().putExtra("TTS", getResources().getString(R.string.loading));
         LicenseServiceFred licenseServiceFred = new LicenseServiceFred(getApplicationContext(), new OnEventListener() {
             @Override
             public void onSuccess(Object object) {
@@ -97,16 +109,16 @@ public class MainActivity extends AppCompatActivity {
             }
 
             public void onFailure(Exception e) {
-                Toast.makeText(getApplicationContext(), "ERROR: " + e.getMessage(), Toast.LENGTH_LONG).show();
+//                Toast.makeText(getApplicationContext(), "ERROR: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 Button close = (Button) findViewById(R.id.close);
                 close.callOnClick();
             }
         },imei);
         licenseServiceFred.execute();
-
     }
 
     private void initializeView() {
+       //mTts.speak(getResources().getString(R.string.loading), TextToSpeech.QUEUE_FLUSH,null,null);
         startService(new Intent(MainActivity.this, FloatingWidgetService.class));
         finish();
     }
@@ -115,6 +127,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "onDestroy");
+    }
+
+    @Override
+    public void onInit(int status) {
+        if(status != TextToSpeech.ERROR) {
+            mTts.setLanguage(Locale.FRANCE);
+            mTts.setSpeechRate(1); // 1 est la valeur par défaut. Une valeur inférieure rendra l'énonciation plus lente, une valeur supérieure la rendra plus rapide.
+            mTts.setPitch(1); // 1 est la valeur par défaut. Une valeur inférieure rendra l'énonciation plus grave, une valeur supérieure la rendra plus aigue.
+            //mTts.speak(getResources().getString(R.string.init_app),TextToSpeech.QUEUE_FLUSH,null,null);
+        }
     }
 }
 

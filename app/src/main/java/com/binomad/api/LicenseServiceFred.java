@@ -1,8 +1,13 @@
 package com.binomad.api;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
 
+import com.example.myapplication.R;
 import com.exceptions.BenomadException;
 import com.nexiad.safetynexappsample.CONSTANTS;
 
@@ -55,6 +60,7 @@ public class LicenseServiceFred extends AsyncTask{
         this.imei = imei;
     }
 
+    @SuppressLint("WrongThread")
     @Override
     protected Object doInBackground(Object[] objects) {
         // Instantiate the RequestQueue.

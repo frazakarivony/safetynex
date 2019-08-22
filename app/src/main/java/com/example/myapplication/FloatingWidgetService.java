@@ -7,6 +7,7 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.hardware.Sensor;
@@ -25,19 +26,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.location.Location;
 import android.location.LocationListener;
 import android.widget.TextView;
 
+import com.amulyakhare.textdrawable.TextDrawable;
 import com.nexiad.safetynexappsample.CNxDemoData;
 import com.nexiad.safetynexappsample.CNxInputAPI;
 import com.nexiad.safetynexappsample.CONSTANTS;
 
 import java.util.Objects;
 
-public class FloatingWidgetService extends Service implements SensorEventListener {
+public class FloatingWidgetService extends Service implements SensorEventListener{
 
     private final String TAG = "FloatingWidgetService";
     private WindowManager mWindowManager;
@@ -56,7 +59,6 @@ public class FloatingWidgetService extends Service implements SensorEventListene
     private String workingPath = CONSTANTS.DEMO_WORKING_PATH;
     private String inputFile = workingPath + CONSTANTS.DEMO_IN_FILE_NAME;
     private String outputFile = workingPath + CONSTANTS.DEMO_OUT_FILE_NAME;
-
 
     @Nullable
     @Override
@@ -181,12 +183,27 @@ public class FloatingWidgetService extends Service implements SensorEventListene
 
                 final TextView text = mOverlayView.findViewById(R.id.textView2);
                 text.setText(doubleclickListenerPerso.safetyNexAppiService.getRisk(mInpuAPI));
-                ((LinearLayout)text.getParent()).setBackground(getApplicationContext().getDrawable(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.getColorEnum().getBg())));
-                text.setCompoundDrawablesWithIntrinsicBounds(getTextIconDrawable(doubleclickListenerPerso.safetyNexAppiService.getColorEnum().getBg()) ,0,0,0);
 
+                ((LinearLayout)text.getParent()).setBackground(getApplicationContext().getDrawable(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetBorderColor())));
+                // text.setCompoundDrawablesWithIntrinsicBounds(getTextIconDrawable(doubleclickListenerPerso.safetyNexAppiService.getColorEnum().getFloatingWidgetBorderColor()) ,0,0,0);
 
-                //text.setBackground(getApplicationContext().getDrawable(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.getColorEnum().getBg())));
-                text.setTextColor(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.getColorEnum().getTxt()));
+                if(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getTextRounded() != null) {
+                    text.setCompoundDrawablesWithIntrinsicBounds(TextDrawable.builder()
+                            .beginConfig()
+                            .width(60)  // width in px
+                            .height(60) // height in px
+                            .withBorder(5)
+                            .textColor(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()))
+                            .fontSize(30)
+                            .bold()
+                            .endConfig()
+                            .buildRound(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getTextRounded() , Color.WHITE), null, null, null);
+                }else{
+                    text.setCompoundDrawablesWithIntrinsicBounds(getTextIconDrawable(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetBorderColor()) ,0,0,0);
+                }
+
+                //text.setBackground(getApplicationContext().getDrawable(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.getColorEnum().getFloatingWidgetBorderColor())));
+                text.setTextColor(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()));
                 //text.setText(String.valueOf(mInpuAPI.getmSpeed()));
             }
 
@@ -232,6 +249,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
         }
         mLocationManager.removeUpdates(mLocationListener);
         mSensorManager.unregisterListener(this.mSensorListener);
+
     }
 
     private Notification getNotification() {
@@ -294,14 +312,29 @@ public class FloatingWidgetService extends Service implements SensorEventListene
             case "WARNING":
                 drawableId = R.drawable.rounded_corner_warning;
                 break;
+            case "WARNING_SPEED":
+                drawableId = R.drawable.rounded_corner_warning;
+                break;
+            case "GPS_LOST":
+                drawableId = R.drawable.rounded_corner_gps_lost;
+                break;
             case "ALERT":
                 drawableId = R.drawable.rounded_corner_alert;
                 break;
             case "BLACK":
                 drawableId = R.color.colorNSXTxtBlack;
                 break;
+            case "ORANGE":
+                drawableId = R.color.colorNSXBgWarningLevel;
+                break;
+            case "RED":
+                drawableId = R.color.colorNSXBgAlertLevel;
+                break;
             case "WHITE":
                 drawableId = R.color.colorNSXTxtWhite;
+                break;
+            case "GREY":
+                drawableId = R.color.colorNSXTxtGrey;
                 break;
             default:
                 drawableId = R.color.colorNSX;
@@ -334,4 +367,5 @@ public class FloatingWidgetService extends Service implements SensorEventListene
         }
         return drawableId;
     }
+
 }

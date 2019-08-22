@@ -5,4 +5,6 @@
     <string name="add_floating_button">ADD FLOATING BUTTON</string>
     <string name="close_app">CLOSE APP</string>
     <string name="loading">Récupération des licences et des cartes... </string>
+    <string name="floating_view">Démarrage de l\'application. </string>
+    <string name="init_app">Initialisation de l\'application en cours.</string>
 </resources>

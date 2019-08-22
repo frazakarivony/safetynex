@@ -12,4 +12,5 @@
     <color name="colorNSXBgAlertLevel">#FF0000</color>
     <color name="colorNSXTxtWhite">#FFFFFF</color>
     <color name="colorNSXTxtBlack">#000000</color>
+    <color name="colorNSXTxtGrey">#676769</color>
 </resources>

@@ -1,13 +1,14 @@
 package com.example.myapplication;
 
 import android.app.Application;
-import android.content.Context;
-import android.content.Intent;
 import android.content.res.AssetManager;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
+import android.os.Build;
 import android.os.Handler;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 
 import com.nexiad.safetynexappsample.CNxDemoData;
 import com.nexiad.safetynexappsample.CNxInputAPI;
@@ -18,20 +19,18 @@ import com.nexyad.jndksafetynex.CNxRisk;
 import com.nexyad.jndksafetynex.CNxUserStat;
 import com.nexyad.jndksafetynex.JNDKSafetyNex;
 
-import org.apache.commons.io.FileUtils;
-
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import static com.nexyad.jndksafetynex.CNxRisk.CNxAlert.TONE_ALERT;
 
-class SafetyNexAppiService {
+class SafetyNexAppiService implements TextToSpeech.OnInitListener {
 
     private boolean mIsRunning;
     private CNxDemoData mData;
@@ -54,12 +53,12 @@ class SafetyNexAppiService {
     private static final Integer LOW_LOWLEVEL_RISK = 0;
     private static final Integer MEDIUM_LOWLEVEL_RISK = 1;
     private static final Integer HIGH_LOWLEVEL_RISK = 2;
+    private TextToSpeech mTts;
+    private int previousM_iSafetyNexEngineState = -1;
 
-    public MainActivityColorEnum getColorEnum() {
-        return colorEnum;
-    }
 
-    private MainActivityColorEnum colorEnum;
+    private FloatingWidgetAlertingInfos alertingTypeEnum;
+    private ToneGenerator toneGenerator;
 
     SafetyNexAppiService(Application app, View view) {
         this.TAG  = "SafetyNexService";
@@ -74,8 +73,9 @@ class SafetyNexAppiService {
         MapSubPath = workingPath + CONSTANTS.MAP_SUB_PATH;
         ResMapSubPath = resPath + CONSTANTS.MAP_SUB_PATH;
         UnlockKey = CONSTANTS.DEMO_UNLOCK_KEY;
-        Language = 0;
-
+        Language = 1;
+        this.toneGenerator  = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100);
+        this.mTts = new TextToSpeech(this.app.getApplicationContext(), this);
         try {
             Language = Integer.parseInt(String.valueOf(CONSTANTS.DEMO_LANGUAGE));
         }catch (Exception e) {
@@ -99,12 +99,14 @@ class SafetyNexAppiService {
         };*/
     }
 
+    public FloatingWidgetAlertingInfos floatingWidgetAlertingInfos() {
+        return this.alertingTypeEnum;
+    }
+
     void initAPI() {
         Log.v(TAG, "initAPI");
-
         this.mIsRunning = true;
         mTimerHandler.postDelayed(mTimerRunnable, CONSTANTS.DEMO_FIRST_DELAY);
-       // this.mJniFunction = JNDKSafetyNex.GetInstance(this.app.getApplicationContext());
         CNxLicenseInfo tempLicInfo = new CNxLicenseInfo();
         this.copyMapsOnDeviceStorage();
         boolean isLicOK = this.mJniFunction.Birth(this.LicenseFileBnd, this.MapSubPath, this.UnlockKey, this.Language, this.LicenseFileNx, tempLicInfo);
@@ -120,30 +122,25 @@ class SafetyNexAppiService {
     }
 
     private String getMessageCustomer(long [] prmCurrEhorizon, CNxInputAPI mInpuAPI) {
-        String TempMessage;
+        String TempMessage ;
         float risque = Math.round(this.mNxRisk.m_fRisk * 100);
         risque = (risque < 0 ? 0 : risque);
         if (prmCurrEhorizon != null && prmCurrEhorizon.length > 4) {
-            TempMessage = "Count " + this.mCount
-                    + "; Speed " + Math.round(mInpuAPI.getmSpeed()) + "km/h"
-                    + "; State " + this.mNxRisk.m_iSafetyNexEngineState
-                    + "; Risk " + risque + "%"
-                    + "; TTS:" +this.mNxRisk.m_TAlert.m_sTextToSpeech
-                    + "; NxAlert :" + this.mNxRisk.m_TAlert.m_iNxAlertValue
-                    + "; len :" +  prmCurrEhorizon[1];
+            TempMessage = "Vitesse : " + Math.round(mInpuAPI.getmSpeed()) + "km/h"
+                    + " | Risque :" + risque + "%";
         } else {
-            TempMessage = "Count " + this.mCount
-                    + "; Speed " + Math.round(mInpuAPI.getmSpeed()) + "km/h"
-                    + "; State " + this.mNxRisk.m_iSafetyNexEngineState
-                    + "; Risk " +risque + "%"
-                    + "; TTS:" +this.mNxRisk.m_TAlert.m_sTextToSpeech
-                    + "; NxAlert :" + this.mNxRisk.m_TAlert.m_iNxAlertValue;
+            TempMessage = "Vitesse : " + Math.round(mInpuAPI.getmSpeed()) + "km/h"
+                    + " | Risque : " +risque + "%";
         }
         return TempMessage;
     }
 
     private void closeAPI() {
         Log.v(TAG, "closeAPI");
+        if(this.mTts != null){
+            this.mTts.stop();
+            this.mTts.shutdown();
+        }
         this.mJniFunction.UserStop();
         float grade = this.mJniFunction.GetUserGrade();
         CNxUserStat InputUserStat = new CNxUserStat();
@@ -226,12 +223,15 @@ class SafetyNexAppiService {
         this.mJniFunction.SetGPSData(cNxInputAPI.getmLat(), cNxInputAPI.getmLon(), cNxInputAPI.getNbOfSat(), cNxInputAPI.getmCap(), cNxInputAPI.getmSpeed(), cNxInputAPI.getmTimeDiffGPS());
         //Set Accel and get Risk
         this.mJniFunction.GetAccelDataWithRisk(cNxInputAPI.getmAccelX(), cNxInputAPI.getmAccelY(), cNxInputAPI.getmAccelZ(), this.mNxRisk);
-        this.colorEnum = updateRiskInfo();
         long [] CurrEhorizon = this.mJniFunction.GetCurrEHorizon();
+        Long speed = null;
         //Update Output
         if (CurrEhorizon != null) {
             mMessage = getMessageCustomer(CurrEhorizon, cNxInputAPI);
-            mMessage += printCNxInputAPI(cNxInputAPI);
+            if(CurrEhorizon.length > 6) {
+                     speed = CurrEhorizon[6];
+            }
+//            mMessage += printCNxInputAPI(cNxInputAPI);
             this.writeDatas(mMessage);
         } else {
 
@@ -239,6 +239,10 @@ class SafetyNexAppiService {
                     + "; No e-Horizon";
         }
         this.mCount++;
+        if(this.previousM_iSafetyNexEngineState != mNxRisk.m_iSafetyNexEngineState) {
+            this.alertingTypeEnum = updateRiskInfo(speed);
+        }
+        this.previousM_iSafetyNexEngineState = mNxRisk.m_iSafetyNexEngineState;
         return mMessage;
     }
 
@@ -250,8 +254,9 @@ class SafetyNexAppiService {
         this.mIsRunning=false;
     }
 
-    private MainActivityColorEnum updateRiskInfo(){
-        MainActivityColorEnum color = MainActivityColorEnum.LOW_OF_LOWLEVEL;
+    private FloatingWidgetAlertingInfos updateRiskInfo(Long speedLimitSegment){
+
+        FloatingWidgetAlertingInfos alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.LOW_OF_LOWLEVEL, null);
         switch (mNxRisk.m_iSafetyNexEngineState) {
             case CNxRisk.RISK_AVAILABLE:
                 /* risque faible à moyen
@@ -263,37 +268,42 @@ class SafetyNexAppiService {
                     Integer risk = manageLowRiskLevel(mNxRisk.m_fRisk * 100);
                     switch (risk){
                         case 0 :
-                            color = MainActivityColorEnum.LOW_OF_LOWLEVEL;
+                            alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.LOW_OF_LOWLEVEL, null);
                             break;
                         case 1 :
-                            color = MainActivityColorEnum.MEDIUM_OF_LOWLEVEL;
+                            alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.MEDIUM_OF_LOWLEVEL, null);
                             break;
                         default:
-                            color = MainActivityColorEnum.HIGH_OF_LOWLEVEL;
+                            alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.HIGH_OF_LOWLEVEL, null);
                             break;
                     }
                 }
                 /*Risk higher than THRESHOLD_ALERT1 70 à 90% warning*/
                 if (mNxRisk.m_TAlert.m_iVisualAlert == CNxRisk.CNxAlert.VISUAL_ALERT_2){
                     /*Do SomeThing*/
-                    color = MainActivityColorEnum.WARNING;
+                    alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.WARNING, null);
                 }
                 /*Risk higher than THRESHOLD_ALERT2 > 90% Danger*/
                 if (mNxRisk.m_TAlert.m_iVisualAlert == CNxRisk.CNxAlert.VISUAL_ALERT_3){
                     /*Do SomeThing*/
-                    color = MainActivityColorEnum.ALERT;
+                    alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.ALERT, null);
                 }
                 if (mNxRisk.m_TAlert.m_iTonesRiskAlert == TONE_ALERT){
                     /*Do SomeThing*/
+                    this.toneGenerator.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT, 1000);
                 }
-                if (mNxRisk.m_TAlert.m_sTextToSpeech != ""){
-                    /*Do SomeThing*/
+                if (mNxRisk.m_TAlert.m_sTextToSpeech != "" && !mNxRisk.m_TAlert.m_sTextToSpeech.isEmpty() && mNxRisk.m_TAlert.m_sTextToSpeech != null){
+                    speechOut(mNxRisk.m_TAlert.m_sTextToSpeech);
+                    this.mMessage+=" \n\n"+mNxRisk.m_TAlert.m_sTextToSpeech;
                 }
                 if (mNxRisk.m_SpeedAlert.m_iSpeedLimitPanel <=20){
                     /*Do SomeThing*/
                 }
                 if (mNxRisk.m_SpeedAlert.m_iSpeedLimitTone == CNxRisk.CNxSpeedAlert.SPEED_TONE){
                     /*Do SomeThing*/
+                    this.toneGenerator.startTone(ToneGenerator.TONE_SUP_ERROR, 1000);
+                    alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.WARNING_SPEED, speedLimitSegment.toString());
+
                 }
             break;
             case CNxRisk.UPDATING_HORIZ:
@@ -304,6 +314,9 @@ class SafetyNexAppiService {
                 break;
             case CNxRisk.GPS_LOST:
                 /*Do SomeThing*/
+                speechOut("Perte du GPS.");
+                alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.GPS_LOST, "GPS");
+
                 break;
             case CNxRisk.RISK_BUG:
                 /*Do SomeThing*/
@@ -315,7 +328,8 @@ class SafetyNexAppiService {
                 /*default*/
                 break;
         };
-        return color;
+
+     return alertingTypeEnum;
     }
 
     private Integer manageLowRiskLevel(float percentOfRisk){
@@ -329,5 +343,23 @@ class SafetyNexAppiService {
         }
 
         return levelOflowlevelRisk;
+    }
+
+    @Override
+    public void onInit(int status) {
+        if(status != TextToSpeech.ERROR) {
+            mTts.setLanguage(Locale.FRANCE);
+            mTts.setSpeechRate(1); // 1 est la valeur par défaut. Une valeur inférieure rendra l'énonciation plus lente, une valeur supérieure la rendra plus rapide.
+            mTts.setPitch(1); // 1 est la valeur par défaut. Une valeur inférieure rendra l'énonciation plus grave, une valeur supérieure la rendra plus aigue.
+            speechOut("Démarrage de l'application");
+        }
+    }
+
+    private void speechOut(String txt){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mTts.speak(txt,TextToSpeech.QUEUE_ADD,null,null);
+        } else {
+            mTts.speak(txt, TextToSpeech.QUEUE_ADD, null);
+        }
     }
 }
