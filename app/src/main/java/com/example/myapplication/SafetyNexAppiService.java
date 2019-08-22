@@ -293,7 +293,7 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                     /*Do SomeThing*/
                     this.toneGenerator.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT, 1000);
                 }
-                if (mNxRisk.m_TAlert.m_sTextToSpeech != "" && !mNxRisk.m_TAlert.m_sTextToSpeech.isEmpty() && mNxRisk.m_TAlert.m_sTextToSpeech != null){
+                if (mNxRisk.m_TAlert.m_sTextToSpeech != null && mNxRisk.m_TAlert.m_sTextToSpeech != "" && !mNxRisk.m_TAlert.m_sTextToSpeech.isEmpty()){
                     speechOut(mNxRisk.m_TAlert.m_sTextToSpeech);
                     this.mMessage+=" \n\n"+mNxRisk.m_TAlert.m_sTextToSpeech;
                 }
