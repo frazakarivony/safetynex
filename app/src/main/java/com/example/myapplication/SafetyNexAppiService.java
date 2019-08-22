@@ -90,6 +90,7 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         mInpuAPI = new CNxInputAPI();
         mNxRisk = new CNxRisk();
         mTimerHandler = new Handler();
+        this.alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.LOW_OF_LOWLEVEL,null);
         /*mTimerRunnable = new Runnable() {
             @Override
             public void run() {
