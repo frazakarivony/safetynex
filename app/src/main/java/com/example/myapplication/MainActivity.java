@@ -25,13 +25,11 @@ import org.w3c.dom.Text;
 
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
+public class MainActivity extends AppCompatActivity {
 
     private static final int DRAW_OVER_OTHER_APP_PERMISSION = 123;
     private static final String TAG = "MainActivity";
     private Intent checkIntent = new Intent();
-
-    private TextToSpeech  mTts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,9 +37,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
         super.onCreate(savedInstanceState);
 
         TelephonyManager telephonyManager = (TelephonyManager) getSystemService(getApplicationContext().TELEPHONY_SERVICE);
-
-        mTts = new TextToSpeech(this, this);
-        mTts.speak(getResources().getString(R.string.init_app),TextToSpeech.QUEUE_FLUSH, null, null);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -127,16 +122,6 @@ public class MainActivity extends AppCompatActivity implements TextToSpeech.OnIn
     protected void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "onDestroy");
-    }
-
-    @Override
-    public void onInit(int status) {
-        if(status != TextToSpeech.ERROR) {
-            mTts.setLanguage(Locale.FRANCE);
-            mTts.setSpeechRate(1); // 1 est la valeur par défaut. Une valeur inférieure rendra l'énonciation plus lente, une valeur supérieure la rendra plus rapide.
-            mTts.setPitch(1); // 1 est la valeur par défaut. Une valeur inférieure rendra l'énonciation plus grave, une valeur supérieure la rendra plus aigue.
-            //mTts.speak(getResources().getString(R.string.init_app),TextToSpeech.QUEUE_FLUSH,null,null);
-        }
     }
 }
 

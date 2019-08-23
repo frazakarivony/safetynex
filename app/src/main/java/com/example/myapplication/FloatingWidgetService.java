@@ -128,7 +128,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
                 last_x = sensorEvent.values[CONSTANTS.ACCELOROMETRE_X_INDIXE];
                 last_y = sensorEvent.values[CONSTANTS.ACCELOROMETRE_Y_INDIXE];
                 last_z = sensorEvent.values[CONSTANTS.ACCELOROMETRE_Z_INDIXE];
-                Log.v("SensorEventListener ", "change x : "+last_x+" y : "+last_y+" z : "+last_z);
+            //    Log.v("SensorEventListener ", "change x : "+last_x+" y : "+last_y+" z : "+last_z);
 
             }
 
