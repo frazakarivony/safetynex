@@ -353,7 +353,7 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                 }
                 if (mNxRisk.m_SpeedAlert.m_iSpeedLimitTone == CNxRisk.CNxSpeedAlert.SPEED_TONE){
                     /*Do SomeThing*/
-                    this.toneGenerator.startTone(ToneGenerator.TONE_SUP_ERROR, 1000);
+                    //this.toneGenerator.startTone(ToneGenerator.TONE_SUP_ERROR, 1000);
                     speechOut("Portion limitée à "+speedLimitSegment.toString()+" kilomètres par heure.");
                     alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.WARNING_SPEED, speedLimitSegment.toString());
 
@@ -379,6 +379,7 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                 break;
             default:
                 /*default*/
+                this.lastTTS = "";
                 break;
         };
         return alertingTypeEnum;
