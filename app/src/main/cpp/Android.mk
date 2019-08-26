@@ -1,6 +1,6 @@
 LOCAL_PATH := $(call my-dir)
 #FRMBND_PATH := bin
-FRMBND_PATH := ../jniLibs/armeabi
+FRMBND_PATH := ../jniLibs/arm64-v8a
 FRMBND_NAME := NavFramework5241
 
 include $(CLEAR_VARS)
