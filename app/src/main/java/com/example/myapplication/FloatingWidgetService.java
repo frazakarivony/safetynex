@@ -170,7 +170,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
                     mInpuAPI.setmLat((float)location.getLatitude());
                     mInpuAPI.setmLon((float)location.getLongitude());
                     mInpuAPI.setmTime(location.getTime());
-                    mInpuAPI.setmTimeDiffGPS(System.currentTimeMillis() - location.getTime());//TODO qu'est-ce que c'est?
+                    mInpuAPI.setmTimeDiffGPS(System.currentTimeMillis() - location.getTime());
                     mInpuAPI.setNbOfSat(location.getExtras().getInt("satellites"));
                     mInpuAPI.setmCap(location.getBearing());
                     mInpuAPI.setmSpeed(location.getSpeed()*CONSTANTS.SPEED_MS_TO_KH);
