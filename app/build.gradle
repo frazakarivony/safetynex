@@ -26,8 +26,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility = 1.7
+        targetCompatibility = 1.7
     }
     buildToolsVersion = '28.0.3'
 }
@@ -41,9 +41,9 @@ dependencies {
     implementation files('src/main/libs/bndandroid-1_1_2.jar')
     api 'com.haotek.ksoap2:ksoap2-android-assembly:3.3.0'
     api 'com.android.volley:volley:1.1.1'
-    implementation "com.android.support:support-compat:27.1.1"
+    implementation 'com.android.support:support-compat:27.1.1'
     implementation 'com.android.support:appcompat-v7:27.1.1'
-    api "commons-io:commons-io:+"
+    api 'commons-io:commons-io:2.6'
     api 'com.loopj.android:android-async-http:1.4.10'
     api 'org.json:json:20190722'
     api group: 'me.tongfei', name: 'progressbar', version: '0.7.4'
