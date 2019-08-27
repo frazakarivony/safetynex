@@ -202,6 +202,13 @@ public class FloatingWidgetService extends Service implements SensorEventListene
                     text.setCompoundDrawablesWithIntrinsicBounds(getTextIconDrawable(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetBorderColor()) ,0,0,0);
                 }
 
+          /*      if(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().imgId != null){
+                    ImageView img = new ImageView(getApplicationContext());
+                    int imageId = getResources().getIdentifier(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().imgId ,"mipmap", getPackageName());
+                    img.setImageResource(imageId);
+                    text.setCompoundDrawablesWithIntrinsicBounds(img.getDrawable() ,null,null,null);
+                }*/
+
                 //text.setBackground(getApplicationContext().getDrawable(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.getColorEnum().getFloatingWidgetBorderColor())));
                 text.setTextColor(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()));
                 //text.setText(String.valueOf(mInpuAPI.getmSpeed()));

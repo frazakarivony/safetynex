@@ -222,7 +222,6 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
 
     private void writeDatas(String mMessage){
         this.mData.WriteData(mMessage);
-//        ((TextView)this.mView.findViewById(R.id.fabHeadMsg)).setText(mMessage);
     }
 
     public String getRisk(CNxInputAPI cNxInputAPI){
@@ -239,7 +238,6 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
             if(CurrEhorizon.length > 6) {
                      speed = CurrEhorizon[6];
             }
-//            mMessage += printCNxInputAPI(cNxInputAPI);
             this.writeDatas(mMessage);
         } else {
 
@@ -247,9 +245,7 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                     + "; No e-Horizon";
         }
         this.mCount++;
-      //  if(this.previousM_iSafetyNexEngineState != mNxRisk.m_iSafetyNexEngineState) {
-            this.alertingTypeEnum = updateRiskInfo(speed);
-        //}
+        this.alertingTypeEnum = updateRiskInfo(speed);
         this.previousM_iSafetyNexEngineState = mNxRisk.m_iSafetyNexEngineState;
         return mMessage;
     }
@@ -285,6 +281,7 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                 }
                 if (alertingTypeEnum.m_iSpeedLimitTone == CNxRisk.CNxSpeedAlert.SPEED_TONE){
       //              this.toneGenerator.startTone(ToneGenerator.TONE_SUP_ERROR, 1000);
+                    speechOut("Portion limitée à "+alertingTypeEnum.getTextRounded()+" kilomètres par heure.");
                 }
             break;
             case CNxRisk.UPDATING_HORIZ:
@@ -310,12 +307,12 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
 
         FloatingWidgetAlertingInfos alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.LOW_OF_LOWLEVEL, null);
         switch (mNxRisk.m_iSafetyNexEngineState) {
-            case CNxRisk.RISK_AVAILABLE:
+            case CNxRisk.RISK_AVAILABLE
+                    :
                     // risque faible à moyen
                     //  0 à 30% ok vert
                     //  30 à 50% ok orange claire
-                     // 50 à 70% ok mais orange ++
-
+                    //  50 à 70% ok mais orange ++
                 if (mNxRisk.m_TAlert.m_iVisualAlert == CNxRisk.CNxAlert.VISUAL_ALERT_1 ){
                     Integer risk = manageLowRiskLevel(mNxRisk.m_fRisk * 100);
                     switch (risk){
@@ -342,8 +339,12 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                     this.toneGenerator.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT, 1000);
                 }
                 if (mNxRisk.m_TAlert.m_sTextToSpeech != null && mNxRisk.m_TAlert.m_sTextToSpeech != ""){
-                    speechOut(mNxRisk.m_TAlert.m_sTextToSpeech);
+
+                    if(mNxRisk.m_TAlert.m_iNxAlertValue != -1){
+                        alertingTypeEnum.imgId = "icon_"+ String.valueOf(mNxRisk.m_TAlert.m_iNxAlertValue);
+                    }
                     this.mMessage+=" \n\n"+mNxRisk.m_TAlert.m_sTextToSpeech;
+                    speechOut(mNxRisk.m_TAlert.m_sTextToSpeech);
                 }
                 if (mNxRisk.m_SpeedAlert.m_iSpeedLimitPanel <=20){
                 }
@@ -406,5 +407,6 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
             }
             this.lastTTS = txt;
         }
+
     }
 }
