@@ -26,16 +26,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         Log.i(TAG, "onCreate");
         super.onCreate(savedInstanceState);
-
 
         ActivityCompat.requestPermissions(MainActivity.this,
                 new String[]{Manifest.permission.READ_PHONE_STATE,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.WRITE_EXTERNAL_STORAGE},
                 REQUEST_PERMISSIONS);
-
-
-
     }
 
     @Override
@@ -80,7 +77,10 @@ public class MainActivity extends AppCompatActivity {
         Button close = findViewById(R.id.close);
 
 
-        textView.setText(getResources().getString(R.string.init_app));
+        if(((MainApp) getApplication()).isFirstRun()){
+            textView.setText(getResources().getString(R.string.init_app));
+        };
+
         ((MainApp)getApplication()).setCurrentActivity(this);
         button.setOnClickListener(v -> {
             if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) && !Settings.canDrawOverlays(MainActivity.this)) {

@@ -44,10 +44,10 @@ class DoubleclickListenerPerso implements GestureDetector.OnGestureListener, Vie
 
     @Override
     public boolean onSingleTapUp(MotionEvent e) {
-        context.stopService(this.intentFloatingService);
-        this.safetyNexAppiService.stop();
-        context.startActivity(this.mainApp.getCurrentActivity().getIntent());
-        Log.v("DoubleClickListener", "onSingleTapUp");
+//        context.stopService(this.intentFloatingService);
+//        this.safetyNexAppiService.stop();
+//        context.startActivity(this.mainApp.getCurrentActivity().getIntent());
+//        Log.v("DoubleClickListener", "onSingleTapUp");
         return false;
     }
 
@@ -59,7 +59,8 @@ class DoubleclickListenerPerso implements GestureDetector.OnGestureListener, Vie
     @Override
     public void onLongPress(MotionEvent e) {
         context.stopService(this.intentFloatingService);
-        Log.v("DoubleClickListener", "onSingleTapUp");
+        Log.i("DoubleClickListener", "onSingleTapUp");
+        System.exit(0);
     }
 
     @Override

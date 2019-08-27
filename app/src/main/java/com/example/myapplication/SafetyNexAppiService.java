@@ -63,6 +63,8 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
 
     private FloatingWidgetAlertingInfos alertingTypeEnum;
     private ToneGenerator toneGenerator;
+    private FloatingWidgetAlertingInfos currentAlertingTypeEnum;
+    private int rank = 0;
 
     SafetyNexAppiService(Application app, View view) {
         this.TAG  = "SafetyNexService";
@@ -260,62 +262,60 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         this.mIsRunning=false;
     }
 
-/*    private FloatingWidgetAlertingInfos updateRiskInfo(Long speedLimitSegment){
+    private FloatingWidgetAlertingInfos updateRiskInfo(Long speedLimitSegment){
+        FloatingWidgetAlertingInfos alertingTypeEnum;
 
-        FloatingWidgetAlertingInfos alertingTypeEnum = this.mokFloatingAlertingInfos.get(0 + (int)(Math.random() * ((this.mokFloatingAlertingInfos.size()))));
+        Log.i(TAG, String.valueOf(rank));
+        if(rank%10==0){
+            alertingTypeEnum = this.mokFloatingAlertingInfos.get(0 + (int)(Math.random() * ((this.mokFloatingAlertingInfos.size()))));
+            currentAlertingTypeEnum =alertingTypeEnum;
+        }else{
+            alertingTypeEnum = currentAlertingTypeEnum;
+        }
+        rank++;
+
         switch (alertingTypeEnum.m_iSafetyNexEngineState) {
             case CNxRisk.RISK_AVAILABLE:
-                /* risque faible à moyen
-                  0 à 30% ok vert
-                  30 à 50% ok orange claire
-                  50 à 70% ok mais orange ++
-                * */
-  /*              if (alertingTypeEnum.m_iTonesRiskAlert == TONE_ALERT){
-                    /*Do SomeThing*/
-    /*                this.toneGenerator.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT, 1000);
+              if (alertingTypeEnum.m_iTonesRiskAlert == TONE_ALERT){
+    //                this.toneGenerator.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT, 1000);
                 }
                 if (alertingTypeEnum.m_sTextToSpeech != null && alertingTypeEnum.m_sTextToSpeech != ""){
                     speechOut(alertingTypeEnum.m_sTextToSpeech);
                     this.mMessage+=" \n\n"+alertingTypeEnum.m_sTextToSpeech;
                 }
                 if (alertingTypeEnum.m_iSpeedLimitTone == CNxRisk.CNxSpeedAlert.SPEED_TONE){
-                    /*Do SomeThing*/
-      /*              this.toneGenerator.startTone(ToneGenerator.TONE_SUP_ERROR, 1000);
+      //              this.toneGenerator.startTone(ToneGenerator.TONE_SUP_ERROR, 1000);
                 }
             break;
             case CNxRisk.UPDATING_HORIZ:
-                /*Do SomeThing*/
-        /*        break;
+                break;
             case CNxRisk.CAR_STOPPED:
-                /*Do SomeThing*/
-          /*      break;
+              break;
             case CNxRisk.GPS_LOST:
-                /*Do SomeThing*/
-            /*    speechOut("Perte du GPS.");
+                speechOut("Perte du GPS.");
 
                 break;
             case CNxRisk.RISK_BUG:
-                /*Do SomeThing*/
-              /*  break;
+                break;
             case CNxRisk.STOP_PROLOG:
-                /*Do SomeThing*/
-               /* break;
+                break;
             default:
-                /*default*/
-               /* break;
-        };
+                break;
+        }
      return alertingTypeEnum;
-    }*/
+    }
+
+    /*
     private FloatingWidgetAlertingInfos updateRiskInfo(Long speedLimitSegment){
 
         FloatingWidgetAlertingInfos alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.LOW_OF_LOWLEVEL, null);
         switch (mNxRisk.m_iSafetyNexEngineState) {
             case CNxRisk.RISK_AVAILABLE:
-                    /* risque faible à moyen
-                      0 à 30% ok vert
-                      30 à 50% ok orange claire
-                      50 à 70% ok mais orange ++
-                    * */
+                    // risque faible à moyen
+                    //  0 à 30% ok vert
+                    //  30 à 50% ok orange claire
+                     // 50 à 70% ok mais orange ++
+
                 if (mNxRisk.m_TAlert.m_iVisualAlert == CNxRisk.CNxAlert.VISUAL_ALERT_1 ){
                     Integer risk = manageLowRiskLevel(mNxRisk.m_fRisk * 100);
                     switch (risk){
@@ -330,18 +330,15 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                             break;
                     }
                 }
-                /*Risk higher than THRESHOLD_ALERT1 70 à 90% warning*/
+                //Risk higher than THRESHOLD_ALERT1 70 à 90% warning
                 if (mNxRisk.m_TAlert.m_iVisualAlert == CNxRisk.CNxAlert.VISUAL_ALERT_2){
-                    /*Do SomeThing*/
                     alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.WARNING, null);
                 }
-                /*Risk higher than THRESHOLD_ALERT2 > 90% Danger*/
+                //Risk higher than THRESHOLD_ALERT2 > 90% Danger
                 if (mNxRisk.m_TAlert.m_iVisualAlert == CNxRisk.CNxAlert.VISUAL_ALERT_3){
-                    /*Do SomeThing*/
                     alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.ALERT, null);
                 }
                 if (mNxRisk.m_TAlert.m_iTonesRiskAlert == TONE_ALERT){
-                    /*Do SomeThing*/
                     this.toneGenerator.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT, 1000);
                 }
                 if (mNxRisk.m_TAlert.m_sTextToSpeech != null && mNxRisk.m_TAlert.m_sTextToSpeech != ""){
@@ -349,10 +346,8 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                     this.mMessage+=" \n\n"+mNxRisk.m_TAlert.m_sTextToSpeech;
                 }
                 if (mNxRisk.m_SpeedAlert.m_iSpeedLimitPanel <=20){
-                    /*Do SomeThing*/
                 }
                 if (mNxRisk.m_SpeedAlert.m_iSpeedLimitTone == CNxRisk.CNxSpeedAlert.SPEED_TONE){
-                    /*Do SomeThing*/
                     //this.toneGenerator.startTone(ToneGenerator.TONE_SUP_ERROR, 1000);
                     speechOut("Portion limitée à "+speedLimitSegment.toString()+" kilomètres par heure.");
                     alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.WARNING_SPEED, speedLimitSegment.toString());
@@ -360,30 +355,24 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                 }
                 break;
             case CNxRisk.UPDATING_HORIZ:
-                /*Do SomeThing*/
                 break;
             case CNxRisk.CAR_STOPPED:
-                /*Do SomeThing*/
                 break;
             case CNxRisk.GPS_LOST:
-                /*Do SomeThing*/
                 speechOut("Perte du GPS.");
                 alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.GPS_LOST, "GPS");
 
                 break;
             case CNxRisk.RISK_BUG:
-                /*Do SomeThing*/
                 break;
             case CNxRisk.STOP_PROLOG:
-                /*Do SomeThing*/
                 break;
             default:
-                /*default*/
                 this.lastTTS = "";
                 break;
-        };
+        }
         return alertingTypeEnum;
-    }
+    }*/
 
     private Integer manageLowRiskLevel(float percentOfRisk){
         Integer levelOflowlevelRisk = LOW_LOWLEVEL_RISK;

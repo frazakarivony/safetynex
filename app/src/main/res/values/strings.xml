@@ -6,11 +6,5 @@
     <string name="loading">Récupération des licences et des cartes…</string>
     <string name="floating_view">Démarrage de l\'application. </string>
     <string name="init_app">Initialisation de l\'application en cours.</string>
-    <string name="title_location_permission">Localisation</string>
-    <string name="text_location_permission">L\'application a besoin de votre localisation pour fonctionner</string>
-    <string name="title_storage_permission">Stockage</string>
-    <string name="text_storage_permission">L\'application doit pouvoir accéder aux stockage du téléphone</string>
-    <string name="title_phone_state_permission">Etat du téléphone</string>
-    <string name="text_phone_state_permission">Je sais pas pourquoi on a besoin de ça mais on en a besoin</string>
     <string name="ok">OK</string>
 </resources>
