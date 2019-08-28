@@ -1,11 +1,15 @@
 package com.example.myapplication;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentProvider;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -38,6 +42,7 @@ import com.nexiad.safetynexappsample.CNxDemoData;
 import com.nexiad.safetynexappsample.CNxInputAPI;
 import com.nexiad.safetynexappsample.CONSTANTS;
 
+import java.util.List;
 import java.util.Objects;
 
 import static android.app.Notification.EXTRA_NOTIFICATION_ID;
@@ -116,7 +121,17 @@ public class FloatingWidgetService extends Service implements SensorEventListene
             addListenerSensor();
             addListenerLocation(doubleclickListenerPerso);
         }
-            return super.onStartCommand(intent, flags, startId);
+        int ret =  super.onStartCommand(intent, flags, startId);
+        ActivityManager am = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
+
+        List<ActivityManager.AppTask> tasks = am.getAppTasks();
+        for(ActivityManager.AppTask task : tasks){
+            ActivityManager.RecentTaskInfo infos = task.getTaskInfo();
+            if(infos.baseActivity.getClassName().equals(MainActivity.class.getName())){
+                task.finishAndRemoveTask();
+            }
+        }
+        return ret;
     }
 
     private void addListenerSensor() {

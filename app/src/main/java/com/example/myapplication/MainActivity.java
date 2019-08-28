@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -45,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
     private void initializeView() {
        //mTts.speak(getResources().getString(R.string.loading), TextToSpeech.QUEUE_FLUSH,null,null);
         startService(new Intent(MainActivity.this, FloatingWidgetService.class));
-        finish();
     }
 
     @Override
@@ -58,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
     {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        Log.i(TAG,"ZBLLAAAAA");
         continueRun();
     }
 

@@ -258,7 +258,7 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         this.mIsRunning=false;
     }
 
-    private FloatingWidgetAlertingInfos updateRiskInfo(Long speedLimitSegment){
+   /* private FloatingWidgetAlertingInfos updateRiskInfo(Long speedLimitSegment){
         FloatingWidgetAlertingInfos alertingTypeEnum;
 
         Log.i(TAG, String.valueOf(rank));
@@ -300,9 +300,9 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                 break;
         }
      return alertingTypeEnum;
-    }
+    }*/
 
-    /*
+
     private FloatingWidgetAlertingInfos updateRiskInfo(Long speedLimitSegment){
 
         FloatingWidgetAlertingInfos alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.LOW_OF_LOWLEVEL, null);
@@ -350,7 +350,7 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                 }
                 if (mNxRisk.m_SpeedAlert.m_iSpeedLimitTone == CNxRisk.CNxSpeedAlert.SPEED_TONE){
                     //this.toneGenerator.startTone(ToneGenerator.TONE_SUP_ERROR, 1000);
-                    speechOut("Portion limitée à "+speedLimitSegment.toString()+" kilomètres par heure.");
+                    speechOut("Veuillez ralentir portion limitée à "+speedLimitSegment.toString()+" kilomètres par heure.");
                     alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.WARNING_SPEED, speedLimitSegment.toString());
 
                 }
@@ -373,7 +373,7 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                 break;
         }
         return alertingTypeEnum;
-    }*/
+    }
 
     private Integer manageLowRiskLevel(float percentOfRisk){
         Integer levelOflowlevelRisk = LOW_LOWLEVEL_RISK;
@@ -399,14 +399,14 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
     }
 
     private void speechOut(String txt){
-        if(!this.lastTTS.equals(txt)) {
+        //if(!this.lastTTS.equals(txt)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 mTts.speak(txt, TextToSpeech.QUEUE_ADD, null, null);
             } else {
                 mTts.speak(txt, TextToSpeech.QUEUE_ADD, null);
             }
             this.lastTTS = txt;
-        }
+    //    }
 
     }
 }
