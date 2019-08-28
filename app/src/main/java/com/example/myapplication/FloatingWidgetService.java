@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -26,7 +27,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.location.Location;
@@ -39,6 +39,8 @@ import com.nexiad.safetynexappsample.CNxInputAPI;
 import com.nexiad.safetynexappsample.CONSTANTS;
 
 import java.util.Objects;
+
+import static android.app.Notification.EXTRA_NOTIFICATION_ID;
 
 public class FloatingWidgetService extends Service implements SensorEventListener{
 
@@ -260,6 +262,12 @@ public class FloatingWidgetService extends Service implements SensorEventListene
     }
 
     private Notification getNotification() {
+        Intent snoozeIntent = new Intent(this, StopButton.class);
+        snoozeIntent.setAction("dsffgds");
+        snoozeIntent.putExtra(EXTRA_NOTIFICATION_ID, 0);
+        PendingIntent snoozePendingIntent =
+                PendingIntent.getBroadcast(this, 0, snoozeIntent, 0);
+
         NotificationChannel channel = new NotificationChannel("channel_1","SafetyNext",NotificationManager.IMPORTANCE_DEFAULT);
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         if (notificationManager != null) {
@@ -268,8 +276,8 @@ public class FloatingWidgetService extends Service implements SensorEventListene
         Notification.Builder builder = new Notification.Builder(getApplicationContext(),"channel_1")
                 .setContentTitle("SafetyNext")
                 .setContentText("SafetyNext")
-                .setSmallIcon(R.drawable.ic_launcher_foreground);
-
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .addAction(R.drawable.ic_check_box_black_24dp, getString(R.string.close_app),snoozePendingIntent);
         return builder.build();
     }
 
