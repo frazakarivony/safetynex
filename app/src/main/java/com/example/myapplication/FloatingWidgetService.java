@@ -215,9 +215,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
                     text.setCompoundDrawablesWithIntrinsicBounds(img.getDrawable() ,null,null,null);
                 }*/
 
-                //text.setBackground(getApplicationContext().getDrawable(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.getColorEnum().getFloatingWidgetBorderColor())));
                 text.setTextColor(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()));
-                //text.setText(String.valueOf(mInpuAPI.getmSpeed()));
             }
 
             @Override

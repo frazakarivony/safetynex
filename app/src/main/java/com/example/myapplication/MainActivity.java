@@ -83,7 +83,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         TelephonyManager telephonyManager = (TelephonyManager) getSystemService(getApplicationContext().TELEPHONY_SERVICE);
-        String imei = telephonyManager.getDeviceId(); // todo update method
+        String imei = "";
+        if (android.os.Build.VERSION.SDK_INT >= 26) {
+            imei=telephonyManager.getImei();
+        }
+        else {
+            imei = telephonyManager.getDeviceId(); // todo update method
+        }
 
         setContentView(R.layout.activity_main);
 
