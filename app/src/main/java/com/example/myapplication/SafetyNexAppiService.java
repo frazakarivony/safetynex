@@ -401,9 +401,9 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
     private void speechOut(String txt){
         //if(!this.lastTTS.equals(txt)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                mTts.speak(txt, TextToSpeech.QUEUE_ADD, null, null);
+                mTts.speak(txt, TextToSpeech.QUEUE_FLUSH, null, null);
             } else {
-                mTts.speak(txt, TextToSpeech.QUEUE_ADD, null);
+                mTts.speak(txt, TextToSpeech.QUEUE_FLUSH, null);
             }
             this.lastTTS = txt;
     //    }

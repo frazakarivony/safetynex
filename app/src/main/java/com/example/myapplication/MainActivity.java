@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(appReceiver);
+        ((MainApp)getApplication()).setFirsRun(true);
         Log.i(TAG, "onDestroy");
     }
 
