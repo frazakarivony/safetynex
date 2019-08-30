@@ -258,7 +258,7 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         this.mIsRunning=false;
     }
 
-   /* private FloatingWidgetAlertingInfos updateRiskInfo(Long speedLimitSegment){
+    private FloatingWidgetAlertingInfos updateRiskInfo(Long speedLimitSegment){
         FloatingWidgetAlertingInfos alertingTypeEnum;
 
         Log.i(TAG, String.valueOf(rank));
@@ -300,10 +300,10 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                 break;
         }
      return alertingTypeEnum;
-    }*/
+    }
 
 
-    private FloatingWidgetAlertingInfos updateRiskInfo(Long speedLimitSegment){
+   /* private FloatingWidgetAlertingInfos updateRiskInfo(Long speedLimitSegment){
 
         FloatingWidgetAlertingInfos alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.LOW_OF_LOWLEVEL, null);
         switch (mNxRisk.m_iSafetyNexEngineState) {
@@ -373,7 +373,7 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                 break;
         }
         return alertingTypeEnum;
-    }
+    }*/
 
     private Integer manageLowRiskLevel(float percentOfRisk){
         Integer levelOflowlevelRisk = LOW_LOWLEVEL_RISK;
@@ -399,14 +399,20 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
     }
 
     private void speechOut(String txt){
-        //if(!this.lastTTS.equals(txt)) {
+        if(!this.lastTTS.equals(txt)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 mTts.speak(txt, TextToSpeech.QUEUE_FLUSH, null, null);
             } else {
                 mTts.speak(txt, TextToSpeech.QUEUE_FLUSH, null);
             }
-            this.lastTTS = txt;
-    //    }
+        }else{
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                mTts.speak(txt, TextToSpeech.QUEUE_ADD, null, null);
+            } else {
+                mTts.speak(txt, TextToSpeech.QUEUE_ADD, null);
+            }
+        }
+        this.lastTTS = txt;
 
     }
 }
