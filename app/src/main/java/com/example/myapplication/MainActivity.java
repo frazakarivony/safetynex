@@ -2,7 +2,12 @@ package com.example.myapplication;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -24,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int DRAW_OVER_OTHER_APP_PERMISSION = 123;
     private static final int REQUEST_PERMISSIONS= 126;
     private static final String TAG = "MainActivityLog";
+    private BroadcastReceiver broadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,13 +37,30 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "onCreate");
         super.onCreate(savedInstanceState);
 
+        IntentFilter intentFilter = new IntentFilter();
+        // Add network connectivity change action.
+        intentFilter.addAction("FLOATING_OK");
+        // Set broadcast receiver priority.
+        intentFilter.setPriority(100);
+
+        broadcastReceiver = new BroadcastReceiver(){
+
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                MainActivity.this.finish();
+            }
+        };
+
+        registerReceiver(broadcastReceiver, intentFilter);
         ActivityCompat.requestPermissions(MainActivity.this,
                 new String[]{Manifest.permission.READ_PHONE_STATE,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.WRITE_EXTERNAL_STORAGE},
                 REQUEST_PERMISSIONS);
+
     }
 
     @Override
     protected void onRestart() {
+        unregisterReceiver(broadcastReceiver);
         super.onRestart();
         Log.i(TAG, "onReStart");
         initializeView();
@@ -51,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        unregisterReceiver(broadcastReceiver);
         Log.i(TAG, "onDestroy");
     }
 

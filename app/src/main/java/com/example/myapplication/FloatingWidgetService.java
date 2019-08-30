@@ -8,9 +8,11 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
@@ -24,6 +26,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
@@ -42,6 +45,7 @@ import com.nexiad.safetynexappsample.CNxDemoData;
 import com.nexiad.safetynexappsample.CNxInputAPI;
 import com.nexiad.safetynexappsample.CONSTANTS;
 
+import java.util.FormatFlagsConversionMismatchException;
 import java.util.List;
 import java.util.Objects;
 
@@ -66,6 +70,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
     private String workingPath = CONSTANTS.DEMO_WORKING_PATH;
     private String inputFile = workingPath + CONSTANTS.DEMO_IN_FILE_NAME;
     private String outputFile = workingPath + CONSTANTS.DEMO_OUT_FILE_NAME;
+    private BroadcastReceiver broadcastReceiver;
 
     @Nullable
     @Override
@@ -122,15 +127,8 @@ public class FloatingWidgetService extends Service implements SensorEventListene
             addListenerLocation(doubleclickListenerPerso);
         }
         int ret =  super.onStartCommand(intent, flags, startId);
-        ActivityManager am = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
 
-        List<ActivityManager.AppTask> tasks = am.getAppTasks();
-        for(ActivityManager.AppTask task : tasks){
-            ActivityManager.RecentTaskInfo infos = task.getTaskInfo();
-            if(infos.baseActivity.getClassName().equals(MainActivity.class.getName())){
-                task.finishAndRemoveTask();
-            }
-        }
+        getApplicationContext().sendBroadcast(new Intent("FLOATING_OK"));
         return ret;
     }
 
@@ -277,17 +275,40 @@ public class FloatingWidgetService extends Service implements SensorEventListene
     }
 
     private Notification getNotification() {
-        Intent snoozeIntent = new Intent(this, StopButton.class);
-        snoozeIntent.setAction("dsffgds");
-        snoozeIntent.putExtra(EXTRA_NOTIFICATION_ID, 0);
+
+
+        IntentFilter intentFilter = new IntentFilter();
+        // Add network connectivity change action.
+        intentFilter.addAction("NOTIFKILLER");
+        // Set broadcast receiver priority.
+        intentFilter.setPriority(100);
+
+        broadcastReceiver = new BroadcastReceiver(){
+
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                unregisterReceiver(broadcastReceiver);
+                stopSelf();
+               // mOverlayView.performLongClick();
+            }
+        };
+
+        registerReceiver(broadcastReceiver, intentFilter);
+
+
+
+        Intent snoozeIntent = new Intent(this, BootUpReceiver.class);
+        snoozeIntent.putExtra("notiID", 158);
+        snoozeIntent.setAction("KILL");
         PendingIntent snoozePendingIntent =
-                PendingIntent.getBroadcast(this, 0, snoozeIntent, 0);
+                PendingIntent.getBroadcast(this, 158, snoozeIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         NotificationChannel channel = new NotificationChannel("channel_1","SafetyNext",NotificationManager.IMPORTANCE_DEFAULT);
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         if (notificationManager != null) {
             notificationManager.createNotificationChannel(channel);
         }
+
         Notification.Builder builder = new Notification.Builder(getApplicationContext(),"channel_1")
                 .setContentTitle("SafetyNext")
                 .setContentText("SafetyNext")
