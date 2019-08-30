@@ -29,4 +29,5 @@ public class CONSTANTS {
 	public static final int ACCELOROMETRE_X_INDIXE = 0;
 	public static final int ACCELOROMETRE_Y_INDIXE = 1;
 	public static final int ACCELOROMETRE_Z_INDIXE = 2;
+	public static String LOGNAME = "SafetyApp ";
 }

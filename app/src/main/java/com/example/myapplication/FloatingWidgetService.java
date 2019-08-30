@@ -44,7 +44,7 @@ import java.util.Objects;
 
 public class FloatingWidgetService extends Service implements SensorEventListener{
 
-    private final String TAG = "FloatingWidgetService";
+    private final String TAG = CONSTANTS.LOGNAME.concat("FloatingWidgetService");
     private WindowManager mWindowManager;
     private View mOverlayView;
     int mWidth;
@@ -71,6 +71,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.i(TAG, "onStartCommand");
 
         if (mOverlayView == null) {
 
@@ -124,6 +125,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
     }
 
     private void addListenerSensor() {
+        Log.i(TAG, "addListenerSensor");
 
         mSensorManager = (SensorManager) getSystemService(getApplicationContext().SENSOR_SERVICE);
         Sensor sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
@@ -150,6 +152,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
     }
 
     private void addListenerLocation(final DoubleclickListenerPerso doubleclickListenerPerso) {
+        Log.i(TAG, "addListenerLocation");
         mLocationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
 
         if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -241,10 +244,10 @@ public class FloatingWidgetService extends Service implements SensorEventListene
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.i(TAG, "onCreate");
         AppReceiver.getInstance().setFloatingWidgetService(this);
         startForeground(12345678, getNotification());
         setTheme(R.style.AppTheme);
-        Log.i(TAG, "onCreate");
         mData = new CNxDemoData(inputFile, outputFile);
 
         SensorManager senSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -266,6 +269,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
     }
 
     private Notification getNotification() {
+        Log.i(TAG, "getNotification");
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("KILL");
@@ -292,6 +296,8 @@ public class FloatingWidgetService extends Service implements SensorEventListene
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
+//        Log.i(TAG, "onSensorChanged");
+
         Sensor mySensor = sensorEvent.sensor;
 
         if (mySensor.getType() == Sensor.TYPE_ACCELEROMETER) {

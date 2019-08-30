@@ -67,7 +67,7 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
     private int rank = 0;
 
     SafetyNexAppiService(Application app, View view) {
-        this.TAG  = "SafetyNexService";
+        this.TAG  = CONSTANTS.LOGNAME.concat("SafetyNexService");
         this.app = (MainApp)app;
         this.mView = view;
         String workingPath = CONSTANTS.DEMO_WORKING_PATH;
@@ -228,6 +228,7 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         Log.v(TAG, "getRisk "+printCNxInputAPI(cNxInputAPI));
         //Set GPS
         this.mJniFunction.SetGPSData(cNxInputAPI.getmLat(), cNxInputAPI.getmLon(), cNxInputAPI.getNbOfSat(), cNxInputAPI.getmCap(), cNxInputAPI.getmSpeed(), cNxInputAPI.getmTimeDiffGPS());
+        Log.i(TAG,"gps : "+cNxInputAPI.getmLat()+"/"+cNxInputAPI.getmLon()+"/"+cNxInputAPI.getmTimeDiffGPS()+"/"+cNxInputAPI.getmCap());
         //Set Accel and get Risk
         this.mJniFunction.GetAccelDataWithRisk(cNxInputAPI.getmAccelX(), cNxInputAPI.getmAccelY(), cNxInputAPI.getmAccelZ(), this.mNxRisk);
         long [] CurrEhorizon = this.mJniFunction.GetCurrEHorizon();
@@ -258,54 +259,25 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         this.mIsRunning=false;
     }
 
-    private FloatingWidgetAlertingInfos updateRiskInfo(Long speedLimitSegment){
-        FloatingWidgetAlertingInfos alertingTypeEnum;
 
-        Log.i(TAG, String.valueOf(rank));
-        if(rank%10==0){
-            alertingTypeEnum = this.mokFloatingAlertingInfos.get(0 + (int)(Math.random() * ((this.mokFloatingAlertingInfos.size()))));
-            currentAlertingTypeEnum =alertingTypeEnum;
-        }else{
-            alertingTypeEnum = currentAlertingTypeEnum;
-        }
-        rank++;
+   private FloatingWidgetAlertingInfos updateRiskInfo(Long speedLimitSegment) {
 
-        switch (alertingTypeEnum.m_iSafetyNexEngineState) {
-            case CNxRisk.RISK_AVAILABLE:
-              if (alertingTypeEnum.m_iTonesRiskAlert == TONE_ALERT){
-    //                this.toneGenerator.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT, 1000);
-                }
-                if (alertingTypeEnum.m_sTextToSpeech != null && alertingTypeEnum.m_sTextToSpeech != ""){
-                    speechOut(alertingTypeEnum.m_sTextToSpeech);
-                    this.mMessage+=" \n\n"+alertingTypeEnum.m_sTextToSpeech;
-                }
-                if (alertingTypeEnum.m_iSpeedLimitTone == CNxRisk.CNxSpeedAlert.SPEED_TONE){
-      //              this.toneGenerator.startTone(ToneGenerator.TONE_SUP_ERROR, 1000);
-                    speechOut("Portion limitée à "+alertingTypeEnum.getTextRounded()+" kilomètres par heure.");
-                }
-            break;
-            case CNxRisk.UPDATING_HORIZ:
-                break;
-            case CNxRisk.CAR_STOPPED:
-              break;
-            case CNxRisk.GPS_LOST:
-                speechOut("Perte du GPS.");
+       FloatingWidgetAlertingInfos alertingTypeEnum;
 
-                break;
-            case CNxRisk.RISK_BUG:
-                break;
-            case CNxRisk.STOP_PROLOG:
-                break;
-            default:
-                break;
-        }
-     return alertingTypeEnum;
-    }
+       if (CONSTANTS.DEMO_DATA_TEST) {
+            if (rank % 30 == 0) {
+                Log.i(TAG, "new random");
+                alertingTypeEnum = this.mokFloatingAlertingInfos.get((int) (Math.random() * ((this.mokFloatingAlertingInfos.size()))));
+                currentAlertingTypeEnum = alertingTypeEnum;
+            } else {
+                alertingTypeEnum = currentAlertingTypeEnum;
+           }
+            rank++;
+       }else{
+            alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.LOW_OF_LOWLEVEL, null);
+       }
 
 
-   /* private FloatingWidgetAlertingInfos updateRiskInfo(Long speedLimitSegment){
-
-        FloatingWidgetAlertingInfos alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.LOW_OF_LOWLEVEL, null);
         switch (mNxRisk.m_iSafetyNexEngineState) {
             case CNxRisk.RISK_AVAILABLE
                     :
@@ -373,7 +345,7 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                 break;
         }
         return alertingTypeEnum;
-    }*/
+    }
 
     private Integer manageLowRiskLevel(float percentOfRisk){
         Integer levelOflowlevelRisk = LOW_LOWLEVEL_RISK;

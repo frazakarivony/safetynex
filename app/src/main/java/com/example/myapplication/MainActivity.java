@@ -17,17 +17,19 @@ import android.widget.TextView;
 
 import com.binomad.api.LicenseServiceFred;
 import com.binomad.api.OnEventListener;
+import com.nexiad.safetynexappsample.CONSTANTS;
 
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int DRAW_OVER_OTHER_APP_PERMISSION = 123;
     private static final int REQUEST_PERMISSIONS= 126;
-    private static final String TAG = "MainActivityLog";
+    private static final String TAG =  CONSTANTS.LOGNAME.concat("MainActivityLog");
     private AppReceiver appReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.i(TAG, "onCreate");
 
         appReceiver =  AppReceiver.getInstance();
         appReceiver.setMainActivity(this);
@@ -41,8 +43,7 @@ public class MainActivity extends AppCompatActivity {
         // Set broadcast receiver priority.
         intentFilter.setPriority(100);
 
-
-
+        Log.i(TAG, "register appReceiver FLOATING_OK");
         registerReceiver(appReceiver, intentFilter);
         ActivityCompat.requestPermissions(MainActivity.this,
                 new String[]{Manifest.permission.READ_PHONE_STATE,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.WRITE_EXTERNAL_STORAGE},
@@ -52,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onRestart() {
+        Log.i(TAG, "onReStart");
         unregisterReceiver(appReceiver);
         super.onRestart();
         Log.i(TAG, "onReStart");
@@ -60,12 +62,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeView() {
        //mTts.speak(getResources().getString(R.string.loading), TextToSpeech.QUEUE_FLUSH,null,null);
+        Log.i(TAG, "initializeView");
         startService(new Intent(MainActivity.this, FloatingWidgetService.class));
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.i(TAG, "onDestroy");
         unregisterReceiver(appReceiver);
         ((MainApp)getApplication()).setFirsRun(true);
         Log.i(TAG, "onDestroy");
@@ -75,10 +79,12 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
     {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        Log.i(TAG, "onRequestPermissionsResult");
         continueRun();
     }
 
     private void continueRun(){
+        Log.i(TAG, "continueRun");
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
