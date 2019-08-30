@@ -60,7 +60,7 @@ class DoubleclickListenerPerso implements GestureDetector.OnGestureListener, Vie
     public void onLongPress(MotionEvent e) {
         context.stopService(this.intentFloatingService);
         Log.i("DoubleClickListener", "onSingleTapUp");
-        System.exit(0);
+        context.sendBroadcast(new Intent("KILL"));
     }
 
     @Override

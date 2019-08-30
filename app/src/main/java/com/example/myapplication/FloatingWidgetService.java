@@ -1,16 +1,12 @@
 package com.example.myapplication;
 
 import android.Manifest;
-import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
-import android.content.ContentProvider;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -26,7 +22,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
@@ -45,11 +40,7 @@ import com.nexiad.safetynexappsample.CNxDemoData;
 import com.nexiad.safetynexappsample.CNxInputAPI;
 import com.nexiad.safetynexappsample.CONSTANTS;
 
-import java.util.FormatFlagsConversionMismatchException;
-import java.util.List;
 import java.util.Objects;
-
-import static android.app.Notification.EXTRA_NOTIFICATION_ID;
 
 public class FloatingWidgetService extends Service implements SensorEventListener{
 
@@ -252,6 +243,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
     @Override
     public void onCreate() {
         super.onCreate();
+        AppReceiver.getInstance().setFloatingWidgetService(this);
         startForeground(12345678, getNotification());
         setTheme(R.style.AppTheme);
         Log.i(TAG, "onCreate");
@@ -271,37 +263,20 @@ public class FloatingWidgetService extends Service implements SensorEventListene
         }
         mLocationManager.removeUpdates(mLocationListener);
         mSensorManager.unregisterListener(this.mSensorListener);
+        unregisterReceiver(AppReceiver.getInstance());
 
     }
 
     private Notification getNotification() {
 
-
         IntentFilter intentFilter = new IntentFilter();
-        // Add network connectivity change action.
-        intentFilter.addAction("NOTIFKILLER");
-        // Set broadcast receiver priority.
-        intentFilter.setPriority(100);
+        intentFilter.addAction("KILL");
+        registerReceiver(AppReceiver.getInstance(), intentFilter);
 
-        broadcastReceiver = new BroadcastReceiver(){
-
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                unregisterReceiver(broadcastReceiver);
-                stopSelf();
-               // mOverlayView.performLongClick();
-            }
-        };
-
-        registerReceiver(broadcastReceiver, intentFilter);
-
-
-
-        Intent snoozeIntent = new Intent(this, BootUpReceiver.class);
-        snoozeIntent.putExtra("notiID", 158);
-        snoozeIntent.setAction("KILL");
-        PendingIntent snoozePendingIntent =
-                PendingIntent.getBroadcast(this, 158, snoozeIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        Intent closeIntent = new Intent(this, StopNotificationReceiver.class);
+        closeIntent.setAction("NOTIFKILLSIG");
+        PendingIntent closePendingIntent =
+                PendingIntent.getBroadcast(this, 158, closeIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationChannel channel = new NotificationChannel("channel_1","SafetyNext",NotificationManager.IMPORTANCE_DEFAULT);
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
@@ -313,7 +288,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
                 .setContentTitle("SafetyNext")
                 .setContentText("SafetyNext")
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
-                .addAction(R.drawable.ic_check_box_black_24dp, getString(R.string.close_app),snoozePendingIntent);
+                .addAction(R.drawable.ic_check_box_black_24dp, getString(R.string.close_app), closePendingIntent);
         return builder.build();
     }
 
