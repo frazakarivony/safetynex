@@ -1,11 +1,6 @@
 package com.example.myapplication;
 
 import android.Manifest;
-import android.app.Activity;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -29,10 +24,13 @@ public class MainActivity extends AppCompatActivity {
     private static final int DRAW_OVER_OTHER_APP_PERMISSION = 123;
     private static final int REQUEST_PERMISSIONS= 126;
     private static final String TAG = "MainActivityLog";
-    private BroadcastReceiver broadcastReceiver;
+    private AppReceiver appReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        appReceiver =  AppReceiver.getInstance();
+        appReceiver.setMainActivity(this);
 
         Log.i(TAG, "onCreate");
         super.onCreate(savedInstanceState);
@@ -43,15 +41,9 @@ public class MainActivity extends AppCompatActivity {
         // Set broadcast receiver priority.
         intentFilter.setPriority(100);
 
-        broadcastReceiver = new BroadcastReceiver(){
 
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                MainActivity.this.finish();
-            }
-        };
 
-        registerReceiver(broadcastReceiver, intentFilter);
+        registerReceiver(appReceiver, intentFilter);
         ActivityCompat.requestPermissions(MainActivity.this,
                 new String[]{Manifest.permission.READ_PHONE_STATE,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.WRITE_EXTERNAL_STORAGE},
                 REQUEST_PERMISSIONS);
@@ -60,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onRestart() {
-        unregisterReceiver(broadcastReceiver);
+        unregisterReceiver(appReceiver);
         super.onRestart();
         Log.i(TAG, "onReStart");
         initializeView();
@@ -74,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(broadcastReceiver);
+        unregisterReceiver(appReceiver);
         Log.i(TAG, "onDestroy");
     }
 
@@ -129,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
         close.setOnClickListener(v -> {
             MainActivity.this.finishAffinity();
             ((MainApp)getApplication()).setCurrentActivity(null);
-            System.exit(0);
+            this.sendBroadcast(new Intent("KILL"));
         });
 
         getIntent().putExtra("TTS", getResources().getString(R.string.loading));
