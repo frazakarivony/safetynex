@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
             imei=telephonyManager.getImei();
         }
         else {
-            imei = telephonyManager.getDeviceId(); // todo update method
+            imei = telephonyManager.getDeviceId();
         }
 
         setContentView(R.layout.activity_main);
