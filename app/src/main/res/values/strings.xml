@@ -7,4 +7,6 @@
     <string name="floating_view">Démarrage de l\'application. </string>
     <string name="init_app">Initialisation de l\'application en cours.</string>
     <string name="ok">OK</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Play</string>
 </resources>

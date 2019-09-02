@@ -370,7 +370,7 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         }
     }
 
-    private void speechOut(String txt){
+    public void speechOut(String txt){
         if(!this.lastTTS.equals(txt)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 mTts.speak(txt, TextToSpeech.QUEUE_FLUSH, null, null);

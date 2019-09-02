@@ -1,12 +1,12 @@
 package com.example.myapplication;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
@@ -61,7 +62,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
     private String workingPath = CONSTANTS.DEMO_WORKING_PATH;
     private String inputFile = workingPath + CONSTANTS.DEMO_IN_FILE_NAME;
     private String outputFile = workingPath + CONSTANTS.DEMO_OUT_FILE_NAME;
-    private BroadcastReceiver broadcastReceiver;
+    private Boolean isPaused=false;
 
     @Nullable
     @Override
@@ -69,10 +70,12 @@ public class FloatingWidgetService extends Service implements SensorEventListene
         return null;
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "onStartCommand");
 
+        DoubleclickListenerPerso doubleclickListenerPerso;
         if (mOverlayView == null) {
 
             mOverlayView = LayoutInflater.from(this).inflate(R.layout.overlay_layout, null);
@@ -112,12 +115,45 @@ public class FloatingWidgetService extends Service implements SensorEventListene
                 }
             });
 
-            DoubleclickListenerPerso doubleclickListenerPerso = new DoubleclickListenerPerso(getApplicationContext(),params, mWindowManager, intent, ((MainApp)getApplication()),mOverlayView);
+            doubleclickListenerPerso = new DoubleclickListenerPerso(getApplicationContext(),params, mWindowManager, intent, ((MainApp)getApplication()),mOverlayView);
             mOverlayView.setOnTouchListener(doubleclickListenerPerso);
 
             addListenerSensor();
             addListenerLocation(doubleclickListenerPerso);
+
+            TextView text = mOverlayView.findViewById(R.id.textView2);
+            text.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    final int DRAWABLE_RIGHT = 2;
+                    if(event.getAction() == MotionEvent.ACTION_DOWN) {
+                        if(event.getRawX() >= (text.getRight() - text.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                            if(!isPaused){
+                                doubleclickListenerPerso.safetyNexAppiService.speechOut(getString(R.string.pause));
+                                text.setCompoundDrawablesWithIntrinsicBounds(
+                                        null,
+                                        null,
+                                        TextDrawable.builder()
+                                                .beginConfig()
+                                                .width(60)  // width in px
+                                                .height(60) // height in px
+                                                .withBorder(5)
+                                                .textColor(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()))
+                                                .fontSize(30)
+                                                .bold()
+                                                .endConfig()
+                                                .buildRound(getString(R.string.resume), Color.WHITE),
+                                        null);
+                            }
+                            isPaused = !isPaused;
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            });
         }
+
         int ret =  super.onStartCommand(intent, flags, startId);
 
         getApplicationContext().sendBroadcast(new Intent("FLOATING_OK"));
@@ -169,56 +205,62 @@ public class FloatingWidgetService extends Service implements SensorEventListene
         mLocationListener = new LocationListener() {
             @Override
             public void onLocationChanged(final Location location) {
-                CNxInputAPI mInpuAPI = new CNxInputAPI();
+                if(!isPaused){
+                    CNxInputAPI mInpuAPI = new CNxInputAPI();
 
-                if(CONSTANTS.DEMO_DATA_TEST){
-                    String lineFull = mData.ReadNextData();
-                    mInpuAPI.ParseData(lineFull);
-                    mInpuAPI.setNbOfSat(7);
-                }else{
-                    mInpuAPI.setmLat((float)location.getLatitude());
-                    mInpuAPI.setmLon((float)location.getLongitude());
-                    mInpuAPI.setmTime(location.getTime());
-                    mInpuAPI.setmTimeDiffGPS(System.currentTimeMillis() - location.getTime());
-                    mInpuAPI.setNbOfSat(location.getExtras().getInt("satellites"));
-                    mInpuAPI.setmCap(location.getBearing());
-                    mInpuAPI.setmSpeed(location.getSpeed()*CONSTANTS.SPEED_MS_TO_KH);
-                    mInpuAPI.setmAccelZ(last_x);
-                    mInpuAPI.setmAccelY(last_y);
-                    mInpuAPI.setmAccelX(last_x);
+                    if(CONSTANTS.DEMO_DATA_TEST){
+                        String lineFull = mData.ReadNextData();
+                        mInpuAPI.ParseData(lineFull);
+                        mInpuAPI.setNbOfSat(7);
+                    }else{
+                        mInpuAPI.setmLat((float)location.getLatitude());
+                        mInpuAPI.setmLon((float)location.getLongitude());
+                        mInpuAPI.setmTime(location.getTime());
+                        mInpuAPI.setmTimeDiffGPS(System.currentTimeMillis() - location.getTime());
+                        mInpuAPI.setNbOfSat(location.getExtras().getInt("satellites"));
+                        mInpuAPI.setmCap(location.getBearing());
+                        mInpuAPI.setmSpeed(location.getSpeed()*CONSTANTS.SPEED_MS_TO_KH);
+                        mInpuAPI.setmAccelZ(last_x);
+                        mInpuAPI.setmAccelY(last_y);
+                        mInpuAPI.setmAccelX(last_x);
+                    }
+
+                    final TextView text = mOverlayView.findViewById(R.id.textView2);
+                    text.setText(doubleclickListenerPerso.safetyNexAppiService.getRisk(mInpuAPI));
+
+                    ((LinearLayout)text.getParent()).setBackground(getApplicationContext().getDrawable(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetBorderColor())));
+                    // text.setCompoundDrawablesWithIntrinsicBounds(getTextIconDrawable(doubleclickListenerPerso.safetyNexAppiService.getColorEnum().getFloatingWidgetBorderColor()) ,0,0,0);
+
+
+                    if(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getTextRounded() != null) {
+                        text.setCompoundDrawablesWithIntrinsicBounds(TextDrawable.builder()
+                                .beginConfig()
+                                .width(60)  // width in px
+                                .height(60) // height in px
+                                .withBorder(5)
+                                .textColor(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()))
+                                .fontSize(30)
+                                .bold()
+                                .endConfig()
+                                .buildRound(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getTextRounded() , Color.WHITE),
+                                null,
+                                TextDrawable.builder()
+                                        .beginConfig()
+                                        .width(60)  // width in px
+                                        .height(60) // height in px
+                                        .withBorder(5)
+                                        .textColor(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()))
+                                        .fontSize(30)
+                                        .bold()
+                                        .endConfig()
+                                        .buildRound(getString(R.string.pause), Color.WHITE),
+                                null);
+                    }else{
+                        text.setCompoundDrawablesWithIntrinsicBounds(getTextIconDrawable(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetBorderColor()) ,0,0,0);
+                    }
+
+                    text.setTextColor(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()));
                 }
-
-
-
-                final TextView text = mOverlayView.findViewById(R.id.textView2);
-                text.setText(doubleclickListenerPerso.safetyNexAppiService.getRisk(mInpuAPI));
-
-                ((LinearLayout)text.getParent()).setBackground(getApplicationContext().getDrawable(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetBorderColor())));
-                // text.setCompoundDrawablesWithIntrinsicBounds(getTextIconDrawable(doubleclickListenerPerso.safetyNexAppiService.getColorEnum().getFloatingWidgetBorderColor()) ,0,0,0);
-
-                if(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getTextRounded() != null) {
-                    text.setCompoundDrawablesWithIntrinsicBounds(TextDrawable.builder()
-                            .beginConfig()
-                            .width(60)  // width in px
-                            .height(60) // height in px
-                            .withBorder(5)
-                            .textColor(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()))
-                            .fontSize(30)
-                            .bold()
-                            .endConfig()
-                            .buildRound(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getTextRounded() , Color.WHITE), null, null, null);
-                }else{
-                    text.setCompoundDrawablesWithIntrinsicBounds(getTextIconDrawable(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetBorderColor()) ,0,0,0);
-                }
-
-          /*      if(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().imgId != null){
-                    ImageView img = new ImageView(getApplicationContext());
-                    int imageId = getResources().getIdentifier(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().imgId ,"mipmap", getPackageName());
-                    img.setImageResource(imageId);
-                    text.setCompoundDrawablesWithIntrinsicBounds(img.getDrawable() ,null,null,null);
-                }*/
-
-                text.setTextColor(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()));
             }
 
             @Override
