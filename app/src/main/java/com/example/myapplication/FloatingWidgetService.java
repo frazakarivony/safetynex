@@ -13,6 +13,8 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ScaleDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -133,16 +135,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
                                 text.setCompoundDrawablesWithIntrinsicBounds(
                                         null,
                                         null,
-                                        TextDrawable.builder()
-                                                .beginConfig()
-                                                .width(60)  // width in px
-                                                .height(60) // height in px
-                                                .withBorder(5)
-                                                .textColor(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()))
-                                                .fontSize(30)
-                                                .bold()
-                                                .endConfig()
-                                                .buildRound(getString(R.string.resume), Color.WHITE),
+                                        getDrawable(R.drawable.ic_play_circle_outline_white_24dp),
                                         null);
                             }
                             isPaused = !isPaused;
@@ -253,16 +246,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
                     text.setCompoundDrawablesRelativeWithIntrinsicBounds(
                             text.getCompoundDrawables()[0],
                             text.getCompoundDrawables()[1],
-                            TextDrawable.builder()
-                                    .beginConfig()
-                                    .width(60)  // width in px
-                                    .height(60) // height in px
-                                    .withBorder(5)
-                                    .textColor(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()))
-                                    .fontSize(30)
-                                    .bold()
-                                    .endConfig()
-                                    .buildRound(getString(R.string.pause), Color.WHITE),
+                            getDrawable(R.drawable.ic_pause_circle_outline_white_24dp),
                             text.getCompoundDrawables()[3]
                     );
                     text.setTextColor(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()));
