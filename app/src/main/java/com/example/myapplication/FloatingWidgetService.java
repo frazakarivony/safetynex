@@ -244,21 +244,27 @@ public class FloatingWidgetService extends Service implements SensorEventListene
                                 .endConfig()
                                 .buildRound(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getTextRounded() , Color.WHITE),
                                 null,
-                                TextDrawable.builder()
-                                        .beginConfig()
-                                        .width(60)  // width in px
-                                        .height(60) // height in px
-                                        .withBorder(5)
-                                        .textColor(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()))
-                                        .fontSize(30)
-                                        .bold()
-                                        .endConfig()
-                                        .buildRound(getString(R.string.pause), Color.WHITE),
+                                null,
                                 null);
                     }else{
                         text.setCompoundDrawablesWithIntrinsicBounds(getTextIconDrawable(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetBorderColor()) ,0,0,0);
                     }
 
+                    text.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                            text.getCompoundDrawables()[0],
+                            text.getCompoundDrawables()[1],
+                            TextDrawable.builder()
+                                    .beginConfig()
+                                    .width(60)  // width in px
+                                    .height(60) // height in px
+                                    .withBorder(5)
+                                    .textColor(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()))
+                                    .fontSize(30)
+                                    .bold()
+                                    .endConfig()
+                                    .buildRound(getString(R.string.pause), Color.WHITE),
+                            text.getCompoundDrawables()[3]
+                    );
                     text.setTextColor(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()));
                 }
             }
