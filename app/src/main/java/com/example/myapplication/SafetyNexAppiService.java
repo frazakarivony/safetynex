@@ -5,6 +5,7 @@ import android.content.res.AssetManager;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
@@ -371,17 +373,23 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
     }
 
     public void speechOut(String txt){
+        HashMap<String,String> params = new HashMap<>();
+        params.put(TextToSpeech.Engine.KEY_PARAM_VOLUME, "0.5");
+
+        Bundle paramss = new Bundle();
+        paramss.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 0.5f);
+
         if(!this.lastTTS.equals(txt)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                mTts.speak(txt, TextToSpeech.QUEUE_FLUSH, null, null);
+                mTts.speak(txt, TextToSpeech.QUEUE_FLUSH, paramss, null);
             } else {
-                mTts.speak(txt, TextToSpeech.QUEUE_FLUSH, null);
+                mTts.speak(txt, TextToSpeech.QUEUE_FLUSH, params);
             }
         }else{
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                mTts.speak(txt, TextToSpeech.QUEUE_ADD, null, null);
+                mTts.speak(txt, TextToSpeech.QUEUE_ADD, paramss, null);
             } else {
-                mTts.speak(txt, TextToSpeech.QUEUE_ADD, null);
+                mTts.speak(txt, TextToSpeech.QUEUE_ADD, params);
             }
         }
         this.lastTTS = txt;

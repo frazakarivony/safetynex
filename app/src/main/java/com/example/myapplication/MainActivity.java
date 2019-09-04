@@ -15,7 +15,7 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.binomad.api.LicenseServiceFred;
+import com.binomad.api.LicenseAppiService;
 import com.binomad.api.OnEventListener;
 import com.nexiad.safetynexappsample.CONSTANTS;
 
@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         getIntent().putExtra("TTS", getResources().getString(R.string.loading));
-        LicenseServiceFred licenseServiceFred = new LicenseServiceFred(getApplicationContext(), new OnEventListener() {
+        LicenseAppiService licenseAppiService = new LicenseAppiService(getApplicationContext(), new OnEventListener() {
             @Override
             public void onSuccess(Object object) {
                 if("ok".equals(object)) {
@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
                 close.callOnClick();
             }
         },imei);
-        licenseServiceFred.execute();
+        licenseAppiService.execute();
     }
 }
 

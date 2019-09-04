@@ -37,7 +37,7 @@ import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
-public class LicenseServiceFred extends AsyncTask{
+public class LicenseAppiService extends AsyncTask{
 
     private static final String NAMESPACE = "bnd:licenseWSDL";
     private static final String METHOD_NAME = "NewLicenseEx";
@@ -51,7 +51,7 @@ public class LicenseServiceFred extends AsyncTask{
     private String imei;
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36";
 
-    public LicenseServiceFred(Context context, OnEventListener callback, String imei) {
+    public LicenseAppiService(Context context, OnEventListener callback, String imei) {
         this.mCallBack = callback;
         this.mContext = context;
         this.licenseBndPathFile = CONSTANTS.DEMO_WORKING_PATH.concat(CONSTANTS.DEMO_LICENSE_FILE);
