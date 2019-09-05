@@ -8,7 +8,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
-public class DoubleclickListenerPerso implements GestureDetector.OnGestureListener, View.OnTouchListener {
+public class UserActionListener implements GestureDetector.OnGestureListener, View.OnTouchListener {
 
     private GestureDetector gestureDetector;
     private WindowManager mWindowManager;
@@ -20,7 +20,7 @@ public class DoubleclickListenerPerso implements GestureDetector.OnGestureListen
     private WindowManager.LayoutParams params;
     private Intent intentFloatingService;
 
-    public DoubleclickListenerPerso(Context context, WindowManager.LayoutParams params, WindowManager windowManager, Intent intent){
+    public UserActionListener(Context context, WindowManager.LayoutParams params, WindowManager windowManager, Intent intent){
         this.context = context;
         this.params = params;
         this.mWindowManager = windowManager;

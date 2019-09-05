@@ -43,7 +43,7 @@ import com.api.safetynex.listener.LicensingListener;
 import com.api.safetynex.listener.interfaces.OnEventListener;
 import com.api.safetynex.MainApp;
 import com.api.safetynex.R;
-import com.api.safetynex.listener.DoubleclickListenerPerso;
+import com.api.safetynex.listener.UserActionListener;
 import com.api.safetynex.service.SafetyNexAppiService;
 import com.api.utils.ConnectionUtils;
 import com.api.safetynex.receiver.AppReceiver;
@@ -56,7 +56,7 @@ import com.nexiad.safetynexappsample.CONSTANTS;
 
 import java.util.Objects;
 
-public class FloatingWidgetService extends Service implements SensorEventListener{
+public class FloatingWidgetService extends Service {
 
     private final String TAG = CONSTANTS.LOGNAME.concat("FloatingWidgetService");
     private WindowManager mWindowManager;
@@ -78,7 +78,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
     private Boolean isPaused=false;
     private SafetyNexAppiService safetyNexAppiService;
     private LicenseAppiService licenseAppiService;
-    private DoubleclickListenerPerso doubleclickListenerPerso;
+    private UserActionListener doubleclickListenerPerso;
     private OnEventListener onEventListener;
 
     @Nullable
@@ -133,7 +133,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
 
         SensorManager senSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         Sensor senAccelerometer = Objects.requireNonNull(senSensorManager).getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        senSensorManager.registerListener(this.mSensorListener, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
         onEventListener = new LicensingListener(this.safetyNexAppiService.getApp());
     }
@@ -190,7 +190,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
                 }
             });
 
-            doubleclickListenerPerso = new DoubleclickListenerPerso(getApplicationContext(),params, mWindowManager, intent);
+            doubleclickListenerPerso = new UserActionListener(getApplicationContext(),params, mWindowManager, intent);
             mOverlayView.setOnTouchListener(doubleclickListenerPerso);
 
             addListenerSensor();
@@ -252,7 +252,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
                 SensorManager.SENSOR_DELAY_GAME);
     }
 
-    private void addListenerLocation(final DoubleclickListenerPerso doubleclickListenerPerso) {
+    private void addListenerLocation(final UserActionListener doubleclickListenerPerso) {
         Log.i(TAG, "addListenerLocation");
         mLocationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
 
@@ -371,38 +371,5 @@ public class FloatingWidgetService extends Service implements SensorEventListene
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .addAction(R.drawable.ic_check_box_black_24dp, getString(R.string.close_app), closePendingIntent);
         return builder.build();
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent sensorEvent) {
-//        Log.i(TAG, "onSensorChanged");
-
-        Sensor mySensor = sensorEvent.sensor;
-
-        if (mySensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            float x = sensorEvent.values[0];
-            float y = sensorEvent.values[1];
-            float z = sensorEvent.values[2];
-
-            long curTime = System.currentTimeMillis();
-
-            if ((curTime - lastUpdate) > 100) {
-                long diffTime = (curTime - lastUpdate);
-                lastUpdate = curTime;
-
-                float speed = Math.abs(x + y + z - last_x - last_y - last_z)/ diffTime * 10000;
-
-                if (speed > SHAKE_THRESHOLD) {
-
-                }
-                last_x = x;
-                last_y = y;
-                last_z = z;
-            }
-        }
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 }
