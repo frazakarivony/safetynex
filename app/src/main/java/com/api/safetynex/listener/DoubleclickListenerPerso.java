@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.api.safetynex.listener;
 
 import android.content.Context;
 import android.content.Intent;
@@ -8,7 +8,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
-class DoubleclickListenerPerso implements GestureDetector.OnGestureListener, View.OnTouchListener {
+public class DoubleclickListenerPerso implements GestureDetector.OnGestureListener, View.OnTouchListener {
 
     private GestureDetector gestureDetector;
     private WindowManager mWindowManager;
@@ -20,7 +20,7 @@ class DoubleclickListenerPerso implements GestureDetector.OnGestureListener, Vie
     private WindowManager.LayoutParams params;
     private Intent intentFloatingService;
 
-    DoubleclickListenerPerso(Context context, WindowManager.LayoutParams params, WindowManager windowManager, Intent intent){
+    public DoubleclickListenerPerso(Context context, WindowManager.LayoutParams params, WindowManager windowManager, Intent intent){
         this.context = context;
         this.params = params;
         this.mWindowManager = windowManager;

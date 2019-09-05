@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.api.safetynex.service.floatingwidget;
 
 public enum FloatingWidgetColorEnum {
     //Objets directement construits

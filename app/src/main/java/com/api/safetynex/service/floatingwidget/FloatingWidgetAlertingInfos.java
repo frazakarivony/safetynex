@@ -1,10 +1,9 @@
-package com.example.myapplication;
+package com.api.safetynex.service.floatingwidget;
 
 import com.nexyad.jndksafetynex.CNxRisk;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 public class FloatingWidgetAlertingInfos {
 

@@ -1,4 +1,4 @@
-package com.exceptions;
+package com.api.exceptions;
 
 public class NexiadException extends Exception {
     public NexiadException(String message) {

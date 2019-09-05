@@ -1,4 +1,4 @@
-package com.binomad.api;
+package com.api.binomad;
 
 public enum BinomadLicensingParams {
     //Objets directement construits

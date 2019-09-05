@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.api.safetynex;
 
 import org.junit.Test;
 

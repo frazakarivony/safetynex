@@ -1,6 +1,6 @@
-package com.example.utils;
+package com.api.utils;
 
-import com.example.myapplication.R;
+import com.api.safetynex.R;
 
 public class DrawableUtils {
 

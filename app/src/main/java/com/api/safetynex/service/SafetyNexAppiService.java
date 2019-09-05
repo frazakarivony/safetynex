@@ -1,17 +1,17 @@
-package com.example.myapplication;
+package com.api.safetynex.service;
 
 import android.app.Application;
 import android.content.res.AssetManager;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
-import android.view.View;
 
-import com.exceptions.NexiadException;
+import com.api.exceptions.NexiadException;
+import com.api.safetynex.service.floatingwidget.FloatingWidgetAlertingInfos;
+import com.api.safetynex.service.floatingwidget.FloatingWidgetColorEnum;
+import com.api.safetynex.MainApp;
 import com.nexiad.safetynexappsample.CNxDemoData;
 import com.nexiad.safetynexappsample.CNxInputAPI;
 import com.nexiad.safetynexappsample.CONSTANTS;
@@ -31,12 +31,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import static com.nexyad.jndksafetynex.CNxRisk.CNxAlert.TONE_ALERT;
 
-class SafetyNexAppiService implements TextToSpeech.OnInitListener {
+public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
 
     private CNxDemoData mData;
     private int mCount;
@@ -108,11 +106,11 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         this.mokFloatingAlertingInfos.add(FloatingWidgetAlertingInfos.generateFakeFloating(FloatingWidgetColorEnum.GPS_LOST, "GPS"));
     }
 
-    FloatingWidgetAlertingInfos floatingWidgetAlertingInfos() {
+    public FloatingWidgetAlertingInfos floatingWidgetAlertingInfos() {
         return this.alertingTypeEnum;
     }
 
-    void initAPI() throws NexiadException {
+    public void initAPI() throws NexiadException {
         Log.v(TAG, "initAPI");
         CNxLicenseInfo tempLicInfo = new CNxLicenseInfo();
         this.copyMapsOnDeviceStorage();
@@ -143,7 +141,7 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         return TempMessage;
     }
 
-    void closeAPI() {
+    public void closeAPI() {
         Log.v(TAG, "closeAPI");
         if(this.mTts != null){
             this.mTts.stop();
@@ -204,7 +202,7 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         this.mData.WriteData(mMessage);
     }
 
-    String getRisk(CNxInputAPI cNxInputAPI){
+    public String getRisk(CNxInputAPI cNxInputAPI){
         Log.v(TAG, "getRisk "+printCNxInputAPI(cNxInputAPI));
         //Set GPS
         this.mJniFunction.SetGPSData(cNxInputAPI.getmLat(), cNxInputAPI.getmLon(), cNxInputAPI.getNbOfSat(), cNxInputAPI.getmCap(), cNxInputAPI.getmSpeed(), cNxInputAPI.getmTimeDiffGPS());
@@ -354,7 +352,7 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         }
     }
 
-    void speechOut(String txt){
+    public void speechOut(String txt){
         HashMap<String,String> params = new HashMap<>();
         params.put(TextToSpeech.Engine.KEY_PARAM_VOLUME, "0.5");
 

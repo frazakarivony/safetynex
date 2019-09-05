@@ -1,11 +1,11 @@
-package com.binomad.api;
+package com.api.binomad;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.example.myapplication.Utils;
-import com.exceptions.BenomadException;
+import com.api.utils.Utils;
+import com.api.exceptions.BenomadException;
 import com.nexiad.safetynexappsample.CONSTANTS;
 
 import org.json.JSONObject;

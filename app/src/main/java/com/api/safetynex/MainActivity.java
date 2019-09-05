@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.api.safetynex;
 
 import android.Manifest;
 import android.content.Intent;
@@ -14,7 +14,9 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.binomad.api.LicenseAppiService;
+import com.api.binomad.LicenseAppiService;
+import com.api.safetynex.receiver.AppReceiver;
+import com.api.safetynex.service.floatingwidget.FloatingWidgetService;
 import com.nexiad.safetynexappsample.CONSTANTS;
 
 
