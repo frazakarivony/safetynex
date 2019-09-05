@@ -5,7 +5,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.api.safetynex.listener.interfaces.OnEventListener;
-import com.api.utils.Utils;
+import com.api.utils.ConnectionUtils;
 import com.api.exceptions.BenomadException;
 import com.nexiad.safetynexappsample.CONSTANTS;
 
@@ -61,7 +61,7 @@ public class LicenseAppiService extends AsyncTask{
         // Request a string response from the provided URL.
         try {
 
-            if(Utils.isInternetConnection(mContext)){
+            if(ConnectionUtils.isInternetConnection(mContext)){
                 File fileLicenseBnd = new File(this.licenseBndPathFile);
                 File fileLicenseNxd = new File(this.licenseNxPathFile);
                 File fileCertificateNxd = new File(this.certificateNxtPathFile);

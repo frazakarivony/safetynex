@@ -31,7 +31,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.location.Location;
@@ -46,7 +45,7 @@ import com.api.safetynex.MainApp;
 import com.api.safetynex.R;
 import com.api.safetynex.listener.DoubleclickListenerPerso;
 import com.api.safetynex.service.SafetyNexAppiService;
-import com.api.utils.Utils;
+import com.api.utils.ConnectionUtils;
 import com.api.safetynex.receiver.AppReceiver;
 import com.api.safetynex.receiver.StopNotificationReceiver;
 import com.api.utils.DrawableUtils;
@@ -269,7 +268,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
                 final TextView text = mOverlayView.findViewById(R.id.textView2);
 
                 if(!isPaused) {
-                    if (Utils.isInternetConnection(getApplicationContext())) {
+                    if (ConnectionUtils.isInternetConnection(getApplicationContext())) {
 
                         CNxInputAPI mInpuAPI = new CNxInputAPI();
 
