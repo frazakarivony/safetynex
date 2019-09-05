@@ -61,8 +61,7 @@ public class UserActionListener implements GestureDetector.OnGestureListener, Vi
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        String msg = "";
-        msg = "Mouvement vers : ";
+        String msg = "Mouvement vers : ";
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     msg += "bas detecté " ;
@@ -73,7 +72,6 @@ public class UserActionListener implements GestureDetector.OnGestureListener, Vi
                     //get the touch location
                     initialTouchX = event.getRawX();
                     initialTouchY = event.getRawY();
-
                     break;
                 case MotionEvent.ACTION_MOVE:
                     msg += "indéterminé detecté ";
