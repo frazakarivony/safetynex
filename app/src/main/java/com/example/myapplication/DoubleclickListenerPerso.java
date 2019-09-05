@@ -29,7 +29,7 @@ class DoubleclickListenerPerso implements GestureDetector.OnGestureListener, Vie
         this.mWindowManager = windowManager;
         this.intentFloatingService = intent;
         gestureDetector = new GestureDetector(context, this);
-        this.safetyNexAppiService = new SafetyNexAppiService(this.mainApp, view);
+        this.safetyNexAppiService = new SafetyNexAppiService(this.mainApp);
         this.safetyNexAppiService.initAPI();
     }
 

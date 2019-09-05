@@ -9,4 +9,5 @@
     <string name="ok">OK</string>
     <string name="pause">Pause</string>
     <string name="resume">Play</string>
+    <string name="no_connection">Perte connexion</string>
 </resources>

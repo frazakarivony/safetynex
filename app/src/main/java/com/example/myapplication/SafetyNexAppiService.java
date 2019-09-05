@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -36,30 +37,25 @@ import static com.nexyad.jndksafetynex.CNxRisk.CNxAlert.TONE_ALERT;
 
 class SafetyNexAppiService implements TextToSpeech.OnInitListener {
 
-    private boolean mIsRunning;
     private CNxDemoData mData;
-    private CNxInputAPI mInpuAPI;
     private int mCount;
     private JNDKSafetyNex mJniFunction;
     private CNxRisk mNxRisk;
     private String LicenseFileBnd;
     private String LicenseFileNx;
     private String MapSubPath;
-    private String ResMapSubPath;
     private String UnlockKey;
-    private int Language;
+    private int language;
     private String TAG;
     private String mMessage;
-    private Handler mTimerHandler;
-    private Runnable mTimerRunnable;
     private MainApp app;
-    private View mView;
     private static final Integer LOW_LOWLEVEL_RISK = 0;
     private static final Integer MEDIUM_LOWLEVEL_RISK = 1;
     private static final Integer HIGH_LOWLEVEL_RISK = 2;
     private TextToSpeech mTts;
-    private int previousM_iSafetyNexEngineState = 99;
     private String lastTTS = "";
+    private int lastState;
+    private int stateRepetition= -123;
 
     private List<FloatingWidgetAlertingInfos> mokFloatingAlertingInfos;
 
@@ -68,38 +64,30 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
     private FloatingWidgetAlertingInfos currentAlertingTypeEnum;
     private int rank = 0;
 
-    SafetyNexAppiService(Application app, View view) {
+    SafetyNexAppiService(Application app) {
         this.TAG  = CONSTANTS.LOGNAME.concat("SafetyNexService");
         this.app = (MainApp)app;
-        this.mView = view;
         String workingPath = CONSTANTS.DEMO_WORKING_PATH;
-        String resPath = CONSTANTS.APP_ASSETS_MAPS_PATH;
         String inputFile = workingPath + CONSTANTS.DEMO_IN_FILE_NAME;
         String outputFile = workingPath + CONSTANTS.DEMO_OUT_FILE_NAME;
         LicenseFileBnd = workingPath + CONSTANTS.DEMO_LICENSE_FILE;
         LicenseFileNx = workingPath + CONSTANTS.DEMO_LICENSE_FILE_NEXYAD;
         MapSubPath = workingPath + CONSTANTS.MAP_SUB_PATH;
-        ResMapSubPath = resPath + CONSTANTS.MAP_SUB_PATH;
         UnlockKey = CONSTANTS.DEMO_UNLOCK_KEY;
-        Language = 1;
+        language = 1;
         this.toneGenerator  = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100);
         this.mTts = new TextToSpeech(this.app.getApplicationContext(), this);
         try {
-            Language = Integer.parseInt(String.valueOf(CONSTANTS.DEMO_LANGUAGE));
+            language = Integer.parseInt(String.valueOf(CONSTANTS.DEMO_LANGUAGE));
         }catch (Exception e) {
             System.err.println("Exception: " + e.getMessage());
         }
 
         mCount = 0;
-
-        mIsRunning = true;
         mData = new CNxDemoData(inputFile, outputFile);
         mJniFunction = JNDKSafetyNex.GetInstance(this.app.getApplicationContext());
-        mInpuAPI = new CNxInputAPI();
         mNxRisk = new CNxRisk();
-        mTimerHandler = new Handler();
-
-        this.mokFloatingAlertingInfos = new ArrayList<FloatingWidgetAlertingInfos>();
+        this.mokFloatingAlertingInfos = new ArrayList<>();
         this.mokFloatingAlertingInfos.add(FloatingWidgetAlertingInfos.generateFakeFloating(FloatingWidgetColorEnum.LOW_OF_LOWLEVEL, null));
         this.mokFloatingAlertingInfos.add(FloatingWidgetAlertingInfos.generateFakeFloating(FloatingWidgetColorEnum.MEDIUM_OF_LOWLEVEL, null));
         this.mokFloatingAlertingInfos.add(FloatingWidgetAlertingInfos.generateFakeFloating(FloatingWidgetColorEnum.HIGH_OF_LOWLEVEL, null));
@@ -109,17 +97,15 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         this.mokFloatingAlertingInfos.add(FloatingWidgetAlertingInfos.generateFakeFloating(FloatingWidgetColorEnum.GPS_LOST, "GPS"));
     }
 
-    public FloatingWidgetAlertingInfos floatingWidgetAlertingInfos() {
+    FloatingWidgetAlertingInfos floatingWidgetAlertingInfos() {
         return this.alertingTypeEnum;
     }
 
     void initAPI() {
         Log.v(TAG, "initAPI");
-        this.mIsRunning = true;
-        mTimerHandler.postDelayed(mTimerRunnable, CONSTANTS.DEMO_FIRST_DELAY);
         CNxLicenseInfo tempLicInfo = new CNxLicenseInfo();
         this.copyMapsOnDeviceStorage();
-        boolean isLicOK = this.mJniFunction.Birth(this.LicenseFileBnd, this.MapSubPath, this.UnlockKey, this.Language, this.LicenseFileNx, tempLicInfo);
+        boolean isLicOK = this.mJniFunction.Birth(this.LicenseFileBnd, this.MapSubPath, this.UnlockKey, this.language, this.LicenseFileNx, tempLicInfo);
         if(!isLicOK) {
             new Timer().schedule(new TimerTask() {
                 @Override
@@ -145,32 +131,6 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         return TempMessage;
     }
 
-    private void closeAPI() {
-        Log.v(TAG, "closeAPI");
-        if(this.mTts != null){
-            this.mTts.stop();
-            this.mTts.shutdown();
-        }
-        this.mJniFunction.UserStop();
-        float grade = this.mJniFunction.GetUserGrade();
-        CNxUserStat InputUserStat = new CNxUserStat();
-        CNxUserStat OutUserStat = new CNxUserStat();
-        this.mJniFunction.GetSIUserStat(InputUserStat );
-        this.mJniFunction.GetLocalUserStat(OutUserStat, InputUserStat);
-        float duration = 0;
-        float distance = 0;
-        CNxFullStat[] FullStat = this.mJniFunction.GetCloudStat();
-        for (CNxFullStat cNxFullStat : FullStat) {
-            duration += cNxFullStat.m_fDuration;
-            distance += cNxFullStat.m_fDistance;
-        }
-        this.mJniFunction.StoreCloudStatToMemory(CONSTANTS.DEMO_WORKING_PATH);
-        mMessage = "Grade = " + grade
-                + "; duration =" + duration
-                + "; distance =" + distance;
-        this.mJniFunction.Death();
-    }
-
     private void copyMapsOnDeviceStorage(){
        File externalFilesDir =  new File(MapSubPath);
         AssetManager assetManager = this.app.getAssets();
@@ -180,7 +140,7 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                 externalFilesDir.mkdir();
 
                 String[] li = assetManager.list(CONSTANTS.MAP_SUB_PATH);
-                for(String f : li){
+                for(String f : Objects.requireNonNull(li)){
                   InputStream in = assetManager.open(CONSTANTS.MAP_SUB_PATH+File.separator+f);
                   String path = externalFilesDir.getAbsolutePath()+File.separator+f;
                   File fil = new File(path);
@@ -202,31 +162,11 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         }
     }
 
-    private void doNextStep() {
-        upDateHMI();
-        if(this.mIsRunning) {
-            if(this.mData.isEOF()) {
-                closeAPI();
-                this.mIsRunning = false;
-                upDateHMI();
-            } else {
-                mTimerHandler.postDelayed(mTimerRunnable, CONSTANTS.DEMO_RUN_DELAY);
-            }
-        } else {
-            closeAPI();
-            upDateHMI();
-        }
-    }
-
-    private void upDateHMI() {
-        Log.v(TAG, mMessage);
-    }
-
     private void writeDatas(String mMessage){
         this.mData.WriteData(mMessage);
     }
 
-    public String getRisk(CNxInputAPI cNxInputAPI){
+    String getRisk(CNxInputAPI cNxInputAPI){
         Log.v(TAG, "getRisk "+printCNxInputAPI(cNxInputAPI));
         //Set GPS
         this.mJniFunction.SetGPSData(cNxInputAPI.getmLat(), cNxInputAPI.getmLon(), cNxInputAPI.getNbOfSat(), cNxInputAPI.getmCap(), cNxInputAPI.getmSpeed(), cNxInputAPI.getmTimeDiffGPS());
@@ -249,18 +189,12 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         }
         this.mCount++;
         this.alertingTypeEnum = updateRiskInfo(speed);
-        this.previousM_iSafetyNexEngineState = mNxRisk.m_iSafetyNexEngineState;
         return mMessage;
     }
 
     private String printCNxInputAPI(CNxInputAPI cNxInputAPI){
         return "NB Sat : "+cNxInputAPI.getNbOfSat()+" X: "+cNxInputAPI.getmAccelX()+" Y: "+cNxInputAPI.getmAccelY()+" Z: "+cNxInputAPI.getmAccelZ()+" state : "+mNxRisk.m_iSafetyNexEngineState+" speed: "+cNxInputAPI.getmSpeed()*3.6;
     }
-
-    void stop(){
-        this.mIsRunning=false;
-    }
-
 
    private FloatingWidgetAlertingInfos updateRiskInfo(Long speedLimitSegment) {
 
@@ -279,6 +213,16 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
             alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.LOW_OF_LOWLEVEL, null);
        }
 
+
+       if(mNxRisk.m_iSafetyNexEngineState == lastState){
+           if(stateRepetition%5 == 0){
+
+           }
+           stateRepetition++;
+       }else{
+           lastState=mNxRisk.m_iSafetyNexEngineState;
+           stateRepetition=0;
+       }
 
         switch (mNxRisk.m_iSafetyNexEngineState) {
             case CNxRisk.RISK_AVAILABLE
@@ -312,10 +256,10 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                 if (mNxRisk.m_TAlert.m_iTonesRiskAlert == TONE_ALERT){
                     this.toneGenerator.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT, 1000);
                 }
-                if (mNxRisk.m_TAlert.m_sTextToSpeech != null && mNxRisk.m_TAlert.m_sTextToSpeech != ""){
+                if (mNxRisk.m_TAlert.m_sTextToSpeech != null && !mNxRisk.m_TAlert.m_sTextToSpeech.equals("")){
 
                     if(mNxRisk.m_TAlert.m_iNxAlertValue != -1){
-                        alertingTypeEnum.imgId = "icon_"+ String.valueOf(mNxRisk.m_TAlert.m_iNxAlertValue);
+                        alertingTypeEnum.imgId = "icon_"+ mNxRisk.m_TAlert.m_iNxAlertValue;
                     }
                     this.mMessage+=" \n\n"+mNxRisk.m_TAlert.m_sTextToSpeech;
                     speechOut(mNxRisk.m_TAlert.m_sTextToSpeech);
@@ -372,7 +316,7 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         }
     }
 
-    public void speechOut(String txt){
+    void speechOut(String txt){
         HashMap<String,String> params = new HashMap<>();
         params.put(TextToSpeech.Engine.KEY_PARAM_VOLUME, "0.5");
 
@@ -380,17 +324,9 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         paramss.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 0.5f);
 
         if(!this.lastTTS.equals(txt)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                mTts.speak(txt, TextToSpeech.QUEUE_FLUSH, paramss, null);
-            } else {
-                mTts.speak(txt, TextToSpeech.QUEUE_FLUSH, params);
-            }
+            mTts.speak(txt, TextToSpeech.QUEUE_FLUSH, paramss, null);
         }else{
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                mTts.speak(txt, TextToSpeech.QUEUE_ADD, paramss, null);
-            } else {
-                mTts.speak(txt, TextToSpeech.QUEUE_ADD, params);
-            }
+            mTts.speak(txt, TextToSpeech.QUEUE_ADD, paramss, null);
         }
         this.lastTTS = txt;
 

@@ -3,11 +3,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.TextView;
 
-import com.example.myapplication.R;
+import com.example.myapplication.Utils;
 import com.exceptions.BenomadException;
 import com.nexiad.safetynexappsample.CONSTANTS;
 
@@ -42,14 +39,13 @@ public class LicenseAppiService extends AsyncTask{
     private static final String NAMESPACE = "bnd:licenseWSDL";
     private static final String METHOD_NAME = "NewLicenseEx";
     private static final String SOAP_ACTION = "bnd:licenseWSDL#NewLicenseEx";
-    private OnEventListener<String> mCallBack;
+    private OnEventListener mCallBack;
     private Context mContext;
     public Exception mException;
     private String licenseBndPathFile;
     private String licenseNxPathFile;
     private String certificateNxtPathFile;
     private String imei;
-    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36";
 
     public LicenseAppiService(Context context, OnEventListener callback, String imei) {
         this.mCallBack = callback;
@@ -68,13 +64,15 @@ public class LicenseAppiService extends AsyncTask{
         // Request a string response from the provided URL.
         try {
 
-            Map<String, String> properties = new HashMap<String, String>();
-            properties.put("Content-Type", "application/json");
-            properties.put("Authorization", "Basic "+ Base64.encode("softeam:SEFzk6489A".getBytes()));
-            getNexiadLicenceAndGetCertificate(surl, "GET",properties);
-            getBenomadLicence(3550, this.imei);
+            if(Utils.isInternetConnection(mContext)){
+                Map<String, String> properties = new HashMap<String, String>();
+                properties.put("Content-Type", "application/json");
+                properties.put("Authorization", "Basic "+ Base64.encode("softeam:SEFzk6489A".getBytes()));
+                getNexiadLicenceAndGetCertificate(surl, properties);
+                getBenomadLicence(3550, this.imei);
+            }
 
-            this.mCallBack.onSuccess(new String("ok"));
+            this.mCallBack.onSuccess("ok");
 
         }catch (Exception e){
             e.printStackTrace();
@@ -93,7 +91,7 @@ public class LicenseAppiService extends AsyncTask{
 
     private void setHttpUrlRequestProperty(HttpsURLConnection urlConnection, Map<String, String> properties){
         if(properties != null) {
-            for (Map.Entry m : properties.entrySet()) {
+            for (Map.Entry<String, String> m : properties.entrySet()) {
                 urlConnection.setRequestProperty(m.getKey().toString(), m.getValue().toString());
             }
         }
@@ -132,14 +130,13 @@ public class LicenseAppiService extends AsyncTask{
         SoapObject objetSOAP = (SoapObject)envelope.getResponse();
         if(objetSOAP != null && objetSOAP.getProperty("errorCode").toString().equals("0")) {
             writeStreamToFile(this.licenseBndPathFile, new ByteArrayInputStream(Base64.decode(objetSOAP.getProperty("licenseContent").toString())));
-        }else{
-            throw new BenomadException("ERREUR de récupération de la licence Binomad");
         }
+        else throw new BenomadException("ERREUR de récupération de la licence Binomad");
     }
 
-    private void getNexiadLicenceAndGetCertificate(String surl,String methode , Map<String, String> params) throws Exception{
+    private void getNexiadLicenceAndGetCertificate(String surl, Map<String, String> params) throws Exception{
 
-        HttpsURLConnection httpsURLConnection = generateHttpsURLConnection(surl,methode,params);
+        HttpsURLConnection httpsURLConnection = generateHttpsURLConnection(surl, "GET",params);
         JSONObject jsonObject = null;
         if(httpsURLConnection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
             Log.v("getNexiadLicenceAndGetCertificateUri", String.valueOf(httpsURLConnection.getResponseCode()));
@@ -148,7 +145,7 @@ public class LicenseAppiService extends AsyncTask{
                             new InputStreamReader(httpsURLConnection.getInputStream()));
 
             String input;
-            StringBuffer stringBuffer = new StringBuffer();
+            StringBuilder stringBuffer = new StringBuilder();
 
             while ((input = br.readLine()) != null) {
                 stringBuffer.append(input);
