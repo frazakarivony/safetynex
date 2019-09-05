@@ -13,6 +13,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -22,14 +23,17 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.location.Location;
@@ -37,6 +41,10 @@ import android.location.LocationListener;
 import android.widget.TextView;
 
 import com.amulyakhare.textdrawable.TextDrawable;
+import com.binomad.api.LicenseAppiService;
+import com.binomad.api.OnEventListener;
+import com.example.utils.DrawableUtils;
+import com.exceptions.NexiadException;
 import com.nexiad.safetynexappsample.CNxDemoData;
 import com.nexiad.safetynexappsample.CNxInputAPI;
 import com.nexiad.safetynexappsample.CONSTANTS;
@@ -63,6 +71,10 @@ public class FloatingWidgetService extends Service implements SensorEventListene
     private String inputFile = workingPath + CONSTANTS.DEMO_IN_FILE_NAME;
     private String outputFile = workingPath + CONSTANTS.DEMO_OUT_FILE_NAME;
     private Boolean isPaused=false;
+    private SafetyNexAppiService safetyNexAppiService;
+    private LicenseAppiService licenseAppiService;
+    private DoubleclickListenerPerso doubleclickListenerPerso;
+    private OnEventListener onEventListener;
 
     @Nullable
     @Override
@@ -70,22 +82,103 @@ public class FloatingWidgetService extends Service implements SensorEventListene
         return null;
     }
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.i(TAG, "onCreate");
+   /*
+        récuparation du layout
+         */
+        if (mOverlayView == null) {
+            mOverlayView = LayoutInflater.from(this).inflate(R.layout.overlay_layout, null);
+        }
+
+        AppReceiver.getInstance().setFloatingWidgetService(this);
+        startForeground(12345678, createFloatingWidgetSpecialNotification());
+        setTheme(R.style.AppTheme);
+        mData = new CNxDemoData(inputFile, outputFile);
+
+        safetyNexAppiService = SafetyNexAppiService.getInstance(getApplication());
+
+        String imei = "";
+        if (ActivityCompat.checkSelfPermission(((MainApp)getApplication()), Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+        }
+
+        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(getApplicationContext().TELEPHONY_SERVICE);
+        if (android.os.Build.VERSION.SDK_INT >= 26) {
+            imei=telephonyManager.getImei();
+        }
+        else {
+            imei = telephonyManager.getDeviceId();
+        }
+        this.generateFloatingListeners();
+
+        this.licenseAppiService = new LicenseAppiService(getApplicationContext(), onEventListener, imei);
+        try {
+            this.safetyNexAppiService.initAPI();
+        }catch (NexiadException e){
+            e.printStackTrace();
+            LicenseAppiService.removeAllLicences();
+            this.licenseAppiService.execute();
+        }
+    }
+
+    private void generateFloatingListeners(){
+
+        SensorManager senSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        Sensor senAccelerometer = Objects.requireNonNull(senSensorManager).getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+
+        onEventListener = new OnEventListener() {
+            @Override
+            public void onSuccess(Object object) {
+                if("ok".equals(object)) {
+                    if (((MainApp) getApplication()).isFirstRun()) {
+                   /*     Button button = mOverlayView.findViewById(R.id.button);
+                        button.setClickable(true);
+                        button.callOnClick();*/
+                        try {
+                            safetyNexAppiService.initAPI();
+                        }catch (NexiadException e){
+                            e.printStackTrace();
+                          //  licenseAppiService.execute();
+                        }
+                        ((MainApp) getApplication()).setFirsRun(false);
+                    }
+                }
+            }
+
+            public void onFailure(Exception e) {
+                Button close = ((MainApp) getApplication()).getCurrentActivity().findViewById(R.id.close);
+                close.callOnClick();
+            }
+        };
+
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.i(TAG, "onDestroy");
+        if (mOverlayView != null){
+            mWindowManager.removeView(mOverlayView);
+        }
+        mLocationManager.removeUpdates(mLocationListener);
+        mSensorManager.unregisterListener(this.mSensorListener);
+        unregisterReceiver(AppReceiver.getInstance());
+
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "onStartCommand");
-
-        DoubleclickListenerPerso doubleclickListenerPerso;
-        if (mOverlayView == null) {
-
-            mOverlayView = LayoutInflater.from(this).inflate(R.layout.overlay_layout, null);
-
-            final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                    WindowManager.LayoutParams.WRAP_CONTENT,
-                    WindowManager.LayoutParams.WRAP_CONTENT,
-                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                    PixelFormat.TRANSLUCENT);
+        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.TRANSLUCENT);
 
             //Specify the view position
             params.gravity = Gravity.TOP | Gravity.LEFT;        //Initially view will be added to top-left corner
@@ -115,7 +208,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
                 }
             });
 
-            doubleclickListenerPerso = new DoubleclickListenerPerso(getApplicationContext(),params, mWindowManager, intent, ((MainApp)getApplication()),mOverlayView);
+            doubleclickListenerPerso = new DoubleclickListenerPerso(getApplicationContext(),params, mWindowManager, intent);
             mOverlayView.setOnTouchListener(doubleclickListenerPerso);
 
             addListenerSensor();
@@ -129,7 +222,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
                     if(event.getAction() == MotionEvent.ACTION_DOWN) {
                         if(event.getRawX() >= (text.getRight() - text.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
                             if(!isPaused){
-                                doubleclickListenerPerso.safetyNexAppiService.speechOut(getString(R.string.pause));
+                                safetyNexAppiService.speechOut(getString(R.string.pause));
                                 text.setCompoundDrawablesWithIntrinsicBounds(
                                         null,
                                         null,
@@ -143,7 +236,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
                     return false;
                 }
             });
-        }
+       // }
 
         int ret =  super.onStartCommand(intent, flags, startId);
 
@@ -214,40 +307,40 @@ public class FloatingWidgetService extends Service implements SensorEventListene
                             mInpuAPI.setmAccelX(last_x);
                         }
 
-                        text.setText(doubleclickListenerPerso.safetyNexAppiService.getRisk(mInpuAPI));
+                    text.setText(safetyNexAppiService.getRisk(mInpuAPI));
 
-                        ((LinearLayout) text.getParent()).setBackground(getApplicationContext().getDrawable(getDrawableColor(
-                                doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetBorderColor()
-                        )));
+                    ((LinearLayout)text.getParent()).setBackground(getApplicationContext().getDrawable(DrawableUtils.getDrawableColor(safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetBorderColor())));
+                    // text.setCompoundDrawablesWithIntrinsicBounds(getTextIconDrawable(doubleclickListenerPerso.safetyNexAppiService.getColorEnum().getFloatingWidgetBorderColor()) ,0,0,0);
 
-                        if (doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getTextRounded() != null) {
-                            text.setCompoundDrawablesWithIntrinsicBounds(TextDrawable.builder()
-                                            .beginConfig()
-                                            .width(60)  // width in px
-                                            .height(60) // height in px
-                                            .withBorder(5)
-                                            .textColor(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()))
-                                            .fontSize(30)
-                                            .bold()
-                                            .endConfig()
-                                            .buildRound(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getTextRounded(), Color.WHITE),
-                                    null,
-                                    null,
-                                    null);
-                        } else {
-                            text.setCompoundDrawablesWithIntrinsicBounds(getTextIconDrawable(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetBorderColor()), 0, 0, 0);
-                        }
 
-                        text.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                                text.getCompoundDrawables()[0],
-                                text.getCompoundDrawables()[1],
-                                getDrawable(R.drawable.ic_pause_circle_outline_white_24dp),
-                                text.getCompoundDrawables()[3]
-                        );
-                        text.setTextColor(getDrawableColor(doubleclickListenerPerso.safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()));
-                    } else {
+                    if(safetyNexAppiService.floatingWidgetAlertingInfos().getTextRounded() != null) {
+                        text.setCompoundDrawablesWithIntrinsicBounds(TextDrawable.builder()
+                                .beginConfig()
+                                .width(60)  // width in px
+                                .height(60) // height in px
+                                .withBorder(5)
+                                .textColor(DrawableUtils.getDrawableColor(safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()))
+                                .fontSize(30)
+                                .bold()
+                                .endConfig()
+                                .buildRound(safetyNexAppiService.floatingWidgetAlertingInfos().getTextRounded() , Color.WHITE),
+                                null,
+                                null,
+                                null);
+                    }else{
+                        text.setCompoundDrawablesWithIntrinsicBounds(DrawableUtils.getTextIconDrawable(safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetBorderColor()) ,0,0,0);
+                    }
+
+                    text.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                            text.getCompoundDrawables()[0],
+                            text.getCompoundDrawables()[1],
+                            getDrawable(R.drawable.ic_pause_circle_outline_white_24dp),
+                            text.getCompoundDrawables()[3]
+                    );
+                    text.setTextColor(DrawableUtils.getDrawableColor(safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()));
+                }   else {
                         text.setText(R.string.no_connection);
-                        doubleclickListenerPerso.safetyNexAppiService.speechOut(getString(R.string.no_connection));
+                        safetyNexAppiService.speechOut(getString(R.string.no_connection));
                     }
                 }
             }
@@ -272,35 +365,8 @@ public class FloatingWidgetService extends Service implements SensorEventListene
                 LOCATION_REFRESH_DISTANCE, mLocationListener);
     }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.i(TAG, "onCreate");
-        AppReceiver.getInstance().setFloatingWidgetService(this);
-        startForeground(12345678, getNotification());
-        setTheme(R.style.AppTheme);
-        mData = new CNxDemoData(inputFile, outputFile);
-
-        SensorManager senSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        Sensor senAccelerometer = Objects.requireNonNull(senSensorManager).getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.i(TAG, "onDestroy");
-        if (mOverlayView != null){
-            mWindowManager.removeView(mOverlayView);
-        }
-        mLocationManager.removeUpdates(mLocationListener);
-        mSensorManager.unregisterListener(this.mSensorListener);
-        unregisterReceiver(AppReceiver.getInstance());
-
-    }
-
-    private Notification getNotification() {
-        Log.i(TAG, "getNotification");
+    private Notification createFloatingWidgetSpecialNotification() {
+        Log.i(TAG, "createFloatingWidgetSpecialNotification");
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("KILL");
@@ -357,76 +423,4 @@ public class FloatingWidgetService extends Service implements SensorEventListene
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
-
-    private int getDrawableColor(String code){
-        int drawableId;
-        switch (code){
-            case "LOW":
-                drawableId = R.drawable.rounded_corner_low;
-                break;
-            case "MEDIUM":
-                drawableId = R.drawable.rounded_corner_medium;
-                break;
-            case "HIGH":
-                drawableId = R.drawable.rounded_corner_high;
-                break;
-            case "WARNING":
-                drawableId = R.drawable.rounded_corner_warning;
-                break;
-            case "WARNING_SPEED":
-                drawableId = R.drawable.rounded_corner_warning;
-                break;
-            case "GPS_LOST":
-                drawableId = R.drawable.rounded_corner_gps_lost;
-                break;
-            case "ALERT":
-                drawableId = R.drawable.rounded_corner_alert;
-                break;
-            case "BLACK":
-                drawableId = R.color.colorNSXTxtBlack;
-                break;
-            case "ORANGE":
-                drawableId = R.color.colorNSXBgWarningLevel;
-                break;
-            case "RED":
-                drawableId = R.color.colorNSXBgAlertLevel;
-                break;
-            case "WHITE":
-                drawableId = R.color.colorNSXTxtWhite;
-                break;
-            case "GREY":
-                drawableId = R.color.colorNSXTxtGrey;
-                break;
-            default:
-                drawableId = R.color.colorNSX;
-                break;
-        }
-        return drawableId;
-    }
-
-    private int getTextIconDrawable(String code){
-        int drawableId;
-        switch (code){
-            case "LOW":
-                drawableId = R.drawable.ic_check_box_black_24dp;
-                break;
-            case "MEDIUM":
-                drawableId = R.drawable.ic_medium_level_warning_24dp;
-                break;
-            case "HIGH":
-                drawableId = R.drawable.ic_high_level_warning_24dp;
-                break;
-            case "WARNING":
-                drawableId = R.drawable.ic_warning_24dp;
-                break;
-            case "ALERT":
-                drawableId = R.drawable.ic_error_black_24dp;
-                break;
-            default:
-                drawableId = R.drawable.ic_check_box_black_24dp;
-                break;
-        }
-        return drawableId;
-    }
-
 }

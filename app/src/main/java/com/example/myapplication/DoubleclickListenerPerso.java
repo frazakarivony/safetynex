@@ -19,18 +19,13 @@ class DoubleclickListenerPerso implements GestureDetector.OnGestureListener, Vie
     private float initialTouchY;
     private WindowManager.LayoutParams params;
     private Intent intentFloatingService;
-    private MainApp mainApp;
-    public SafetyNexAppiService safetyNexAppiService;
 
-    DoubleclickListenerPerso(Context context, WindowManager.LayoutParams params, WindowManager windowManager, Intent intent, MainApp mainApp, View view){
+    DoubleclickListenerPerso(Context context, WindowManager.LayoutParams params, WindowManager windowManager, Intent intent){
         this.context = context;
-        this.mainApp = mainApp;
         this.params = params;
         this.mWindowManager = windowManager;
         this.intentFloatingService = intent;
         gestureDetector = new GestureDetector(context, this);
-        this.safetyNexAppiService = new SafetyNexAppiService(this.mainApp);
-        this.safetyNexAppiService.initAPI();
     }
 
     @Override
@@ -44,10 +39,6 @@ class DoubleclickListenerPerso implements GestureDetector.OnGestureListener, Vie
 
     @Override
     public boolean onSingleTapUp(MotionEvent e) {
-//        context.stopService(this.intentFloatingService);
-//        this.safetyNexAppiService.stop();
-//        context.startActivity(this.mainApp.getCurrentActivity().getIntent());
-//        Log.v("DoubleClickListener", "onSingleTapUp");
         return false;
     }
 

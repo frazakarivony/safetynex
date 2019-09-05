@@ -42,17 +42,14 @@ public class LicenseAppiService extends AsyncTask{
     private OnEventListener mCallBack;
     private Context mContext;
     public Exception mException;
-    private String licenseBndPathFile;
-    private String licenseNxPathFile;
-    private String certificateNxtPathFile;
+    private static String licenseBndPathFile = CONSTANTS.DEMO_WORKING_PATH.concat(CONSTANTS.DEMO_LICENSE_FILE);
+    private static String licenseNxPathFile = CONSTANTS.DEMO_WORKING_PATH.concat(CONSTANTS.DEMO_LICENSE_FILE_NEXYAD);
+    private static String certificateNxtPathFile = CONSTANTS.DEMO_WORKING_PATH.concat(CONSTANTS.DEMO_CERTIFICATE_FILE_NEXYAD);
     private String imei;
 
-    public LicenseAppiService(Context context, OnEventListener callback, String imei) {
-        this.mCallBack = callback;
+    public LicenseAppiService(Context context, OnEventListener callBack, String imei) {
         this.mContext = context;
-        this.licenseBndPathFile = CONSTANTS.DEMO_WORKING_PATH.concat(CONSTANTS.DEMO_LICENSE_FILE);
-        this.licenseNxPathFile = CONSTANTS.DEMO_WORKING_PATH.concat(CONSTANTS.DEMO_LICENSE_FILE_NEXYAD);
-        this.certificateNxtPathFile = CONSTANTS.DEMO_WORKING_PATH.concat(CONSTANTS.DEMO_CERTIFICATE_FILE_NEXYAD);
+        this.mCallBack = callBack;
         this.imei = imei;
     }
 
@@ -65,13 +62,22 @@ public class LicenseAppiService extends AsyncTask{
         try {
 
             if(Utils.isInternetConnection(mContext)){
-                Map<String, String> properties = new HashMap<String, String>();
-                properties.put("Content-Type", "application/json");
-                properties.put("Authorization", "Basic "+ Base64.encode("softeam:SEFzk6489A".getBytes()));
-                getNexiadLicenceAndGetCertificate(surl, properties);
-                getBenomadLicence(3550, this.imei);
-            }
+                File fileLicenseBnd = new File(this.licenseBndPathFile);
+                File fileLicenseNxd = new File(this.licenseNxPathFile);
+                File fileCertificateNxd = new File(this.certificateNxtPathFile);
 
+                if(!fileCertificateNxd.exists() || !fileLicenseNxd.exists()) {
+
+                    Map<String, String> properties = new HashMap<String, String>();
+                    properties.put("Content-Type", "application/json");
+                    properties.put("Authorization", "Basic " + Base64.encode("softeam:SEFzk6489A".getBytes()));
+                    getNexiadLicenceAndGetCertificate(surl, properties);
+                }
+
+                if(!fileLicenseBnd.exists()) {
+                    getBenomadLicence(3550, this.imei);
+                }
+            }
             this.mCallBack.onSuccess("ok");
 
         }catch (Exception e){
@@ -80,6 +86,8 @@ public class LicenseAppiService extends AsyncTask{
         }
         return null;
     }
+
+
 
     private void getCertificate(String surl) throws Exception {
         HttpsURLConnection urlConnectionHttps = generateHttpsURLConnection(surl,"GET",null);
@@ -130,8 +138,9 @@ public class LicenseAppiService extends AsyncTask{
         SoapObject objetSOAP = (SoapObject)envelope.getResponse();
         if(objetSOAP != null && objetSOAP.getProperty("errorCode").toString().equals("0")) {
             writeStreamToFile(this.licenseBndPathFile, new ByteArrayInputStream(Base64.decode(objetSOAP.getProperty("licenseContent").toString())));
+        }else{
+            throw new BenomadException("ERREUR de récupération de la licence Binomad");
         }
-        else throw new BenomadException("ERREUR de récupération de la licence Binomad");
     }
 
     private void getNexiadLicenceAndGetCertificate(String surl, Map<String, String> params) throws Exception{
@@ -145,7 +154,7 @@ public class LicenseAppiService extends AsyncTask{
                             new InputStreamReader(httpsURLConnection.getInputStream()));
 
             String input;
-            StringBuilder stringBuffer = new StringBuilder();
+            StringBuffer stringBuffer = new StringBuffer();
 
             while ((input = br.readLine()) != null) {
                 stringBuffer.append(input);
@@ -190,6 +199,22 @@ public class LicenseAppiService extends AsyncTask{
         }
         catch (IOException e) {
             Log.e("Exception", "File write failed: " + e.toString());
+        }
+    }
+
+    public static void removeAllLicences(){
+        File fileLicenseBnd = new File(licenseBndPathFile);
+        File fileLicenseNxd = new File(licenseNxPathFile);
+        File fileCertificateNxd = new File(certificateNxtPathFile);
+
+        if(fileCertificateNxd.exists()){
+            fileCertificateNxd.delete();
+        }
+        if(fileLicenseNxd.exists()) {
+            fileLicenseNxd.delete();
+        }
+        if(fileLicenseBnd.exists()) {
+            fileLicenseBnd.delete();
         }
     }
 

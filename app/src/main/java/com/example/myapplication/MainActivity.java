@@ -10,13 +10,11 @@ import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.binomad.api.LicenseAppiService;
-import com.binomad.api.OnEventListener;
 import com.nexiad.safetynexappsample.CONSTANTS;
 
 
@@ -26,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_PERMISSIONS= 126;
     private static final String TAG =  CONSTANTS.LOGNAME.concat("MainActivityLog");
     private AppReceiver appReceiver;
+    private LicenseAppiService licenseAppiService = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,11 +59,6 @@ public class MainActivity extends AppCompatActivity {
         initializeView();
     }
 
-    private void initializeView() {
-       //mTts.speak(getResources().getString(R.string.loading), TextToSpeech.QUEUE_FLUSH,null,null);
-        Log.i(TAG, "initializeView");
-        startService(new Intent(MainActivity.this, FloatingWidgetService.class));
-    }
 
     @Override
     protected void onDestroy() {
@@ -89,15 +83,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(getApplicationContext().TELEPHONY_SERVICE);
-        String imei = "";
-        if (android.os.Build.VERSION.SDK_INT >= 26) {
-            imei=telephonyManager.getImei();
-        }
-        else {
-            imei = telephonyManager.getDeviceId();
-        }
-
         setContentView(R.layout.activity_main);
 
         Button button = findViewById(R.id.button);
@@ -111,18 +96,7 @@ public class MainActivity extends AppCompatActivity {
 
         ((MainApp)getApplication()).setCurrentActivity(this);
         button.setOnClickListener(v -> {
-            if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) && !Settings.canDrawOverlays(MainActivity.this)) {
-
-                //If the draw over permission is not available to open the settings screen
-                //to grant the permission.
-                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        Uri.parse("package:" + getPackageName()));
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivityForResult(intent, DRAW_OVER_OTHER_APP_PERMISSION);
-            }else{
-                initializeView();
-            }
-
+            this.launchFloatingWidget();
         });
 
         close.setOnClickListener(v -> {
@@ -131,26 +105,26 @@ public class MainActivity extends AppCompatActivity {
             this.sendBroadcast(new Intent("KILL"));
         });
 
-        getIntent().putExtra("TTS", getResources().getString(R.string.loading));
-        LicenseAppiService licenseAppiService = new LicenseAppiService(getApplicationContext(), new OnEventListener() {
-            @Override
-            public void onSuccess(Object object) {
-                if("ok".equals(object)) {
-                    if (((MainApp) getApplication()).isFirstRun()) {
-                        Button button = findViewById(R.id.button);
-                        button.setClickable(true);
-                        button.callOnClick();
-                        ((MainApp) getApplication()).setFirsRun(false);
-                    }
-                }
-            }
+        this.launchFloatingWidget();
+    }
 
-            public void onFailure(Exception e) {
-                Button close = findViewById(R.id.close);
-                close.callOnClick();
-            }
-        },imei);
-        licenseAppiService.execute();
+    private void launchFloatingWidget(){
+        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) && !Settings.canDrawOverlays(MainActivity.this)) {
+
+            //If the draw over permission is not available to open the settings screen
+            //to grant the permission.
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + getPackageName()));
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivityForResult(intent, DRAW_OVER_OTHER_APP_PERMISSION);
+        }else{
+            initializeView();
+        }
+    }
+    private void initializeView() {
+       //mTts.speak(getResources().getString(R.string.loading), TextToSpeech.QUEUE_FLUSH,null,null);
+        Log.i(TAG, "initializeView");
+        startService(new Intent(MainActivity.this, FloatingWidgetService.class));
     }
 }
 

@@ -23,7 +23,7 @@ public class CONSTANTS {
 	public static final int  DEMO_FIRST_DELAY = 2000; //wait 2 seconds to begin read data
 	public static final int  DEMO_EXIT_DELAY = 60000; //wait 60 seconds to exit app when license is not valid
 	public static final int  DEMO_RUN_DELAY = 50; //wait 50 milliseconds to read next data
-	public static final boolean DEMO_DATA_TEST = false;
+	public static final boolean DEMO_DATA_TEST = true;
 	public static final String NEXYAD_LICENSING_URI = "https://nexyadsafetynexlicensingprod.azurewebsites.net/api/NexyadLicence?";
 	public static final float SPEED_MS_TO_KH = 3.6f;
 	public static final int ACCELOROMETRE_X_INDIXE = 0;

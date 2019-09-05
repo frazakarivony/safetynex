@@ -11,6 +11,7 @@ import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
 
+import com.exceptions.NexiadException;
 import com.nexiad.safetynexappsample.CNxDemoData;
 import com.nexiad.safetynexappsample.CNxInputAPI;
 import com.nexiad.safetynexappsample.CONSTANTS;
@@ -56,6 +57,7 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
     private String lastTTS = "";
     private int lastState;
     private int stateRepetition= -123;
+    private static final String NEXIAD_LICENCE_EXCEPTION = "Nexiad License exception.";
 
     private List<FloatingWidgetAlertingInfos> mokFloatingAlertingInfos;
 
@@ -64,7 +66,16 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
     private FloatingWidgetAlertingInfos currentAlertingTypeEnum;
     private int rank = 0;
 
-    SafetyNexAppiService(Application app) {
+    private static SafetyNexAppiService safetyNexAppiService;
+
+    public static SafetyNexAppiService getInstance(Application app){
+        if(safetyNexAppiService == null){
+            safetyNexAppiService = new SafetyNexAppiService(app);
+        }
+        return safetyNexAppiService;
+    }
+
+    private SafetyNexAppiService(Application app) {
         this.TAG  = CONSTANTS.LOGNAME.concat("SafetyNexService");
         this.app = (MainApp)app;
         String workingPath = CONSTANTS.DEMO_WORKING_PATH;
@@ -101,17 +112,18 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         return this.alertingTypeEnum;
     }
 
-    void initAPI() {
+    void initAPI() throws NexiadException {
         Log.v(TAG, "initAPI");
         CNxLicenseInfo tempLicInfo = new CNxLicenseInfo();
         this.copyMapsOnDeviceStorage();
         boolean isLicOK = this.mJniFunction.Birth(this.LicenseFileBnd, this.MapSubPath, this.UnlockKey, this.language, this.LicenseFileNx, tempLicInfo);
         if(!isLicOK) {
-            new Timer().schedule(new TimerTask() {
+           /* new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
                 }
-            }, CONSTANTS.DEMO_EXIT_DELAY);
+            }, CONSTANTS.DEMO_EXIT_DELAY);*/
+            throw new NexiadException(NEXIAD_LICENCE_EXCEPTION);
         }
         this.mJniFunction.SetTreshMin(20);
         this.mJniFunction.UserStart();
@@ -129,6 +141,32 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                     + " | Risque : " +risque + "%";
         }
         return TempMessage;
+    }
+
+    void closeAPI() {
+        Log.v(TAG, "closeAPI");
+        if(this.mTts != null){
+            this.mTts.stop();
+            this.mTts.shutdown();
+        }
+        this.mJniFunction.UserStop();
+        float grade = this.mJniFunction.GetUserGrade();
+        CNxUserStat InputUserStat = new CNxUserStat();
+        CNxUserStat OutUserStat = new CNxUserStat();
+        this.mJniFunction.GetSIUserStat(InputUserStat );
+        this.mJniFunction.GetLocalUserStat(OutUserStat, InputUserStat);
+        float duration = 0;
+        float distance = 0;
+        CNxFullStat[] FullStat = this.mJniFunction.GetCloudStat();
+        for (CNxFullStat cNxFullStat : FullStat) {
+            duration += cNxFullStat.m_fDuration;
+            distance += cNxFullStat.m_fDistance;
+        }
+        this.mJniFunction.StoreCloudStatToMemory(CONSTANTS.DEMO_WORKING_PATH);
+        mMessage = "Grade = " + grade
+                + "; duration =" + duration
+                + "; distance =" + distance;
+        this.mJniFunction.Death();
     }
 
     private void copyMapsOnDeviceStorage(){
@@ -199,20 +237,19 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
    private FloatingWidgetAlertingInfos updateRiskInfo(Long speedLimitSegment) {
 
        FloatingWidgetAlertingInfos alertingTypeEnum;
-
+       String speech = "";
        if (CONSTANTS.DEMO_DATA_TEST) {
-            if (rank % 30 == 0) {
+            if (rank % 20 == 0) {
                 Log.i(TAG, "new random");
                 alertingTypeEnum = this.mokFloatingAlertingInfos.get((int) (Math.random() * ((this.mokFloatingAlertingInfos.size()))));
                 currentAlertingTypeEnum = alertingTypeEnum;
             } else {
                 alertingTypeEnum = currentAlertingTypeEnum;
            }
+            speech = alertingTypeEnum.m_sTextToSpeech;
             rank++;
        }else{
             alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.LOW_OF_LOWLEVEL, null);
-       }
-
 
        if(mNxRisk.m_iSafetyNexEngineState == lastState){
            if(stateRepetition%5 == 0){
@@ -258,38 +295,40 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                 }
                 if (mNxRisk.m_TAlert.m_sTextToSpeech != null && !mNxRisk.m_TAlert.m_sTextToSpeech.equals("")){
 
-                    if(mNxRisk.m_TAlert.m_iNxAlertValue != -1){
-                        alertingTypeEnum.imgId = "icon_"+ mNxRisk.m_TAlert.m_iNxAlertValue;
-                    }
-                    this.mMessage+=" \n\n"+mNxRisk.m_TAlert.m_sTextToSpeech;
-                    speechOut(mNxRisk.m_TAlert.m_sTextToSpeech);
-                }
-                if (mNxRisk.m_SpeedAlert.m_iSpeedLimitPanel <=20){
-                }
-                if (mNxRisk.m_SpeedAlert.m_iSpeedLimitTone == CNxRisk.CNxSpeedAlert.SPEED_TONE){
-                    //this.toneGenerator.startTone(ToneGenerator.TONE_SUP_ERROR, 1000);
-                    speechOut("Veuillez ralentir portion limitée à "+speedLimitSegment.toString()+" kilomètres par heure.");
-                    alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.WARNING_SPEED, speedLimitSegment.toString());
+                       if(mNxRisk.m_TAlert.m_iNxAlertValue != -1){
+                           alertingTypeEnum.imgId = "icon_"+ mNxRisk.m_TAlert.m_iNxAlertValue;
+                       }
+                       this.mMessage+=" \n\n"+mNxRisk.m_TAlert.m_sTextToSpeech;
+                       speech = mNxRisk.m_TAlert.m_sTextToSpeech;
+                   }
+                   if (mNxRisk.m_SpeedAlert.m_iSpeedLimitPanel <=20){
+                   }
+                   if (mNxRisk.m_SpeedAlert.m_iSpeedLimitTone == CNxRisk.CNxSpeedAlert.SPEED_TONE){
+                       //this.toneGenerator.startTone(ToneGenerator.TONE_SUP_ERROR, 1000);
+                       speech = "Veuillez ralentir portion limitée à "+speedLimitSegment.toString()+" kilomètres par heure.";
+                       alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.WARNING_SPEED, speedLimitSegment.toString());
 
-                }
-                break;
-            case CNxRisk.UPDATING_HORIZ:
-                break;
-            case CNxRisk.CAR_STOPPED:
-                break;
-            case CNxRisk.GPS_LOST:
-                speechOut("Perte du GPS.");
-                alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.GPS_LOST, "GPS");
+                   }
+                   break;
+               case CNxRisk.UPDATING_HORIZ:
+                   break;
+               case CNxRisk.CAR_STOPPED:
+                   break;
+               case CNxRisk.GPS_LOST:
+                   speech = "Perte du GPS";
+                   alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.GPS_LOST, "GPS");
 
-                break;
-            case CNxRisk.RISK_BUG:
-                break;
-            case CNxRisk.STOP_PROLOG:
-                break;
-            default:
-                this.lastTTS = "";
-                break;
-        }
+                   break;
+               case CNxRisk.RISK_BUG:
+                   break;
+               case CNxRisk.STOP_PROLOG:
+                   break;
+               default:
+                   this.lastTTS = "";
+                   break;
+           }
+       }
+        speechOut(speech);
         return alertingTypeEnum;
     }
 
@@ -312,7 +351,6 @@ class SafetyNexAppiService implements TextToSpeech.OnInitListener {
             mTts.setLanguage(Locale.FRANCE);
             mTts.setSpeechRate(1); // 1 est la valeur par défaut. Une valeur inférieure rendra l'énonciation plus lente, une valeur supérieure la rendra plus rapide.
             mTts.setPitch(1); // 1 est la valeur par défaut. Une valeur inférieure rendra l'énonciation plus grave, une valeur supérieure la rendra plus aigue.
-            speechOut("Démarrage de l'application");
         }
     }
 
