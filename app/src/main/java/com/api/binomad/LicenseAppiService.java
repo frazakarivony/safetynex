@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.api.safetynex.listener.interfaces.OnEventListener;
 import com.api.utils.Utils;
 import com.api.exceptions.BenomadException;
 import com.nexiad.safetynexappsample.CONSTANTS;
@@ -41,7 +42,6 @@ public class LicenseAppiService extends AsyncTask{
     private static final String SOAP_ACTION = "bnd:licenseWSDL#NewLicenseEx";
     private OnEventListener mCallBack;
     private Context mContext;
-    public Exception mException;
     private static String licenseBndPathFile = CONSTANTS.DEMO_WORKING_PATH.concat(CONSTANTS.DEMO_LICENSE_FILE);
     private static String licenseNxPathFile = CONSTANTS.DEMO_WORKING_PATH.concat(CONSTANTS.DEMO_LICENSE_FILE_NEXYAD);
     private static String certificateNxtPathFile = CONSTANTS.DEMO_WORKING_PATH.concat(CONSTANTS.DEMO_CERTIFICATE_FILE_NEXYAD);

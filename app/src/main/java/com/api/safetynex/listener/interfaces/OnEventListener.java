@@ -1,4 +1,4 @@
-package com.api.binomad;
+package com.api.safetynex.listener.interfaces;
 
 public interface OnEventListener<T> {
     void onSuccess(T object);

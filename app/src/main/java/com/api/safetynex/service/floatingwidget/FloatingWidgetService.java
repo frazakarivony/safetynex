@@ -40,7 +40,8 @@ import android.widget.TextView;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.api.binomad.LicenseAppiService;
-import com.api.binomad.OnEventListener;
+import com.api.safetynex.listener.LicensingListener;
+import com.api.safetynex.listener.interfaces.OnEventListener;
 import com.api.safetynex.MainApp;
 import com.api.safetynex.R;
 import com.api.safetynex.listener.DoubleclickListenerPerso;
@@ -123,6 +124,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
             this.safetyNexAppiService.initAPI();
         }catch (NexiadException e){
             e.printStackTrace();
+            this.safetyNexAppiService.closeAPI();
             LicenseAppiService.removeAllLicences();
             this.licenseAppiService.execute();
         }
@@ -134,31 +136,7 @@ public class FloatingWidgetService extends Service implements SensorEventListene
         Sensor senAccelerometer = Objects.requireNonNull(senSensorManager).getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
-        onEventListener = new OnEventListener() {
-            @Override
-            public void onSuccess(Object object) {
-                if("ok".equals(object)) {
-                    if (((MainApp) getApplication()).isFirstRun()) {
-                   /*     Button button = mOverlayView.findViewById(R.id.button);
-                        button.setClickable(true);
-                        button.callOnClick();*/
-                        try {
-                            safetyNexAppiService.initAPI();
-                        }catch (NexiadException e){
-                            e.printStackTrace();
-                          //  licenseAppiService.execute();
-                        }
-                        ((MainApp) getApplication()).setFirsRun(false);
-                    }
-                }
-            }
-
-            public void onFailure(Exception e) {
-                Button close = ((MainApp) getApplication()).getCurrentActivity().findViewById(R.id.close);
-                close.callOnClick();
-            }
-        };
-
+        onEventListener = new LicensingListener(this.safetyNexAppiService.getApp());
     }
 
     @Override

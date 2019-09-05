@@ -198,6 +198,10 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         }
     }
 
+    public MainApp getApp() {
+        return app;
+    }
+
     private void writeDatas(String mMessage){
         this.mData.WriteData(mMessage);
     }

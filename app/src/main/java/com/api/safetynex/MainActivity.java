@@ -1,6 +1,7 @@
 package com.api.safetynex;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -14,7 +15,6 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.api.binomad.LicenseAppiService;
 import com.api.safetynex.receiver.AppReceiver;
 import com.api.safetynex.service.floatingwidget.FloatingWidgetService;
 import com.nexiad.safetynexappsample.CONSTANTS;
@@ -26,7 +26,6 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_PERMISSIONS= 126;
     private static final String TAG =  CONSTANTS.LOGNAME.concat("MainActivityLog");
     private AppReceiver appReceiver;
-    private LicenseAppiService licenseAppiService = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
