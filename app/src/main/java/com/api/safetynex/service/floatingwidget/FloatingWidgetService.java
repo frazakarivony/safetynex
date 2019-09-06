@@ -333,6 +333,7 @@ public class FloatingWidgetService extends Service {
                             text.getCompoundDrawables()[3]
                     );
                     text.setTextColor(DrawableUtils.getDrawableColor(safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()));
+                    safetyNexAppiService.speechOut(safetyNexAppiService.floatingWidgetAlertingInfos().m_sTextToSpeech);
                 }   else {
                         text.setText(R.string.no_connection);
                         safetyNexAppiService.speechOut(getString(R.string.no_connection));

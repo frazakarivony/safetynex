@@ -330,7 +330,7 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                    break;
            }
        }
-        speechOut(speech);
+        alertingTypeEnum.m_sTextToSpeech = speech;
         return alertingTypeEnum;
     }
 
