@@ -39,7 +39,7 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
     private CNxDemoData mData;
     private int mCount;
     private JNDKSafetyNex mJniFunction;
-    private CNxRisk mNxRisk;
+    public CNxRisk mNxRisk;
     private String LicenseFileBnd;
     private String LicenseFileNx;
     private String MapSubPath;
@@ -53,8 +53,6 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
     private static final Integer HIGH_LOWLEVEL_RISK = 2;
     private TextToSpeech mTts;
     private String lastTTS = "";
-    private int lastState;
-    private int stateRepetition= -123;
     private static final String NEXIAD_LICENCE_EXCEPTION = "Nexiad License exception.";
 
     private List<FloatingWidgetAlertingInfos> mokFloatingAlertingInfos;
@@ -252,16 +250,6 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
             rank++;
        }else{
             alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.LOW_OF_LOWLEVEL, null);
-
-       if(mNxRisk.m_iSafetyNexEngineState == lastState){
-           if(stateRepetition%5 == 0){
-
-           }
-           stateRepetition++;
-       }else{
-           lastState=mNxRisk.m_iSafetyNexEngineState;
-           stateRepetition=0;
-       }
 
         switch (mNxRisk.m_iSafetyNexEngineState) {
             case CNxRisk.RISK_AVAILABLE

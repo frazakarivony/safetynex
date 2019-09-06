@@ -11,6 +11,8 @@ public class CNxInputAPI {
 	private float mTimeDiffGPS;
 	private int nbOfSat;
 
+	private Boolean locationUpdated = Boolean.FALSE;
+
 	public boolean ParseData(String prmLine) {
 		boolean isData = false;
 	    	if(prmLine != null) {
@@ -117,5 +119,13 @@ public class CNxInputAPI {
 
 	public void setNbOfSat(int nbOfSat) {
 		this.nbOfSat = nbOfSat;
+	}
+
+	public Boolean getLocationUpdated() {
+		return locationUpdated;
+	}
+
+	public void setLocationUpdated(Boolean locationUpdated) {
+		this.locationUpdated = locationUpdated;
 	}
 } 
