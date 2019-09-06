@@ -88,6 +88,7 @@ public class FloatingWidgetService extends Service  {
     private Future timerRunnableFuture;
     private int lastState=-123;
     private int stateRepetition= 1;
+    private boolean stop=false;
 
     @Nullable
     @Override
@@ -157,7 +158,10 @@ public class FloatingWidgetService extends Service  {
         mSensorManager.unregisterListener(this.mSensorListener);
         unregisterReceiver(AppReceiver.getInstance());
 
+        stop=true;
         timerRunnableFuture.cancel(true);
+
+
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -238,14 +242,15 @@ public class FloatingWidgetService extends Service  {
         Runnable timerRunnable = new Runnable() {
             @Override
             public void run() {
-                timerHandler.postDelayed(this, 1000);
+                if(!stop){
+                    timerHandler.postDelayed(this, 1000);
+                }
                 Log.i(TAG, "loooppppp");
                 if(mInpuAPI.getLocationUpdated()){
                     callSafetyApi();
                     mInpuAPI.setLocationUpdated(Boolean.FALSE);
                 }
             }
-
         };
 
         //timerRunnable.run();
@@ -323,11 +328,6 @@ public class FloatingWidgetService extends Service  {
         };
         mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME,
                 LOCATION_REFRESH_DISTANCE, mLocationListener);
-    }
-
-    @Override
-    public SQLiteDatabase openOrCreateDatabase(String name, int mode, SQLiteDatabase.CursorFactory factory, DatabaseErrorHandler errorHandler) {
-        return super.openOrCreateDatabase(name, mode, factory, errorHandler);
     }
 
     private Notification createFloatingWidgetSpecialNotification() {
