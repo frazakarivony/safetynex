@@ -12,6 +12,7 @@ import com.api.exceptions.NexiadException;
 import com.api.safetynex.service.floatingwidget.FloatingWidgetAlertingInfos;
 import com.api.safetynex.service.floatingwidget.FloatingWidgetColorEnum;
 import com.api.safetynex.MainApp;
+import com.api.utils.MockTestingUtils;
 import com.nexiad.safetynexappsample.CNxDemoData;
 import com.nexiad.safetynexappsample.CNxInputAPI;
 import com.nexiad.safetynexappsample.CONSTANTS;
@@ -48,9 +49,9 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
     private String TAG;
     private String mMessage;
     private MainApp app;
-    private static final Integer LOW_LOWLEVEL_RISK = 0;
+   /* private static final Integer LOW_LOWLEVEL_RISK = 0;
     private static final Integer MEDIUM_LOWLEVEL_RISK = 1;
-    private static final Integer HIGH_LOWLEVEL_RISK = 2;
+    private static final Integer HIGH_LOWLEVEL_RISK = 2;*/
     private TextToSpeech mTts;
     private String lastTTS = "";
     private static final String NEXIAD_LICENCE_EXCEPTION = "Nexiad License exception.";
@@ -94,14 +95,7 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         mData = new CNxDemoData(inputFile, outputFile);
         mJniFunction = JNDKSafetyNex.GetInstance(this.app.getApplicationContext());
         mNxRisk = new CNxRisk();
-        this.mokFloatingAlertingInfos = new ArrayList<>();
-        this.mokFloatingAlertingInfos.add(FloatingWidgetAlertingInfos.generateFakeFloating(FloatingWidgetColorEnum.LOW_OF_LOWLEVEL, null));
-        this.mokFloatingAlertingInfos.add(FloatingWidgetAlertingInfos.generateFakeFloating(FloatingWidgetColorEnum.MEDIUM_OF_LOWLEVEL, null));
-        this.mokFloatingAlertingInfos.add(FloatingWidgetAlertingInfos.generateFakeFloating(FloatingWidgetColorEnum.HIGH_OF_LOWLEVEL, null));
-        this.mokFloatingAlertingInfos.add(FloatingWidgetAlertingInfos.generateFakeFloating(FloatingWidgetColorEnum.WARNING, null));
-        this.mokFloatingAlertingInfos.add(FloatingWidgetAlertingInfos.generateFakeFloating(FloatingWidgetColorEnum.ALERT, null));
-        this.mokFloatingAlertingInfos.add(FloatingWidgetAlertingInfos.generateFakeFloating(FloatingWidgetColorEnum.WARNING_SPEED, "90"));
-        this.mokFloatingAlertingInfos.add(FloatingWidgetAlertingInfos.generateFakeFloating(FloatingWidgetColorEnum.GPS_LOST, "GPS"));
+        this.mokFloatingAlertingInfos = MockTestingUtils.generate();
     }
 
     public FloatingWidgetAlertingInfos floatingWidgetAlertingInfos() {
@@ -239,6 +233,7 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
        FloatingWidgetAlertingInfos alertingTypeEnum;
        String speech = "";
        if (CONSTANTS.DEMO_DATA_TEST) {
+
             if (rank % 5 == 0) {
                 Log.i(TAG, "new random");
                 alertingTypeEnum = this.mokFloatingAlertingInfos.get((int) (Math.random() * ((this.mokFloatingAlertingInfos.size()))));
@@ -259,7 +254,7 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                     //  30 à 50% ok orange claire
                     //  50 à 70% ok mais orange ++
                 if (mNxRisk.m_TAlert.m_iVisualAlert == CNxRisk.CNxAlert.VISUAL_ALERT_1 ){
-                    Integer risk = manageLowRiskLevel(mNxRisk.m_fRisk * 100);
+                  /*  Integer risk = manageLowRiskLevel(mNxRisk.m_fRisk * 100);
                     switch (risk){
                         case 0 :
                             alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.LOW_OF_LOWLEVEL, null);
@@ -270,7 +265,8 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                         default:
                             alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.HIGH_OF_LOWLEVEL, null);
                             break;
-                    }
+                    }*/
+                    alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.LOW_OF_LOWLEVEL, null);
                 }
                 //Risk higher than THRESHOLD_ALERT1 70 à 90% warning
                 if (mNxRisk.m_TAlert.m_iVisualAlert == CNxRisk.CNxAlert.VISUAL_ALERT_2){
@@ -290,15 +286,16 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                        }
                        this.mMessage+=" \n\n"+mNxRisk.m_TAlert.m_sTextToSpeech;
                        speech = mNxRisk.m_TAlert.m_sTextToSpeech;
-                   }
-                   if (mNxRisk.m_SpeedAlert.m_iSpeedLimitPanel <=20){
-                   }
-                   if (mNxRisk.m_SpeedAlert.m_iSpeedLimitTone == CNxRisk.CNxSpeedAlert.SPEED_TONE){
-                       //this.toneGenerator.startTone(ToneGenerator.TONE_SUP_ERROR, 1000);
-                       speech = "Veuillez ralentir portion limitée à "+speedLimitSegment.toString()+" kilomètres par heure.";
-                       alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.WARNING_SPEED, speedLimitSegment.toString());
+                }
+               if (mNxRisk.m_SpeedAlert.m_iSpeedLimitPanel <=20){
+               }
 
-                   }
+               if (mNxRisk.m_SpeedAlert.m_iSpeedLimitTone == CNxRisk.CNxSpeedAlert.SPEED_TONE){
+                   //this.toneGenerator.startTone(ToneGenerator.TONE_SUP_ERROR, 1000);
+                   speech = "Veuillez ralentir portion limitée à "+speedLimitSegment.toString()+" kilomètres par heure.";
+                   alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.WARNING_SPEED, speedLimitSegment.toString());
+
+               }
                    break;
                case CNxRisk.UPDATING_HORIZ:
                    break;
@@ -322,7 +319,7 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         return alertingTypeEnum;
     }
 
-    private Integer manageLowRiskLevel(float percentOfRisk){
+   /* private Integer manageLowRiskLevel(float percentOfRisk){
         Integer levelOflowlevelRisk = LOW_LOWLEVEL_RISK;
 
         if(30 < percentOfRisk && percentOfRisk <= 50){
@@ -333,7 +330,7 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         }
 
         return levelOflowlevelRisk;
-    }
+    }*/
 
     @Override
     public void onInit(int status) {
