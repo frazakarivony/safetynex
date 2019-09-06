@@ -117,6 +117,7 @@ public class FloatingWidgetAlertingInfos {
             case WARNING_SPEED:
                 toReturn.m_iSafetyNexEngineState = CNxRisk.RISK_AVAILABLE;
                 toReturn.m_iSpeedLimitTone = CNxRisk.CNxSpeedAlert.SPEED_TONE;
+                toReturn.m_sTextToSpeech = "Veuillez ralentir portion limitée à "+txt+" kilomètres par heure.";
                 break;
             case GPS_LOST:
                 toReturn.m_iSafetyNexEngineState = CNxRisk.GPS_LOST;
