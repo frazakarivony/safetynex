@@ -10,6 +10,8 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.database.DatabaseErrorHandler;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -156,7 +158,6 @@ public class FloatingWidgetService extends Service  {
         unregisterReceiver(AppReceiver.getInstance());
 
         timerRunnableFuture.cancel(true);
-
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -322,6 +323,11 @@ public class FloatingWidgetService extends Service  {
         };
         mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME,
                 LOCATION_REFRESH_DISTANCE, mLocationListener);
+    }
+
+    @Override
+    public SQLiteDatabase openOrCreateDatabase(String name, int mode, SQLiteDatabase.CursorFactory factory, DatabaseErrorHandler errorHandler) {
+        return super.openOrCreateDatabase(name, mode, factory, errorHandler);
     }
 
     private Notification createFloatingWidgetSpecialNotification() {

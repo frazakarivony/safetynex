@@ -1,7 +1,7 @@
 package com.api.safetynex;
 
 import android.Manifest;
-import android.content.BroadcastReceiver;
+import android.app.ActivityManager;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -125,7 +126,23 @@ public class MainActivity extends AppCompatActivity {
     private void initializeView() {
        //mTts.speak(getResources().getString(R.string.loading), TextToSpeech.QUEUE_FLUSH,null,null);
         Log.i(TAG, "initializeView");
-        startService(new Intent(MainActivity.this, FloatingWidgetService.class));
+        if(!checkServiceRunning(FloatingWidgetService.class.getName())) {
+            startService(new Intent(MainActivity.this, FloatingWidgetService.class));
+        }else{
+            this.finish();
+        }
+    }
+
+    public boolean checkServiceRunning(String serv){
+        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
+        {
+            if (serv.equals(service.service.getClassName()))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }
 
