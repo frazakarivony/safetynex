@@ -178,9 +178,11 @@ public class FloatingWidgetService extends Service  {
             mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
             final Point size = new Point();
             if (mWindowManager != null) {
-                mWindowManager.addView(mOverlayView, params);
-                Display display = mWindowManager.getDefaultDisplay();
-                display.getSize(size);
+                if(mOverlayView.getWindowToken()==null){
+                    mWindowManager.addView(mOverlayView, params);
+                    Display display = mWindowManager.getDefaultDisplay();
+                    display.getSize(size);
+                }
             }
 
             final RelativeLayout layout = mOverlayView.findViewById(R.id.layout);
@@ -210,17 +212,20 @@ public class FloatingWidgetService extends Service  {
                 public boolean onTouch(View v, MotionEvent event) {
                     final int DRAWABLE_RIGHT = 2;
                     if(event.getAction() == MotionEvent.ACTION_DOWN) {
-                        if(event.getRawX() >= (text.getRight() - text.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
-                            if(!isPaused){
-                                safetyNexAppiService.speechOut(getString(R.string.pause));
-                                text.setCompoundDrawablesWithIntrinsicBounds(
-                                        null,
-                                        null,
-                                        getDrawable(R.drawable.ic_play_circle_outline_white_24dp),
-                                        null);
+                        if(text.getCompoundDrawables()[DRAWABLE_RIGHT] != null){
+                            if(event.getRawX() >= (text.getRight() - text.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                                if(!isPaused){
+                                    safetyNexAppiService.speechOut(getString(R.string.pause));
+                                    text.setCompoundDrawablesWithIntrinsicBounds(
+                                            null,
+                                            null,
+                                            getDrawable(R.drawable.ic_play_circle_outline_white_24dp),
+                                            null);
+                                }
+                                isPaused = !isPaused;
+                                stateRepetition=0;
+                                return true;
                             }
-                            isPaused = !isPaused;
-                            return true;
                         }
                     }
                     return false;
