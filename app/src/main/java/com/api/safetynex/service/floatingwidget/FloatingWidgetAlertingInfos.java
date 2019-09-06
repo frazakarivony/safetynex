@@ -1,5 +1,7 @@
 package com.api.safetynex.service.floatingwidget;
 
+import android.util.Log;
+
 import com.nexyad.jndksafetynex.CNxRisk;
 
 import java.util.HashMap;
@@ -79,6 +81,7 @@ public class FloatingWidgetAlertingInfos {
     public static FloatingWidgetAlertingInfos generateFakeFloating(FloatingWidgetColorEnum enumF, String txt){
         FloatingWidgetAlertingInfos toReturn = new FloatingWidgetAlertingInfos(enumF, txt);
         Integer indexMock = 1 + (int)(Math.random() * (textToSpeechMock.size() - 1));
+        Log.i("mock", ""+indexMock);
         switch (enumF){
             case LOW_OF_LOWLEVEL:
                 toReturn.m_iSafetyNexEngineState = CNxRisk.RISK_AVAILABLE;
@@ -100,6 +103,7 @@ public class FloatingWidgetAlertingInfos {
                 toReturn.m_iVisualAlert = CNxRisk.CNxAlert.VISUAL_ALERT_2;
                 toReturn.m_sTextToSpeech = textToSpeechMock.get(3);
                 toReturn.m_iNxAlertValue = 3;
+                toReturn.imgId = "ic_icon_3";
                 break;
             case ALERT:
                 toReturn.m_iSafetyNexEngineState = CNxRisk.RISK_AVAILABLE;
@@ -108,6 +112,7 @@ public class FloatingWidgetAlertingInfos {
                 toReturn.m_sTextToSpeech = textToSpeechMock.get(indexMock);
                 toReturn.m_iNxAlertValue = indexMock;
                 toReturn.m_iTonesRiskAlert = CNxRisk.CNxAlert.TONE_ALERT;
+                toReturn.imgId = "ic_icon_"+indexMock;
                 break;
             case WARNING_SPEED:
                 toReturn.m_iSafetyNexEngineState = CNxRisk.RISK_AVAILABLE;

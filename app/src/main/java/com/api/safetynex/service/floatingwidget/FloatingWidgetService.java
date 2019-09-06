@@ -13,6 +13,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -22,6 +23,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.widget.AppCompatDrawableManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Display;
@@ -295,17 +297,28 @@ public class FloatingWidgetService extends Service {
                     // text.setCompoundDrawablesWithIntrinsicBounds(getTextIconDrawable(doubleclickListenerPerso.safetyNexAppiService.getColorEnum().getFloatingWidgetBorderColor()) ,0,0,0);
 
 
-                    if(safetyNexAppiService.floatingWidgetAlertingInfos().getTextRounded() != null) {
-                        text.setCompoundDrawablesWithIntrinsicBounds(TextDrawable.builder()
-                                .beginConfig()
-                                .width(60)  // width in px
-                                .height(60) // height in px
-                                .withBorder(5)
-                                .textColor(DrawableUtils.getDrawableColor(safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()))
-                                .fontSize(30)
-                                .bold()
-                                .endConfig()
-                                .buildRound(safetyNexAppiService.floatingWidgetAlertingInfos().getTextRounded() , Color.WHITE),
+                    if(safetyNexAppiService.floatingWidgetAlertingInfos().getTextRounded() != null || safetyNexAppiService.floatingWidgetAlertingInfos().imgId != null) {
+
+                        Drawable leftText;
+                        if(safetyNexAppiService.floatingWidgetAlertingInfos().imgId != null){
+
+                            int ressourceId = getApplicationContext().getResources().getIdentifier(safetyNexAppiService.floatingWidgetAlertingInfos().imgId, "drawable", getApplicationContext().getPackageName());
+                            leftText = getResources().getDrawable(ressourceId, null);
+
+                        }else {
+                            leftText = TextDrawable.builder()
+                                    .beginConfig()
+                                    .width(100)  // width in px
+                                    .height(100) // height in px
+                                    .withBorder(5)
+                                    .textColor(DrawableUtils.getDrawableColor(safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()))
+                                    .fontSize(30)
+                                    .bold()
+                                    .endConfig()
+                                    .buildRound(safetyNexAppiService.floatingWidgetAlertingInfos().getTextRounded() , Color.WHITE);
+                        }
+
+                        text.setCompoundDrawablesWithIntrinsicBounds(leftText,
                                 null,
                                 null,
                                 null);

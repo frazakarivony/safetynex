@@ -241,7 +241,7 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
        FloatingWidgetAlertingInfos alertingTypeEnum;
        String speech = "";
        if (CONSTANTS.DEMO_DATA_TEST) {
-            if (rank % 20 == 0) {
+            if (rank % 5 == 0) {
                 Log.i(TAG, "new random");
                 alertingTypeEnum = this.mokFloatingAlertingInfos.get((int) (Math.random() * ((this.mokFloatingAlertingInfos.size()))));
                 currentAlertingTypeEnum = alertingTypeEnum;
@@ -298,7 +298,7 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                 if (mNxRisk.m_TAlert.m_sTextToSpeech != null && !mNxRisk.m_TAlert.m_sTextToSpeech.equals("")){
 
                        if(mNxRisk.m_TAlert.m_iNxAlertValue != -1){
-                           alertingTypeEnum.imgId = "icon_"+ mNxRisk.m_TAlert.m_iNxAlertValue;
+                           alertingTypeEnum.imgId = "ic_icon_"+ mNxRisk.m_TAlert.m_iNxAlertValue;
                        }
                        this.mMessage+=" \n\n"+mNxRisk.m_TAlert.m_sTextToSpeech;
                        speech = mNxRisk.m_TAlert.m_sTextToSpeech;
