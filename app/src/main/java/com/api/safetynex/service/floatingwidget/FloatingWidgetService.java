@@ -370,6 +370,8 @@ public class FloatingWidgetService extends Service  {
                 String textResult=safetyNexAppiService.getRisk(mInpuAPI);
                 Log.i(TAG,String.valueOf(stateRepetition));
 
+                text.setText(textResult);
+
                 if(safetyNexAppiService.mNxRisk.m_iSafetyNexEngineState == lastState){
                     if(stateRepetition%10 == 0){
                         Log.i(TAG, "%10");
@@ -394,7 +396,6 @@ public class FloatingWidgetService extends Service  {
 
     private void updateInfos(TextView text, String textResult) {
 
-        text.setText(textResult);
         safetyNexAppiService.speechOut(safetyNexAppiService.floatingWidgetAlertingInfos().m_sTextToSpeech);
 
         ((LinearLayout) text.getParent()).setBackground(getApplicationContext().getDrawable(DrawableUtils.getDrawableColor(safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetBorderColor())));
