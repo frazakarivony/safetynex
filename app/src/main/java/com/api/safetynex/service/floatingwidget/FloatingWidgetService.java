@@ -372,7 +372,7 @@ public class FloatingWidgetService extends Service  {
                 updateInfos(text);
 
                 if(safetyNexAppiService.floatingWidgetAlertingInfos().m_sTextToSpeech.equals(lastSpeech)){
-                    if(speechRepetition %10 == 0){
+                    if(speechRepetition %5 == 0){
                         Log.i(TAG, "%10");
                         safetyNexAppiService.speechOut(safetyNexAppiService.floatingWidgetAlertingInfos().m_sTextToSpeech);
                     }

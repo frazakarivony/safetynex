@@ -121,7 +121,7 @@ public class FloatingWidgetAlertingInfos {
                 break;
             case GPS_LOST:
                 toReturn.m_iSafetyNexEngineState = CNxRisk.GPS_LOST;
-                toReturn.m_sTextToSpeech = "GPS lost";
+                toReturn.m_sTextToSpeech = "Perte du GPS";
                 break;
         }
         return toReturn;
