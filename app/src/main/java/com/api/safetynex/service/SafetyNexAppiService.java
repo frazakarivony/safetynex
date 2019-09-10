@@ -1,14 +1,20 @@
 package com.api.safetynex.service;
 
 import android.app.Application;
+import android.content.Context;
 import android.content.res.AssetManager;
+import android.media.AudioAttributes;
+import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import com.api.exceptions.NexiadException;
+import com.api.safetynex.R;
 import com.api.safetynex.service.floatingwidget.FloatingWidgetAlertingInfos;
 import com.api.safetynex.service.floatingwidget.FloatingWidgetColorEnum;
 import com.api.safetynex.MainApp;
@@ -27,15 +33,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
 import static com.nexyad.jndksafetynex.CNxRisk.CNxAlert.TONE_ALERT;
 
-public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
+public class SafetyNexAppiService implements TextToSpeech.OnInitListener{
 
     private CNxDemoData mData;
     private int mCount;
@@ -55,6 +59,10 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
     private TextToSpeech mTts;
     private String lastTTS = "";
     private static final String NEXIAD_LICENCE_EXCEPTION = "Nexiad License exception.";
+    private AudioManager audioManager;
+    private AudioFocusRequest audioFocusRequest;
+    private boolean rebuildAudioFocusRequest;
+    private AudioAttributes audioAttributes;
 
     private List<FloatingWidgetAlertingInfos> mokFloatingAlertingInfos;
 
@@ -64,7 +72,6 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
     private int rank = 0;
 
     private static SafetyNexAppiService safetyNexAppiService;
-
     public static SafetyNexAppiService getInstance(Application app){
         if(safetyNexAppiService == null){
             safetyNexAppiService = new SafetyNexAppiService(app);
@@ -83,8 +90,31 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         MapSubPath = workingPath + CONSTANTS.MAP_SUB_PATH;
         UnlockKey = CONSTANTS.DEMO_UNLOCK_KEY;
         language = 1;
+        audioManager = (AudioManager) app.getSystemService(Context.AUDIO_SERVICE);
         this.toneGenerator  = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100);
         this.mTts = new TextToSpeech(this.app.getApplicationContext(), this);
+
+        UtteranceProgressListener utteranceProgressListener = new UtteranceProgressListener(){
+
+            @Override
+            public void onStart(String utteranceId) {
+                Log.i(TAG,"onstartlist");
+                requestAudioFocusV26();
+            }
+
+            @Override
+            public void onDone(String utteranceId) {
+                Log.i(TAG,"ondonelist");
+                abandonAudioFocusV26();
+            }
+
+            @Override
+            public void onError(String utteranceId) {
+
+            }
+        };
+
+        this.mTts.setOnUtteranceProgressListener(utteranceProgressListener);
         try {
             language = Integer.parseInt(String.valueOf(CONSTANTS.DEMO_LANGUAGE));
         }catch (Exception e) {
@@ -108,11 +138,6 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         this.copyMapsOnDeviceStorage();
         boolean isLicOK = this.mJniFunction.Birth(this.LicenseFileBnd, this.MapSubPath, this.UnlockKey, this.language, this.LicenseFileNx, tempLicInfo);
         if(!isLicOK) {
-           /* new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                }
-            }, CONSTANTS.DEMO_EXIT_DELAY);*/
             throw new NexiadException(NEXIAD_LICENCE_EXCEPTION);
         }
         this.mJniFunction.SetTreshMin(20);
@@ -124,11 +149,11 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
         float risque = Math.round(this.mNxRisk.m_fRisk * 100);
         risque = (risque < 0 ? 0 : risque);
         if (prmCurrEhorizon != null && prmCurrEhorizon.length > 4) {
-            TempMessage = "Vitesse : " + Math.round(mInpuAPI.getmSpeed()) + "km/h"
-                    + " | Risque :" + risque + "%";
+            TempMessage = app.getString(R.string.speed) + Math.round(mInpuAPI.getmSpeed()) + app.getString(R.string.kmh)
+                    + "| " + app.getString(R.string.risk) + risque + "%";
         } else {
-            TempMessage = "Vitesse : " + Math.round(mInpuAPI.getmSpeed()) + "km/h"
-                    + " | Risque : " +risque + "%";
+            TempMessage = app.getString(R.string.speed) + Math.round(mInpuAPI.getmSpeed()) + app.getString(R.string.kmh)
+                    + "| " + app.getString(R.string.risk) +risque + "%";
         }
         return TempMessage;
     }
@@ -291,8 +316,7 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                }
 
                if (mNxRisk.m_SpeedAlert.m_iSpeedLimitTone == CNxRisk.CNxSpeedAlert.SPEED_TONE){
-                   //this.toneGenerator.startTone(ToneGenerator.TONE_SUP_ERROR, 1000);
-                   speech = "Veuillez ralentir portion limitée à "+speedLimitSegment.toString()+" kilomètres par heure.";
+                   speech = app.getString(R.string.slow_down,speedLimitSegment.toString());
                    alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.WARNING_SPEED, speedLimitSegment.toString());
 
                }
@@ -302,9 +326,8 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
                case CNxRisk.CAR_STOPPED:
                    break;
                case CNxRisk.GPS_LOST:
-                   speech = "Perte du GPS";
+                   speech = app.getString(R.string.gps_lost);
                    alertingTypeEnum = new FloatingWidgetAlertingInfos(FloatingWidgetColorEnum.GPS_LOST, "GPS");
-
                    break;
                case CNxRisk.RISK_BUG:
                    break;
@@ -342,18 +365,49 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener {
     }
 
     public void speechOut(String txt){
-        HashMap<String,String> params = new HashMap<>();
-        params.put(TextToSpeech.Engine.KEY_PARAM_VOLUME, "0.5");
 
+        Log.i(TAG,"speechOut");
         Bundle paramss = new Bundle();
-        paramss.putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 0.5f);
-
+        paramss.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
         if(!this.lastTTS.equals(txt)) {
-            mTts.speak(txt, TextToSpeech.QUEUE_FLUSH, paramss, null);
+            mTts.speak(txt, TextToSpeech.QUEUE_FLUSH, paramss, "1");
         }else{
-            mTts.speak(txt, TextToSpeech.QUEUE_ADD, paramss, null);
+            mTts.speak(txt, TextToSpeech.QUEUE_ADD, paramss, "1");
         }
         this.lastTTS = txt;
+    }
 
+    private int requestAudioFocusV26() {
+        if (audioFocusRequest == null || rebuildAudioFocusRequest) {
+            AudioFocusRequest.Builder builder =
+                    audioFocusRequest == null
+                            ? new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+                            : new AudioFocusRequest.Builder(audioFocusRequest);
+
+            boolean willPauseWhenDucked = willPauseWhenDucked();
+            audioAttributes =new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .build();
+            audioFocusRequest =
+                    builder
+                            .setAudioAttributes(audioAttributes)
+                            .setWillPauseWhenDucked(willPauseWhenDucked)
+                            //.setOnAudioFocusChangeListener(focusListener)
+                            .build();
+
+            rebuildAudioFocusRequest = false;
+        }
+        return audioManager.requestAudioFocus(audioFocusRequest);
+    }
+
+    private void abandonAudioFocusV26() {
+        if (audioFocusRequest != null) {
+            audioManager.abandonAudioFocusRequest(audioFocusRequest);
+        }
+    }
+
+    private boolean willPauseWhenDucked() {
+        return audioAttributes != null && audioAttributes.getContentType() == AudioAttributes.CONTENT_TYPE_SPEECH;
     }
 }
