@@ -10,6 +10,7 @@ public class CNxInputAPI {
 	private float mCap;
 	private float mTimeDiffGPS;
 	private int nbOfSat;
+	private long gpsTimeLong;
 
 	private Boolean locationUpdated = Boolean.FALSE;
 
@@ -128,4 +129,12 @@ public class CNxInputAPI {
 	public void setLocationUpdated(Boolean locationUpdated) {
 		this.locationUpdated = locationUpdated;
 	}
-} 
+
+	public long getGpsTimeLong() {
+		return gpsTimeLong;
+	}
+
+	public void setGpsTimeLong(long gpsTimeLong) {
+		this.gpsTimeLong = gpsTimeLong;
+	}
+}

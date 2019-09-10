@@ -84,8 +84,8 @@ public class FloatingWidgetService extends Service  {
     private OnEventListener onEventListener;
     private CNxInputAPI mInpuAPI;
     private Future timerRunnableFuture;
-    private int lastState=-123;
-    private int stateRepetition= 1;
+    private String lastSpeech ="init";
+    private int speechRepetition = 1;
     private boolean stop=false;
 
     @Nullable
@@ -226,7 +226,7 @@ public class FloatingWidgetService extends Service  {
                                             null);
                                 }
                                 isPaused = !isPaused;
-                                stateRepetition=0;
+                                speechRepetition =0;
                                 return true;
                             }
                         }
@@ -300,8 +300,7 @@ public class FloatingWidgetService extends Service  {
 
                 mInpuAPI.setmLat((float) location.getLatitude());
                 mInpuAPI.setmLon((float) location.getLongitude());
-                mInpuAPI.setmTime(location.getTime());
-                mInpuAPI.setmTimeDiffGPS(System.currentTimeMillis() - location.getTime());
+                mInpuAPI.setGpsTimeLong(location.getTime());
                 mInpuAPI.setNbOfSat(location.getExtras().getInt("satellites"));
                 mInpuAPI.setmCap(location.getBearing());
                 mInpuAPI.setmSpeed(location.getSpeed() * CONSTANTS.SPEED_MS_TO_KH);
@@ -365,23 +364,25 @@ public class FloatingWidgetService extends Service  {
                     mInpuAPI.setNbOfSat(7);
                 }
 
+                mInpuAPI.setmTimeDiffGPS((System.currentTimeMillis() - mInpuAPI.getGpsTimeLong())/1000);
                 String textResult=safetyNexAppiService.getRisk(mInpuAPI);
-                Log.i(TAG,String.valueOf(stateRepetition));
+                Log.i(TAG,String.valueOf(speechRepetition));
 
                 text.setText(textResult);
+                updateInfos(text);
 
-                if(safetyNexAppiService.mNxRisk.m_iSafetyNexEngineState == lastState){
-                    if(stateRepetition%10 == 0){
+                if(safetyNexAppiService.floatingWidgetAlertingInfos().m_sTextToSpeech.equals(lastSpeech)){
+                    if(speechRepetition %10 == 0){
                         Log.i(TAG, "%10");
-                        updateInfos(text,textResult);
+                        safetyNexAppiService.speechOut(safetyNexAppiService.floatingWidgetAlertingInfos().m_sTextToSpeech);
                     }
-                    stateRepetition++;
+                    speechRepetition++;
                     Log.i(TAG, "identique");
                 }else{
                     Log.i(TAG, "different");
-                    updateInfos(text,textResult);
-                    lastState=safetyNexAppiService.mNxRisk.m_iSafetyNexEngineState;
-                    stateRepetition=1;
+                    safetyNexAppiService.speechOut(safetyNexAppiService.floatingWidgetAlertingInfos().m_sTextToSpeech);
+                    lastSpeech =safetyNexAppiService.floatingWidgetAlertingInfos().m_sTextToSpeech;
+                    speechRepetition =1;
                 }
 
 
@@ -392,9 +393,7 @@ public class FloatingWidgetService extends Service  {
         }
     }
 
-    private void updateInfos(TextView text, String textResult) {
-
-        safetyNexAppiService.speechOut(safetyNexAppiService.floatingWidgetAlertingInfos().m_sTextToSpeech);
+    private void updateInfos(TextView text) {
 
         ((LinearLayout) text.getParent()).setBackground(getApplicationContext().getDrawable(DrawableUtils.getDrawableColor(safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetBorderColor())));
 
