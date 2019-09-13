@@ -55,6 +55,7 @@ import com.api.exceptions.NexiadException;
 import com.nexiad.safetynexappsample.CNxDemoData;
 import com.nexiad.safetynexappsample.CNxInputAPI;
 import com.nexiad.safetynexappsample.CONSTANTS;
+import com.nexyad.jndksafetynex.CNxFullStat;
 
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -111,6 +112,7 @@ public class FloatingWidgetService extends Service  {
         mData = new CNxDemoData(inputFile, outputFile);
 
         safetyNexAppiService = SafetyNexAppiService.getInstance(getApplication());
+        AppReceiver.getInstance().setSafetyNexAppiService(safetyNexAppiService);
 
         String imei = "";
         if (ActivityCompat.checkSelfPermission(((MainApp)getApplication()), Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
@@ -225,6 +227,10 @@ public class FloatingWidgetService extends Service  {
                                             getDrawable(R.drawable.ic_play_circle_outline_white_24dp),
                                             null);
                                 }
+//                                CNxFullStat cNxFullStat[] = safetyNexAppiService.mJniFunction.GetCloudStat();
+//                                float grade = safetyNexAppiService.mJniFunction.GetUserGrade();
+//                                float position =safetyNexAppiService.mJniFunction.GetCarPosition();
+//                                CNxFullStat cNxFullStat1[] = safetyNexAppiService.mJniFunction.GetCloudStat();
                                 isPaused = !isPaused;
                                 speechRepetition =0;
                                 return true;

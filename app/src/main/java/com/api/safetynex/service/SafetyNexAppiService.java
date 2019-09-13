@@ -43,7 +43,7 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener{
 
     private CNxDemoData mData;
     private int mCount;
-    private JNDKSafetyNex mJniFunction;
+    public JNDKSafetyNex mJniFunction;
     public CNxRisk mNxRisk;
     private String LicenseFileBnd;
     private String LicenseFileNx;
@@ -370,7 +370,7 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener{
         Bundle paramss = new Bundle();
         paramss.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
         if(!this.lastTTS.equals(txt)) {
-            mTts.speak(txt, TextToSpeech.QUEUE_FLUSH, paramss, "1");
+            mTts.speak(txt, TextToSpeech.QUEUE_ADD, paramss, "1");
         }else{
             mTts.speak(txt, TextToSpeech.QUEUE_ADD, paramss, "1");
         }

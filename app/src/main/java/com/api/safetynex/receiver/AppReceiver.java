@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.api.safetynex.service.SafetyNexAppiService;
 import com.api.safetynex.service.floatingwidget.FloatingWidgetService;
 import com.api.safetynex.MainActivity;
 
@@ -14,6 +15,7 @@ public class AppReceiver extends BroadcastReceiver {
 
     private MainActivity mainActivity;
     private FloatingWidgetService floatingWidgetService;
+    private SafetyNexAppiService safetyNexAppiService;
 
     public static AppReceiver getInstance(){
         if(appReceiver == null){
@@ -40,6 +42,7 @@ public class AppReceiver extends BroadcastReceiver {
                     }
                     break;
                 case "KILL":
+                    safetyNexAppiService.mJniFunction.Death();
                     if(mainActivity != null){
                         mainActivity.finish();
                     }
@@ -59,5 +62,9 @@ public class AppReceiver extends BroadcastReceiver {
 
     public void setFloatingWidgetService(FloatingWidgetService floatingWidgetService) {
         this.floatingWidgetService = floatingWidgetService;
+    }
+
+    public void setSafetyNexAppiService(SafetyNexAppiService safetyNexAppiService) {
+        this.safetyNexAppiService = safetyNexAppiService;
     }
 }
