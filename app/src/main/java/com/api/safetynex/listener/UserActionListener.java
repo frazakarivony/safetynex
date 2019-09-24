@@ -2,11 +2,14 @@ package com.api.safetynex.listener;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+
+import com.api.safetynex.receiver.AppReceiver;
 
 public class UserActionListener implements GestureDetector.OnGestureListener, View.OnTouchListener {
 
@@ -26,6 +29,12 @@ public class UserActionListener implements GestureDetector.OnGestureListener, Vi
         this.mWindowManager = windowManager;
         this.intentFloatingService = intent;
         gestureDetector = new GestureDetector(context, this);
+
+        IntentFilter intentFilter = new IntentFilter();
+        // Add network connectivity change action.
+        intentFilter.addAction("STAT");
+        // Set broadcast receiver priority.
+        context.registerReceiver(AppReceiver.getInstance(), intentFilter);
     }
 
     @Override
@@ -51,7 +60,7 @@ public class UserActionListener implements GestureDetector.OnGestureListener, Vi
     public void onLongPress(MotionEvent e) {
         context.stopService(this.intentFloatingService);
         Log.i("DoubleClickListener", "onSingleTapUp");
-        context.sendBroadcast(new Intent("KILL"));
+        context.getApplicationContext().sendBroadcast(new Intent("KILL"));
     }
 
     @Override

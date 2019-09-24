@@ -16,7 +16,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/rounded_corner_low">
+        android:background="@drawable/rounded_corner_low"
+        android:id="@+id/stat">
 
         <ImageView
             android:id="@+id/icon"
@@ -35,7 +36,6 @@
             android:textAlignment="gravity"
             android:gravity="center_vertical|left"
             />
-
     </LinearLayout>
 
 

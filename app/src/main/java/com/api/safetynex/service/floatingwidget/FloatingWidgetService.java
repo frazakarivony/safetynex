@@ -25,6 +25,9 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.telephony.TelephonyManager;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
@@ -41,6 +44,7 @@ import android.widget.TextView;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.api.binomad.LicenseAppiService;
+import com.api.safetynex.SafetyStats;
 import com.api.safetynex.listener.LicensingListener;
 import com.api.safetynex.listener.interfaces.OnEventListener;
 import com.api.safetynex.MainApp;
@@ -226,6 +230,23 @@ public class FloatingWidgetService extends Service  {
                                             null,
                                             getDrawable(R.drawable.ic_play_circle_outline_white_24dp),
                                             null);
+                                    SafetyStats stats =  safetyNexAppiService.getStat();
+                                    String stattttt = "";
+                                    LinearLayout l = ((LinearLayout)mOverlayView.findViewById(R.id.stat));
+                                    SpannableStringBuilder ssb = new SpannableStringBuilder();
+                                    //TODO filtre infos + affichage
+                                    ssb.append(stats.getInputStat().toString());
+                                    for(CNxFullStat stat : stats.getStats()){
+                                        if(stat.m_iEnvConf != 3) {
+                                            ssb.append("Niveau de risque : " + String.valueOf(stat.m_iRiskSlice) + " environnement : " + stat.m_iEnvConf + "\n", new ImageSpan(getApplicationContext(), R.drawable.ic_icon_1), 0);
+                                            //ssb.setSpan(new ImageSpan(getApplicationContext(), R.drawable.ic_icon_1), 0, 1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+//                                        text.setText(String.valueOf(stat.m_iRiskSlice));
+                                            stattttt += "Niveau de risque : " + String.valueOf(stat.m_iRiskSlice) + " environnement : " + stat.m_iEnvConf;
+                                        }
+                                    }
+                                    text.setText(ssb, TextView.BufferType.SPANNABLE);
+                                }else{
+                                    safetyNexAppiService.restartApi();
                                 }
 //                                CNxFullStat cNxFullStat[] = safetyNexAppiService.mJniFunction.GetCloudStat();
 //                                float grade = safetyNexAppiService.mJniFunction.GetUserGrade();
@@ -233,6 +254,7 @@ public class FloatingWidgetService extends Service  {
 //                                CNxFullStat cNxFullStat1[] = safetyNexAppiService.mJniFunction.GetCloudStat();
                                 isPaused = !isPaused;
                                 speechRepetition =0;
+                                //safetyNexAppiService.restartApi();
                                 return true;
                             }
                         }
@@ -331,6 +353,12 @@ public class FloatingWidgetService extends Service  {
         };
         mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME,
                 LOCATION_REFRESH_DISTANCE, mLocationListener);
+    }
+
+    public void killAll(){
+        Log.i(TAG, "killllll");
+        this.safetyNexAppiService.closeAPI();
+        this.stopSelf();
     }
 
     private Notification createFloatingWidgetSpecialNotification() {

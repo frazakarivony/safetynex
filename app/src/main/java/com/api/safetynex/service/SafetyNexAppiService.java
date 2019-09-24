@@ -15,6 +15,7 @@ import android.util.Log;
 
 import com.api.exceptions.NexiadException;
 import com.api.safetynex.R;
+import com.api.safetynex.SafetyStats;
 import com.api.safetynex.service.floatingwidget.FloatingWidgetAlertingInfos;
 import com.api.safetynex.service.floatingwidget.FloatingWidgetColorEnum;
 import com.api.safetynex.MainApp;
@@ -142,6 +143,15 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener{
         }
         this.mJniFunction.SetTreshMin(20);
         this.mJniFunction.UserStart();
+    }
+
+    public void restartApi(){
+        try {
+            initAPI();
+        } catch (NexiadException e) {
+            e.printStackTrace();
+        }
+      //  this.mJniFunction.UserStart();
     }
 
     private String getMessageCustomer(long [] prmCurrEhorizon, CNxInputAPI mInpuAPI) {
@@ -409,5 +419,29 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener{
 
     private boolean willPauseWhenDucked() {
         return audioAttributes != null && audioAttributes.getContentType() == AudioAttributes.CONTENT_TYPE_SPEECH;
+    }
+
+    public SafetyStats getStat(){
+        Log.v(TAG, "getStat");
+        this.mJniFunction.UserStop();
+        float grade = this.mJniFunction.GetUserGrade();
+        CNxUserStat InputUserStat = new CNxUserStat();
+        CNxUserStat OutUserStat = new CNxUserStat();
+        this.mJniFunction.GetSIUserStat(InputUserStat );
+        this.mJniFunction.GetLocalUserStat(OutUserStat, InputUserStat);
+        float duration = 0;
+        float distance = 0;
+        CNxFullStat[] FullStat = this.mJniFunction.GetCloudStat();
+
+        SafetyStats stats = new SafetyStats();
+        stats.setInputStat(InputUserStat);
+        stats.setOutputStat(OutUserStat);
+        stats.setStats(this.mJniFunction.GetCloudStat());
+
+        mMessage = "Grade = " + grade
+                + "; duration =" + duration
+                + "; distance =" + distance;
+        this.mJniFunction.Death();
+        return stats;
     }
 }

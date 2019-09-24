@@ -47,7 +47,16 @@ public class AppReceiver extends BroadcastReceiver {
                         mainActivity.finish();
                     }
                     if(floatingWidgetService != null){
-                        floatingWidgetService.stopSelf();
+                        floatingWidgetService.killAll();
+                    }
+                    break;
+                case "STAT":
+                    Log.i("STAT", "STAT "+floatingWidgetService+" "+mainActivity);
+                    if(floatingWidgetService != null){
+                        floatingWidgetService.killAll();
+                    }
+                    if(mainActivity != null){
+                        mainActivity.restartMainActivity();
                     }
                     break;
                 default:

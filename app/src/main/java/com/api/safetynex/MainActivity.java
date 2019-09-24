@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter intentFilter = new IntentFilter();
         // Add network connectivity change action.
         intentFilter.addAction("FLOATING_OK");
+        intentFilter.addAction("STAT");
         // Set broadcast receiver priority.
         intentFilter.setPriority(100);
 
@@ -55,10 +56,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onRestart() {
         Log.i(TAG, "onReStart");
-        unregisterReceiver(appReceiver);
+       // unregisterReceiver(appReceiver);
         super.onRestart();
         Log.i(TAG, "onReStart");
-        initializeView();
+        ((MainApp)getApplication()).setFirsRun(false);
+        this.startActivity(this.getIntent());
+        //initializeView();
     }
 
 
@@ -81,6 +84,13 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         Log.i(TAG, "onRequestPermissionsResult");
         continueRun();
+    }
+
+    public void restartMainActivity(){
+        Log.i(TAG, "Restart");
+        ((MainApp)this.getApplication()).setFirsRun(false);
+        this.onRestart();
+        //initializeView();
     }
 
     private void continueRun(){
