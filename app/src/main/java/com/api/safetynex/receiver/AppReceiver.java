@@ -16,6 +16,7 @@ public class AppReceiver extends BroadcastReceiver {
     private MainActivity mainActivity;
     private FloatingWidgetService floatingWidgetService;
     private SafetyNexAppiService safetyNexAppiService;
+    private boolean restartOnlyActivity = false;
 
     public static AppReceiver getInstance(){
         if(appReceiver == null){
@@ -47,18 +48,27 @@ public class AppReceiver extends BroadcastReceiver {
                         mainActivity.finish();
                     }
                     if(floatingWidgetService != null){
-                        floatingWidgetService.killAll();
+                        floatingWidgetService.stopSelf();
                     }
                     break;
-                case "STAT":
-                    Log.i("STAT", "STAT "+floatingWidgetService+" "+mainActivity);
+                case "RESTARTACTIVITY":
+                    setRestartOnlyActivity(true);
+                    Intent openMainActivity = new Intent(context, MainActivity.class);
+                    openMainActivity.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    context.startActivity(openMainActivity);
                     if(floatingWidgetService != null){
-                        floatingWidgetService.killAll();
-                    }
-                    if(mainActivity != null){
-                        mainActivity.restartMainActivity();
+                        floatingWidgetService.stopSelf();
                     }
                     break;
+//                case "STAT":
+//                    Log.i("STAT", "STAT "+floatingWidgetService+" "+mainActivity);
+//                    if(floatingWidgetService != null){
+//                        floatingWidgetService.killAll();
+//                    }
+//                    if(mainActivity != null){
+//                        mainActivity.restartMainActivity();
+//                    }
+//                    break;
                 default:
                     break;
             }
@@ -75,5 +85,13 @@ public class AppReceiver extends BroadcastReceiver {
 
     public void setSafetyNexAppiService(SafetyNexAppiService safetyNexAppiService) {
         this.safetyNexAppiService = safetyNexAppiService;
+    }
+
+    public boolean isRestartOnlyActivity() {
+        return restartOnlyActivity;
+    }
+
+    public void setRestartOnlyActivity(boolean restartOnlyActivity) {
+        this.restartOnlyActivity = restartOnlyActivity;
     }
 }

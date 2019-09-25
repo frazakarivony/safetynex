@@ -355,11 +355,11 @@ public class FloatingWidgetService extends Service  {
                 LOCATION_REFRESH_DISTANCE, mLocationListener);
     }
 
-    public void killAll(){
-        Log.i(TAG, "killllll");
-        this.safetyNexAppiService.closeAPI();
-        this.stopSelf();
-    }
+//    public void killAll(){
+//        Log.i(TAG, "killllll");
+//        this.safetyNexAppiService.closeAPI();
+//        this.stopSelf();
+//    }
 
     private Notification createFloatingWidgetSpecialNotification() {
         Log.i(TAG, "createFloatingWidgetSpecialNotification");

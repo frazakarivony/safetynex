@@ -436,7 +436,7 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener{
         SafetyStats stats = new SafetyStats();
         stats.setInputStat(InputUserStat);
         stats.setOutputStat(OutUserStat);
-        stats.setStats(this.mJniFunction.GetCloudStat());
+        stats.setStats(FullStat);
 
         mMessage = "Grade = " + grade
                 + "; duration =" + duration

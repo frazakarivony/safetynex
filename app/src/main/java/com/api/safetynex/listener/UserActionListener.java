@@ -58,9 +58,15 @@ public class UserActionListener implements GestureDetector.OnGestureListener, Vi
 
     @Override
     public void onLongPress(MotionEvent e) {
-        context.stopService(this.intentFloatingService);
+        //context.stopService(this.intentFloatingService);
         Log.i("DoubleClickListener", "onSingleTapUp");
-        context.getApplicationContext().sendBroadcast(new Intent("KILL"));
+
+        AppReceiver appReceiver = AppReceiver.getInstance();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("RESTARTACTIVITY");
+        intentFilter.setPriority(100);
+        context.registerReceiver(appReceiver, intentFilter);
+        context.getApplicationContext().sendBroadcast(new Intent("RESTARTACTIVITY"));
     }
 
     @Override

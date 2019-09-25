@@ -9,7 +9,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,6 +16,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.api.safetynex.receiver.AppReceiver;
+import com.api.safetynex.service.SafetyNexAppiService;
 import com.api.safetynex.service.floatingwidget.FloatingWidgetService;
 import com.nexiad.safetynexappsample.CONSTANTS;
 
@@ -38,19 +38,46 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "onCreate");
         super.onCreate(savedInstanceState);
 
-        IntentFilter intentFilter = new IntentFilter();
-        // Add network connectivity change action.
-        intentFilter.addAction("FLOATING_OK");
-        intentFilter.addAction("STAT");
-        // Set broadcast receiver priority.
-        intentFilter.setPriority(100);
+        setContentView(R.layout.activity_main);
 
-        Log.i(TAG, "register appReceiver FLOATING_OK");
-        registerReceiver(appReceiver, intentFilter);
-        ActivityCompat.requestPermissions(MainActivity.this,
-                new String[]{Manifest.permission.READ_PHONE_STATE,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                REQUEST_PERMISSIONS);
+        Button button = findViewById(R.id.button);
+        TextView textView = findViewById(R.id.textView);
+        Button close = findViewById(R.id.close);
 
+
+        if(((MainApp) getApplication()).isFirstRun()){
+            textView.setText(getResources().getString(R.string.init_app));
+        };
+
+        ((MainApp)getApplication()).setCurrentActivity(this);
+        button.setOnClickListener(v -> {
+            this.launchFloatingWidget();
+            this.finish();
+        });
+
+        close.setOnClickListener(v -> {
+            MainActivity.this.finishAffinity();
+            ((MainApp)getApplication()).setCurrentActivity(null);
+            this.sendBroadcast(new Intent("KILL"));
+        });
+
+
+        if(appReceiver.isRestartOnlyActivity()){
+            SafetyNexAppiService safetyNexAppiService = SafetyNexAppiService.getInstance(getApplication());
+            SafetyStats safetyStats = safetyNexAppiService.getStat();
+        }else{
+            IntentFilter intentFilter = new IntentFilter();
+            // Add network connectivity change action.
+            intentFilter.addAction("FLOATING_OK");
+            // Set broadcast receiver priority.
+            intentFilter.setPriority(100);
+
+            Log.i(TAG, "register appReceiver FLOATING_OK");
+            registerReceiver(appReceiver, intentFilter);
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.READ_PHONE_STATE,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUEST_PERMISSIONS);
+        }
     }
 
     @Override
@@ -58,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "onReStart");
        // unregisterReceiver(appReceiver);
         super.onRestart();
-        Log.i(TAG, "onReStart");
         ((MainApp)getApplication()).setFirsRun(false);
         this.startActivity(this.getIntent());
         //initializeView();
@@ -86,40 +112,18 @@ public class MainActivity extends AppCompatActivity {
         continueRun();
     }
 
-    public void restartMainActivity(){
-        Log.i(TAG, "Restart");
-        ((MainApp)this.getApplication()).setFirsRun(false);
-        this.onRestart();
-        //initializeView();
-    }
+//    public void restartMainActivity(){
+//        Log.i(TAG, "Restart");
+//        ((MainApp)this.getApplication()).setFirsRun(false);
+//        this.onRestart();
+//        //initializeView();
+//    }
 
     private void continueRun(){
         Log.i(TAG, "continueRun");
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-
-        setContentView(R.layout.activity_main);
-
-        Button button = findViewById(R.id.button);
-        TextView textView = findViewById(R.id.textView);
-        Button close = findViewById(R.id.close);
-
-
-        if(((MainApp) getApplication()).isFirstRun()){
-            textView.setText(getResources().getString(R.string.init_app));
-        };
-
-        ((MainApp)getApplication()).setCurrentActivity(this);
-        button.setOnClickListener(v -> {
-            this.launchFloatingWidget();
-        });
-
-        close.setOnClickListener(v -> {
-            MainActivity.this.finishAffinity();
-            ((MainApp)getApplication()).setCurrentActivity(null);
-            this.sendBroadcast(new Intent("KILL"));
-        });
 
         this.launchFloatingWidget();
     }
