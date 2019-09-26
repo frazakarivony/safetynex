@@ -79,12 +79,10 @@ public class MainActivity extends AppCompatActivity {
 
         if(appReceiver.isRestartOnlyActivity()){
             SafetyNexAppiService safetyNexAppiService = SafetyNexAppiService.getInstance(getApplication());
-            SafetyStats safetyStats = safetyNexAppiService.getStat();
+            SafetyStats stats = safetyNexAppiService.getStat();
 
             ProgressBar p = (ProgressBar) findViewById(R.id.profress);
             p.setVisibility(View.INVISIBLE);
-            SafetyStats stats =  safetyNexAppiService.getStat();
-            String stattttt = "";
             LinearLayoutCompat layout = (LinearLayoutCompat) findViewById(R.id.rl);
             textView.setText("");
 //            ConstraintSet set = new ConstraintSet();
@@ -105,34 +103,26 @@ public class MainActivity extends AppCompatActivity {
             LinearLayoutCompat.LayoutParams paramsTxtView = new LinearLayoutCompat.LayoutParams(LinearLayoutCompat.LayoutParams.MATCH_PARENT, LinearLayoutCompat.LayoutParams.WRAP_CONTENT);
             paramsTxtView.gravity = Gravity.CENTER;
             paramsTxtView.setMargins(50,10,0,10);
-            while (v-->0){
-                TextView tv = new TextView(this);
-                tv.setLayoutParams(paramsTxtView);
-                tv.setText("Niveau de risque : " + String.valueOf(v) + " environnement : " + v);
-                tv.setCompoundDrawablesRelativeWithIntrinsicBounds(getDrawable(R.drawable.ic_icon_1), null, null, null);
-                tv.setId(View.generateViewId());
 
-                layout.addView(tv,idx);
+            for(CNxFullStat stat : stats.getStats()){
+                //if(stat.m_iEnvConf != 3) {
+                    TextView tv = new TextView(this);
+                    tv.setLayoutParams(paramsTxtView);
+                    tv.setText("Niveau de risque : " + String.valueOf(stat.m_iRiskSlice) + " environnement : " + stat.m_iEnvConf);
+                    tv.setCompoundDrawablesRelativeWithIntrinsicBounds(getDrawable(R.drawable.ic_icon_1), null, null, null);
 
-                idx++;
-            }
-         /*   for(CNxFullStat stat : stats.getStats()){
-                TextView tv = new TextView(this);
-                tv.setLayoutParams(paramsTxtView);
-                tv.setText("Niveau de risque : " + String.valueOf(stat.m_iRiskSlice) + " environnement : " + stat.m_iEnvConf);
-                tv.setCompoundDrawablesRelativeWithIntrinsicBounds(getDrawable(R.drawable.ic_icon_1), null, null, null);
+                    tv.setId(View.generateViewId());
+                    layout.addView(tv, idx);
 
-                tv.setId(View.generateViewId());
-                layout.addView(tv,idx);
-
-                idx++;
+                    idx++;
+              //  }
                 // if(stat.m_iEnvConf != 3) {
 //                    ssb.append("Niveau de risque : " + String.valueOf(stat.m_iRiskSlice) + " environnement : " + stat.m_iEnvConf + "\n", new ImageSpan(getApplicationContext(), R.drawable.ic_icon_1), 0);
                     //ssb.setSpan(new ImageSpan(getApplicationContext(), R.drawable.ic_icon_1), 0, 1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
 //                                        text.setText(String.valueOf(stat.m_iRiskSlice));
   //                  stattttt += "Niveau de risque : " + String.valueOf(stat.m_iRiskSlice) + " environnement : " + stat.m_iEnvConf;
                 //}
-            }*/
+            }
     //        textView.setText(ssb, TextView.BufferType.SPANNABLE);
         }else{
             IntentFilter intentFilter = new IntentFilter();

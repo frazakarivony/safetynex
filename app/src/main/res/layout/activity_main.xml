@@ -87,14 +87,6 @@
                 android:orientation="vertical"
                 android:gravity="center">
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="qmksldfqmklsdfjmqlksjdf"
-                    android:drawableLeft="@drawable/ic_icon_24"
-                    android:layout_marginLeft="10dp"
-                    android:gravity="center"/>
-
             </android.support.v7.widget.LinearLayoutCompat>
         </android.support.v7.widget.LinearLayoutCompat>
     </ScrollView>

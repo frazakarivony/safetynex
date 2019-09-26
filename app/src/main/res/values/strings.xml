@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">SofteamNexiadAlerting</string>
     <string name="text_bubulle">Je suis une bubulle</string>
     <string name="add_floating_button">ADD FLOATING BUTTON</string>
     <string name="close_app">CLOSE APP</string>
