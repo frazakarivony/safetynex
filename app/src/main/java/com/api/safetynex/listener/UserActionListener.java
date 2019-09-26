@@ -32,7 +32,7 @@ public class UserActionListener implements GestureDetector.OnGestureListener, Vi
 
         IntentFilter intentFilter = new IntentFilter();
         // Add network connectivity change action.
-        intentFilter.addAction("STAT");
+        intentFilter.addAction("RESTARTACTIVITY");
         // Set broadcast receiver priority.
         context.registerReceiver(AppReceiver.getInstance(), intentFilter);
     }

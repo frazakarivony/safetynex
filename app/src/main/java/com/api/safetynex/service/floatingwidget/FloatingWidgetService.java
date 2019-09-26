@@ -230,21 +230,6 @@ public class FloatingWidgetService extends Service  {
                                             null,
                                             getDrawable(R.drawable.ic_play_circle_outline_white_24dp),
                                             null);
-                                    SafetyStats stats =  safetyNexAppiService.getStat();
-                                    String stattttt = "";
-                                    LinearLayout l = ((LinearLayout)mOverlayView.findViewById(R.id.stat));
-                                    SpannableStringBuilder ssb = new SpannableStringBuilder();
-                                    //TODO filtre infos + affichage
-                                    ssb.append(stats.getInputStat().toString());
-                                    for(CNxFullStat stat : stats.getStats()){
-                                        if(stat.m_iEnvConf != 3) {
-                                            ssb.append("Niveau de risque : " + String.valueOf(stat.m_iRiskSlice) + " environnement : " + stat.m_iEnvConf + "\n", new ImageSpan(getApplicationContext(), R.drawable.ic_icon_1), 0);
-                                            //ssb.setSpan(new ImageSpan(getApplicationContext(), R.drawable.ic_icon_1), 0, 1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-//                                        text.setText(String.valueOf(stat.m_iRiskSlice));
-                                            stattttt += "Niveau de risque : " + String.valueOf(stat.m_iRiskSlice) + " environnement : " + stat.m_iEnvConf;
-                                        }
-                                    }
-                                    text.setText(ssb, TextView.BufferType.SPANNABLE);
                                 }else{
                                     safetyNexAppiService.restartApi();
                                 }

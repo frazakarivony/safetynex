@@ -60,15 +60,15 @@ public class AppReceiver extends BroadcastReceiver {
                         floatingWidgetService.stopSelf();
                     }
                     break;
-//                case "STAT":
-//                    Log.i("STAT", "STAT "+floatingWidgetService+" "+mainActivity);
+                //case "STAT":
+                  // Log.i("STAT", "STAT "+floatingWidgetService+" "+mainActivity);
 //                    if(floatingWidgetService != null){
 //                        floatingWidgetService.killAll();
 //                    }
 //                    if(mainActivity != null){
 //                        mainActivity.restartMainActivity();
 //                    }
-//                    break;
+                    //break;
                 default:
                     break;
             }

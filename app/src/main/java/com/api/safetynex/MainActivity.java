@@ -8,17 +8,29 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
+import android.support.constraint.ConstraintLayout;
+import android.support.constraint.ConstraintSet;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutCompat;
+import android.text.Layout;
+import android.text.SpannableStringBuilder;
+import android.text.style.ImageSpan;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.api.safetynex.receiver.AppReceiver;
 import com.api.safetynex.service.SafetyNexAppiService;
 import com.api.safetynex.service.floatingwidget.FloatingWidgetService;
 import com.nexiad.safetynexappsample.CONSTANTS;
+import com.nexyad.jndksafetynex.CNxFullStat;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -65,6 +77,53 @@ public class MainActivity extends AppCompatActivity {
         if(appReceiver.isRestartOnlyActivity()){
             SafetyNexAppiService safetyNexAppiService = SafetyNexAppiService.getInstance(getApplication());
             SafetyStats safetyStats = safetyNexAppiService.getStat();
+
+            ProgressBar p = (ProgressBar) findViewById(R.id.profress);
+            p.setVisibility(View.INVISIBLE);
+            SafetyStats stats =  safetyNexAppiService.getStat();
+            String stattttt = "";
+            LinearLayoutCompat layout = (LinearLayoutCompat) findViewById(R.id.rl);
+            textView.setText("");
+//            ConstraintSet set = new ConstraintSet();
+
+  //          SpannableStringBuilder ssb = new SpannableStringBuilder();
+
+            //TODO filtre infos + affichage
+            //ssb.append(stats.getInputStat().toString());
+            int idx = 0;
+            int v = 50;
+            ImageView img = new ImageView(this);
+            img.setImageResource(R.drawable.ic_icon_6);
+
+            layout.addView(img,idx);
+            idx++;
+            while (v-->0){
+                TextView tv = new TextView(this);
+                tv.setText("Niveau de risque : " + String.valueOf(v) + " environnement : " + v);
+                tv.setCompoundDrawablesRelativeWithIntrinsicBounds(getDrawable(R.drawable.ic_icon_1), null, null, null);
+
+                tv.setId(View.generateViewId());
+                layout.addView(tv,idx);
+
+                idx++;
+            }
+          /*  for(CNxFullStat stat : stats.getStats()){
+                TextView tv = new TextView(this);
+                tv.setText("Niveau de risque : " + String.valueOf(stat.m_iRiskSlice) + " environnement : " + stat.m_iEnvConf);
+                tv.setCompoundDrawablesRelativeWithIntrinsicBounds(getDrawable(R.drawable.ic_icon_1), null, null, null);
+
+                tv.setId(View.generateViewId());
+                layout.addView(tv,idx);
+
+                idx++;
+                // if(stat.m_iEnvConf != 3) {
+//                    ssb.append("Niveau de risque : " + String.valueOf(stat.m_iRiskSlice) + " environnement : " + stat.m_iEnvConf + "\n", new ImageSpan(getApplicationContext(), R.drawable.ic_icon_1), 0);
+                    //ssb.setSpan(new ImageSpan(getApplicationContext(), R.drawable.ic_icon_1), 0, 1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+//                                        text.setText(String.valueOf(stat.m_iRiskSlice));
+  //                  stattttt += "Niveau de risque : " + String.valueOf(stat.m_iRiskSlice) + " environnement : " + stat.m_iEnvConf;
+                //}
+            }*/
+    //        textView.setText(ssb, TextView.BufferType.SPANNABLE);
         }else{
             IntentFilter intentFilter = new IntentFilter();
             // Add network connectivity change action.
