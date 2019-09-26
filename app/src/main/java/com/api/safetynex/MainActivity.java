@@ -18,8 +18,11 @@ import android.text.Layout;
 import android.text.SpannableStringBuilder;
 import android.text.style.ImageSpan;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -94,21 +97,28 @@ public class MainActivity extends AppCompatActivity {
             int v = 50;
             ImageView img = new ImageView(this);
             img.setImageResource(R.drawable.ic_icon_6);
-
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.gravity = Gravity.CENTER;
+            img.setLayoutParams(params);
             layout.addView(img,idx);
             idx++;
+            LinearLayoutCompat.LayoutParams paramsTxtView = new LinearLayoutCompat.LayoutParams(LinearLayoutCompat.LayoutParams.MATCH_PARENT, LinearLayoutCompat.LayoutParams.WRAP_CONTENT);
+            paramsTxtView.gravity = Gravity.CENTER;
+            paramsTxtView.setMargins(50,10,0,10);
             while (v-->0){
                 TextView tv = new TextView(this);
+                tv.setLayoutParams(paramsTxtView);
                 tv.setText("Niveau de risque : " + String.valueOf(v) + " environnement : " + v);
                 tv.setCompoundDrawablesRelativeWithIntrinsicBounds(getDrawable(R.drawable.ic_icon_1), null, null, null);
-
                 tv.setId(View.generateViewId());
+
                 layout.addView(tv,idx);
 
                 idx++;
             }
-          /*  for(CNxFullStat stat : stats.getStats()){
+         /*   for(CNxFullStat stat : stats.getStats()){
                 TextView tv = new TextView(this);
+                tv.setLayoutParams(paramsTxtView);
                 tv.setText("Niveau de risque : " + String.valueOf(stat.m_iRiskSlice) + " environnement : " + stat.m_iEnvConf);
                 tv.setCompoundDrawablesRelativeWithIntrinsicBounds(getDrawable(R.drawable.ic_icon_1), null, null, null);
 
