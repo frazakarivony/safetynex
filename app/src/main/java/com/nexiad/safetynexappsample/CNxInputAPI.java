@@ -137,4 +137,20 @@ public class CNxInputAPI {
 	public void setGpsTimeLong(long gpsTimeLong) {
 		this.gpsTimeLong = gpsTimeLong;
 	}
+
+	public String toCsv(){
+		String separator = ",";
+		return
+				mTime+separator+
+				mAccelX+separator+
+				mAccelY+separator+
+				mAccelZ+separator+
+				mLat+separator+
+				mLon+separator+
+				mSpeed+separator+
+				mCap+separator+
+				mTimeDiffGPS+separator+
+				nbOfSat+separator+
+				gpsTimeLong+"\r\n";
+	}
 }
