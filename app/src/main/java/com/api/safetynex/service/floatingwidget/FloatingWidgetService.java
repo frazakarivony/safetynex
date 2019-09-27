@@ -20,6 +20,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -61,6 +62,12 @@ import com.nexiad.safetynexappsample.CNxInputAPI;
 import com.nexiad.safetynexappsample.CONSTANTS;
 import com.nexyad.jndksafetynex.CNxFullStat;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -92,6 +99,8 @@ public class FloatingWidgetService extends Service  {
     private String lastSpeech ="init";
     private int speechRepetition = 1;
     private boolean stop=false;
+    private List<CNxInputAPI> saveForMock = new ArrayList<>();
+    private String data="";
 
     @Nullable
     @Override
@@ -155,6 +164,10 @@ public class FloatingWidgetService extends Service  {
     public void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "onDestroy");
+        if(CONSTANTS.DEMO_REAL_MOCK) {
+            writeToFile();
+        }
+
         if (mOverlayView != null){
             mWindowManager.removeView(mOverlayView);
         }
@@ -382,6 +395,9 @@ public class FloatingWidgetService extends Service  {
                     mInpuAPI.ParseData(lineFull);
                     mInpuAPI.setNbOfSat(7);
                 }
+                if(CONSTANTS.DEMO_REAL_MOCK){
+                    saveForMock.add(mInpuAPI);
+                }
 
                 mInpuAPI.setmTimeDiffGPS((System.currentTimeMillis() - mInpuAPI.getGpsTimeLong())/1000);
                 String textResult=safetyNexAppiService.getRisk(mInpuAPI);
@@ -453,5 +469,48 @@ public class FloatingWidgetService extends Service  {
                 text.getCompoundDrawables()[3]
         );
         text.setTextColor(DrawableUtils.getDrawableColor(safetyNexAppiService.floatingWidgetAlertingInfos().getFloatingWidgetColorEnum().getFloatingWidgetTxtColor()));
+    }
+
+    public void writeToFile()
+    {
+        // Get the directory for the user's public pictures directory.
+        final File path =
+            Environment.getExternalStoragePublicDirectory
+                (
+                    //Environment.DIRECTORY_PICTURES
+                    Environment.DIRECTORY_DOWNLOADS + "/safetyNext/"
+                );
+
+        // Make sure the path directory exists.
+        if(!path.exists())
+        {
+            // Make it, if it doesn't exit
+            path.mkdirs();
+        }
+
+        final File file = new File(path, "save.csv");
+        // Save your stream, don't forget to flush() it before closing it.
+
+
+        saveForMock.forEach(mInputApi->{
+            data = data + mInputApi.toCsv();
+        });
+
+        try
+        {
+            file.createNewFile();
+            FileOutputStream fOut = new FileOutputStream(file);
+            OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
+            myOutWriter.append(data);
+
+            myOutWriter.close();
+
+            fOut.flush();
+            fOut.close();
+        }
+        catch (IOException e)
+        {
+            Log.e("Exception", "File write failed: " + e.toString());
+        }
     }
 }
