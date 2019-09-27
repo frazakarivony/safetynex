@@ -8,15 +8,10 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
-import android.support.constraint.ConstraintLayout;
-import android.support.constraint.ConstraintSet;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutCompat;
-import android.text.Layout;
-import android.text.SpannableStringBuilder;
-import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -24,9 +19,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.api.safetynex.receiver.AppReceiver;
@@ -35,6 +28,13 @@ import com.api.safetynex.service.floatingwidget.FloatingWidgetService;
 import com.nexiad.safetynexappsample.CONSTANTS;
 import com.nexyad.jndksafetynex.CNxFullStat;
 
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.utils.ColorTemplate;
+import com.github.mikephil.charting.components.Description;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -75,6 +75,37 @@ public class MainActivity extends AppCompatActivity {
             ((MainApp)getApplication()).setCurrentActivity(null);
             this.sendBroadcast(new Intent("KILL"));
         });
+
+
+        BarChart barChart = findViewById(R.id.barchart);
+
+        ArrayList<BarEntry> entries = new ArrayList<>();
+        entries.add(new BarEntry(1f, 45));
+        entries.add(new BarEntry(2f, 15));
+        entries.add(new BarEntry(3f, 10));
+        entries.add(new BarEntry(4f, 10));
+        entries.add(new BarEntry(5f, 10));
+
+        BarDataSet bardataset = new BarDataSet(entries, "Risk");
+
+        String[] labels = new String[3];
+        labels[0]="plip";
+        labels[1]="plop";
+        labels[2]="ploup";
+
+        bardataset.setStackLabels(labels);
+
+        BarData data = new BarData(bardataset);
+        barChart.setData(data); // set the data and list of lables into chart
+
+        Description description = new Description();
+        description.setText("Bilan de la conduite");
+        barChart.setDescription(description);  // set the description
+
+        bardataset.setColors(ColorTemplate.COLORFUL_COLORS);
+
+        barChart.animateY(5000);
+
 
 
         if(appReceiver.isRestartOnlyActivity()){

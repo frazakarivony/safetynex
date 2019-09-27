@@ -99,7 +99,6 @@ public class FloatingWidgetService extends Service  {
     private String lastSpeech ="init";
     private int speechRepetition = 1;
     private boolean stop=false;
-    private List<CNxInputAPI> saveForMock = new ArrayList<>();
     private String data="";
 
     @Nullable
@@ -396,7 +395,7 @@ public class FloatingWidgetService extends Service  {
                     mInpuAPI.setNbOfSat(7);
                 }
                 if(CONSTANTS.DEMO_REAL_MOCK){
-                    saveForMock.add(mInpuAPI);
+                    data = data + mInpuAPI.toCsv();
                 }
 
                 mInpuAPI.setmTimeDiffGPS((System.currentTimeMillis() - mInpuAPI.getGpsTimeLong())/1000);
@@ -490,11 +489,6 @@ public class FloatingWidgetService extends Service  {
 
         final File file = new File(path, "save"+System.currentTimeMillis()+".csv");
         // Save your stream, don't forget to flush() it before closing it.
-
-
-        saveForMock.forEach(mInputApi->{
-            data = data + mInputApi.toCsv();
-        });
 
         try
         {

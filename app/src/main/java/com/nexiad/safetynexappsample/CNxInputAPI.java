@@ -141,7 +141,6 @@ public class CNxInputAPI {
 	public String toCsv(){
 		String separator = ",";
 		return
-				mTime+separator+
 				mAccelX+separator+
 				mAccelY+separator+
 				mAccelZ+separator+

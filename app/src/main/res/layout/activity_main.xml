@@ -55,6 +55,11 @@
 
             </android.support.v7.widget.LinearLayoutCompat>
 
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/barchart"
+                android:layout_width="match_parent"
+                android:layout_height="@android:dimen/thumbnail_width" />
+
             <android.support.v7.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
