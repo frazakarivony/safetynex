@@ -540,7 +540,7 @@ public class FloatingWidgetService extends Service  {
                     Environment.DIRECTORY_DOWNLOADS + "/safetyNext/"
                 );
 
-        File file = new File(path,"savefred.csv");
+        File file = new File(path,CONSTANTS.MOCK_NAME);
         //Read text from file
         StringBuilder text = new StringBuilder();
 
