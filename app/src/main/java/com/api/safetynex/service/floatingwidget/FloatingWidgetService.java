@@ -60,14 +60,13 @@ import com.api.exceptions.NexiadException;
 import com.nexiad.safetynexappsample.CNxDemoData;
 import com.nexiad.safetynexappsample.CNxInputAPI;
 import com.nexiad.safetynexappsample.CONSTANTS;
-import com.nexyad.jndksafetynex.CNxFullStat;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -100,6 +99,7 @@ public class FloatingWidgetService extends Service  {
     private int speechRepetition = 1;
     private boolean stop=false;
     private String data="";
+    private BufferedReader br;
 
     @Nullable
     @Override
@@ -116,6 +116,9 @@ public class FloatingWidgetService extends Service  {
 
         if (mOverlayView == null) {
             mOverlayView = LayoutInflater.from(this).inflate(R.layout.overlay_layout, null);
+        }
+        if(CONSTANTS.USE_REAL_MOCK){
+            readMockFile();
         }
 
         AppReceiver.getInstance().setFloatingWidgetService(this);
@@ -177,6 +180,13 @@ public class FloatingWidgetService extends Service  {
         stop=true;
         timerRunnableFuture.cancel(true);
 
+        if(CONSTANTS.USE_REAL_MOCK){
+            try {
+                br.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
     }
 
@@ -269,7 +279,7 @@ public class FloatingWidgetService extends Service  {
                     timerHandler.postDelayed(this, 1000);
                 }
                 Log.i(TAG, "loooppppp");
-                if(mInpuAPI.getLocationUpdated()){
+                if(mInpuAPI.getLocationUpdated() || CONSTANTS.USE_REAL_MOCK){
                     callSafetyApi();
                     mInpuAPI.setLocationUpdated(Boolean.FALSE);
                 }
@@ -294,9 +304,11 @@ public class FloatingWidgetService extends Service  {
         mSensorListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent sensorEvent) {
-                mInpuAPI.setmAccelZ(sensorEvent.values[CONSTANTS.ACCELOROMETRE_X_INDIXE]);
-                mInpuAPI.setmAccelY(sensorEvent.values[CONSTANTS.ACCELOROMETRE_Y_INDIXE]);
-                mInpuAPI.setmAccelX(sensorEvent.values[CONSTANTS.ACCELOROMETRE_Z_INDIXE]);
+                if(!CONSTANTS.USE_REAL_MOCK) {
+                    mInpuAPI.setmAccelZ(sensorEvent.values[CONSTANTS.ACCELOROMETRE_X_INDIXE]);
+                    mInpuAPI.setmAccelY(sensorEvent.values[CONSTANTS.ACCELOROMETRE_Y_INDIXE]);
+                    mInpuAPI.setmAccelX(sensorEvent.values[CONSTANTS.ACCELOROMETRE_Z_INDIXE]);
+                }
             }
 
             @Override
@@ -323,13 +335,15 @@ public class FloatingWidgetService extends Service  {
             @Override
             public void onLocationChanged(final Location location) {
 
-                mInpuAPI.setmLat((float) location.getLatitude());
-                mInpuAPI.setmLon((float) location.getLongitude());
-                mInpuAPI.setGpsTimeLong(location.getTime());
-                mInpuAPI.setNbOfSat(location.getExtras().getInt("satellites"));
-                mInpuAPI.setmCap(location.getBearing());
-                mInpuAPI.setmSpeed(location.getSpeed() * CONSTANTS.SPEED_MS_TO_KH);
-                mInpuAPI.setLocationUpdated(Boolean.TRUE);
+                if(!CONSTANTS.USE_REAL_MOCK){
+                    mInpuAPI.setmLat((float) location.getLatitude());
+                    mInpuAPI.setmLon((float) location.getLongitude());
+                    mInpuAPI.setGpsTimeLong(location.getTime());
+                    mInpuAPI.setNbOfSat(location.getExtras().getInt("satellites"));
+                    mInpuAPI.setmCap(location.getBearing());
+                    mInpuAPI.setmSpeed(location.getSpeed() * CONSTANTS.SPEED_MS_TO_KH);
+                    mInpuAPI.setLocationUpdated(Boolean.TRUE);
+                }
             }
 
             @Override
@@ -397,8 +411,18 @@ public class FloatingWidgetService extends Service  {
                 if(CONSTANTS.DEMO_REAL_MOCK){
                     data = data + mInpuAPI.toCsv();
                 }
+                if(CONSTANTS.USE_REAL_MOCK){
+                    String line = null;
+                    try {
+                        line = br.readLine();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    mInpuAPI.getValueFromCsv(line);
+                }else{
+                    mInpuAPI.setmTimeDiffGPS((System.currentTimeMillis() - mInpuAPI.getGpsTimeLong())/1000);
+                }
 
-                mInpuAPI.setmTimeDiffGPS((System.currentTimeMillis() - mInpuAPI.getGpsTimeLong())/1000);
                 String textResult=safetyNexAppiService.getRisk(mInpuAPI);
                 Log.i(TAG,String.valueOf(speechRepetition));
 
@@ -505,6 +529,26 @@ public class FloatingWidgetService extends Service  {
         catch (IOException e)
         {
             Log.e("Exception", "File write failed: " + e.toString());
+        }
+    }
+
+    public void readMockFile(){
+        final File path =
+            Environment.getExternalStoragePublicDirectory
+                (
+                    //Environment.DIRECTORY_PICTURES
+                    Environment.DIRECTORY_DOWNLOADS + "/safetyNext/"
+                );
+
+        File file = new File(path,"savefred.csv");
+        //Read text from file
+        StringBuilder text = new StringBuilder();
+
+        try {
+            br = new BufferedReader(new FileReader(file));
+        }
+        catch (IOException e) {
+            //You'll need to add proper error handling here
         }
     }
 }

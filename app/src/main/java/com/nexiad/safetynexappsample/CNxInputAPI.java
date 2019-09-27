@@ -152,4 +152,18 @@ public class CNxInputAPI {
 				nbOfSat+separator+
 				gpsTimeLong+"\r\n";
 	}
+
+	public void getValueFromCsv(String line){
+		String[] datas = line.split(",");
+		mAccelX = Float.parseFloat(datas[0]);
+		mAccelY = Float.parseFloat(datas[1]);
+		mAccelZ = Float.parseFloat(datas[2]);
+		mLat = Float.parseFloat(datas[3]);
+		mLon = Float.parseFloat(datas[4]);
+		mSpeed = Float.parseFloat(datas[5]);
+		mCap = Float.parseFloat(datas[6]);
+		mTimeDiffGPS = Float.parseFloat(datas[7]);
+		nbOfSat = Integer.parseInt(datas[8]);
+		gpsTimeLong = Long.parseLong(datas[9]);
+	}
 }

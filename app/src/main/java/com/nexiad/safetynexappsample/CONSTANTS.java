@@ -21,7 +21,8 @@ public class CONSTANTS {
 	//	public static final String  DEMO_LANGUAGE = "YOUR LANGUAGE INT VALUE (1;2;3)";
 	public static final int  DEMO_LANGUAGE = 1; //2 for English
 	public static final boolean DEMO_DATA_TEST = false;
-	public static final boolean DEMO_REAL_MOCK = true;
+	public static final boolean DEMO_REAL_MOCK = false;
+	public static final boolean USE_REAL_MOCK = false;
 	public static final String NEXYAD_LICENSING_URI = "https://nexyadsafetynexlicensingprod.azurewebsites.net/api/NexyadLicence?";
 	public static final float SPEED_MS_TO_KH = 3.6f;
 	public static final int ACCELOROMETRE_X_INDIXE = 0;
