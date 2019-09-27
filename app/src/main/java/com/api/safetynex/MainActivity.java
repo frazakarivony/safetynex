@@ -78,40 +78,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        BarChart barChart = findViewById(R.id.barchart);
-
-        ArrayList<BarEntry> entries = new ArrayList<>();
-        entries.add(new BarEntry(1f, 45));
-        entries.add(new BarEntry(2f, 15));
-        entries.add(new BarEntry(3f, 10));
-        entries.add(new BarEntry(4f, 10));
-        entries.add(new BarEntry(5f, 10));
-
-        BarDataSet bardataset = new BarDataSet(entries, "Risk");
-
-        String[] labels = new String[3];
-        labels[0]="plip";
-        labels[1]="plop";
-        labels[2]="ploup";
-
-        bardataset.setStackLabels(labels);
-
-        BarData data = new BarData(bardataset);
-        barChart.setData(data); // set the data and list of lables into chart
-
-        Description description = new Description();
-        description.setText("Bilan de la conduite");
-        barChart.setDescription(description);  // set the description
-
-        bardataset.setColors(ColorTemplate.COLORFUL_COLORS);
-
-        barChart.animateY(5000);
-
-
-
         if(appReceiver.isRestartOnlyActivity()){
             SafetyNexAppiService safetyNexAppiService = SafetyNexAppiService.getInstance(getApplication());
             SafetyStats stats = safetyNexAppiService.getStat();
+
 
             ProgressBar p = (ProgressBar) findViewById(R.id.profress);
             p.setVisibility(View.INVISIBLE);
@@ -119,27 +89,49 @@ public class MainActivity extends AppCompatActivity {
             textView.setText("");
 
             //TODO filtre infos + affichage
+            BarChart barChart = findViewById(R.id.barchart);
+
+            ArrayList<BarEntry> entries = new ArrayList<>();
+            entries.add(new BarEntry(1f, stats.getOutputStat().m_fRiskHist[0]));
+            entries.add(new BarEntry(2f, stats.getOutputStat().m_fRiskHist[1]));
+            entries.add(new BarEntry(3f, stats.getOutputStat().m_fRiskHist[2]));
+            entries.add(new BarEntry(4f, stats.getOutputStat().m_fRiskHist[3]));
+            entries.add(new BarEntry(5f, stats.getOutputStat().m_fRiskHist[4]));
+
+            BarDataSet bardataset = new BarDataSet(entries, "Risk");
+
+            String[] labels = new String[3];
+            labels[0]="plip";
+            labels[1]="plop";
+            labels[2]="ploup";
+
+            bardataset.setStackLabels(labels);
+
+            BarData data = new BarData(bardataset);
+            barChart.setData(data); // set the data and list of lables into chart
+
+            Description description = new Description();
+            description.setText("Bilan de la conduite");
+            barChart.setDescription(description);  // set the description
+
+            bardataset.setColors(ColorTemplate.COLORFUL_COLORS);
+
+            barChart.animateY(5000);
+
+
             int idx = 0;
             int v = 50;
 
-            ImageView img = new ImageView(this);
-            img.setImageResource(R.drawable.ic_icon_6);
-
-            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            params.gravity = Gravity.CENTER;
-            img.setLayoutParams(params);
-            layout.addView(img,idx);
-            idx++;
             LinearLayoutCompat.LayoutParams paramsTxtView = new LinearLayoutCompat.LayoutParams(LinearLayoutCompat.LayoutParams.MATCH_PARENT, LinearLayoutCompat.LayoutParams.WRAP_CONTENT);
             paramsTxtView.gravity = Gravity.CENTER;
             paramsTxtView.setMargins(50,10,0,10);
 
             for(CNxFullStat stat : stats.getStats()){
-                if(stat.m_iEnvConf != 3 && this.getPercentOfRisk(stat.m_iRiskSlice) > 0) {
+                if(stat.m_iEnvConf != 3) {
                     TextView tv = new TextView(this);
                     tv.setLayoutParams(paramsTxtView);
                     tv.setText(this.pointEnvironnement(stat.m_iEnvConf)+ "prise de risque : " + this.getPercentOfRisk(stat.m_iRiskSlice) + "%");
-                    tv.setCompoundDrawablesRelativeWithIntrinsicBounds(getPuceColor(this.getPercentOfRisk(stat.m_iRiskSlice)), null, null, null);
+                    tv.setCompoundDrawablesRelativeWithIntrinsicBounds(getPuceColor(stat.m_iRiskSlice), null, null, null);
 
                     tv.setId(View.generateViewId());
                     layout.addView(tv, idx);
@@ -162,25 +154,60 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private float getPercentOfRisk(int riskRange){
-        return (riskRange/9)*100;
+    private String getPercentOfRisk(int riskRange){
+
+        String retour = "";
+        switch (riskRange){
+            case 0:
+                retour = "0 et 10%";
+                break;
+            case 1:
+                retour = "10 et 20%";
+                break;
+            case 2:
+                retour = "20 et 30%";
+                break;
+            case 3:
+                retour = "30 et 40%";
+                break;
+            case 4:
+                retour = "40 et 50%";
+                break;
+            case 5:
+                retour = "50 et 60%";
+                break;
+            case 6:
+                retour = "60 et 70%";
+                break;
+            case 7:
+                retour = "70 et 80%";
+                break;
+            case 8:
+                retour = "80 et 90%";
+                break;
+            case 9:
+                retour = "90 et 100%";
+                break;
+
+        }
+        return retour;
     }
 
-    private Drawable getPuceColor(Float percentRisk){
+    private Drawable getPuceColor(int percentRisk){
         Drawable retour = null;
-        if(0 <= percentRisk && percentRisk < 20){
+        if(0 <= percentRisk && percentRisk < 2){
             retour = getDrawable(R.drawable.ic_0_20dp);
         }
-        if(20 <= percentRisk && percentRisk < 40){
+        if(2 <= percentRisk && percentRisk < 4){
             retour = getDrawable(R.drawable.ic_20_40dp);
         }
-        if(40 <= percentRisk && percentRisk < 60){
+        if(4 <= percentRisk && percentRisk < 6){
             retour = getDrawable(R.drawable.ic_40_60dp);
         }
-        if(60 <= percentRisk && percentRisk < 80){
+        if(6 <= percentRisk && percentRisk < 8){
             retour = getDrawable(R.drawable.ic_60_80dp);
         }
-        if(80 <= percentRisk && percentRisk <= 100){
+        if(8 <= percentRisk && percentRisk <= 9){
             retour = getDrawable(R.drawable.ic_80_100dp);
         }
         return retour;
