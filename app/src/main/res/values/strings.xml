@@ -9,9 +9,9 @@
     <string name="ok">OK</string>
     <string name="pause">Pause</string>
     <string name="resume">Play</string>
-    <string name="no_connection">Perte connexion</string>
+    <string name="no_connection">Perte de connexion</string>
     <string name="gps_lost">Perte du GPS</string>
-    <string name="slow_down">Veuillez ralentir portion limitée à %1$s kilomètres par heure.</string>
+    <string name="slow_down">Limitation %1$s kilomètres heure.</string>
     <string name="speed">Vitesse :</string>
     <string name="kmh">km/h</string>
     <string name="risk">Risque :</string>
