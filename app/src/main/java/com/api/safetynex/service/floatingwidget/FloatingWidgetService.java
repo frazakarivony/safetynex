@@ -488,7 +488,7 @@ public class FloatingWidgetService extends Service  {
             path.mkdirs();
         }
 
-        final File file = new File(path, "save.csv");
+        final File file = new File(path, "save"+System.currentTimeMillis()+".csv");
         // Save your stream, don't forget to flush() it before closing it.
 
 
