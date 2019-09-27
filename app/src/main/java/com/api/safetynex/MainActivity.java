@@ -5,6 +5,7 @@ import android.app.ActivityManager;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
@@ -85,16 +86,14 @@ public class MainActivity extends AppCompatActivity {
             p.setVisibility(View.INVISIBLE);
             LinearLayoutCompat layout = (LinearLayoutCompat) findViewById(R.id.rl);
             textView.setText("");
-//            ConstraintSet set = new ConstraintSet();
-
-  //          SpannableStringBuilder ssb = new SpannableStringBuilder();
 
             //TODO filtre infos + affichage
-            //ssb.append(stats.getInputStat().toString());
             int idx = 0;
             int v = 50;
+
             ImageView img = new ImageView(this);
             img.setImageResource(R.drawable.ic_icon_6);
+
             FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             params.gravity = Gravity.CENTER;
             img.setLayoutParams(params);
@@ -105,25 +104,18 @@ public class MainActivity extends AppCompatActivity {
             paramsTxtView.setMargins(50,10,0,10);
 
             for(CNxFullStat stat : stats.getStats()){
-                //if(stat.m_iEnvConf != 3) {
+                if(stat.m_iEnvConf != 3 && this.getPercentOfRisk(stat.m_iRiskSlice) > 0) {
                     TextView tv = new TextView(this);
                     tv.setLayoutParams(paramsTxtView);
-                    tv.setText("Niveau de risque : " + String.valueOf(stat.m_iRiskSlice) + " environnement : " + stat.m_iEnvConf);
-                    tv.setCompoundDrawablesRelativeWithIntrinsicBounds(getDrawable(R.drawable.ic_icon_1), null, null, null);
+                    tv.setText(this.pointEnvironnement(stat.m_iEnvConf)+ "prise de risque : " + this.getPercentOfRisk(stat.m_iRiskSlice) + "%");
+                    tv.setCompoundDrawablesRelativeWithIntrinsicBounds(getPuceColor(this.getPercentOfRisk(stat.m_iRiskSlice)), null, null, null);
 
                     tv.setId(View.generateViewId());
                     layout.addView(tv, idx);
 
                     idx++;
-              //  }
-                // if(stat.m_iEnvConf != 3) {
-//                    ssb.append("Niveau de risque : " + String.valueOf(stat.m_iRiskSlice) + " environnement : " + stat.m_iEnvConf + "\n", new ImageSpan(getApplicationContext(), R.drawable.ic_icon_1), 0);
-                    //ssb.setSpan(new ImageSpan(getApplicationContext(), R.drawable.ic_icon_1), 0, 1, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-//                                        text.setText(String.valueOf(stat.m_iRiskSlice));
-  //                  stattttt += "Niveau de risque : " + String.valueOf(stat.m_iRiskSlice) + " environnement : " + stat.m_iEnvConf;
-                //}
+                }
             }
-    //        textView.setText(ssb, TextView.BufferType.SPANNABLE);
         }else{
             IntentFilter intentFilter = new IntentFilter();
             // Add network connectivity change action.
@@ -138,6 +130,45 @@ public class MainActivity extends AppCompatActivity {
                     REQUEST_PERMISSIONS);
         }
     }
+
+    private float getPercentOfRisk(int riskRange){
+        return (riskRange/9)*100;
+    }
+
+    private Drawable getPuceColor(Float percentRisk){
+        Drawable retour = null;
+        if(0 <= percentRisk && percentRisk < 20){
+            retour = getDrawable(R.drawable.ic_0_20dp);
+        }
+        if(20 <= percentRisk && percentRisk < 40){
+            retour = getDrawable(R.drawable.ic_20_40dp);
+        }
+        if(40 <= percentRisk && percentRisk < 60){
+            retour = getDrawable(R.drawable.ic_40_60dp);
+        }
+        if(60 <= percentRisk && percentRisk < 80){
+            retour = getDrawable(R.drawable.ic_60_80dp);
+        }
+        if(80 <= percentRisk && percentRisk <= 100){
+            retour = getDrawable(R.drawable.ic_80_100dp);
+        }
+        return retour;
+    }
+
+    private String pointEnvironnement(int env){
+        String environnement = "Rien ";
+        if(env == 0){
+            environnement = "Non respect de la signalisation, ";
+        }
+        if(env == 1){
+            environnement = "Virage dangereux, ";
+        }
+        if(env == 2){
+            environnement = "Intersection, ";
+        }
+        return environnement;
+    }
+
 
     @Override
     protected void onRestart() {
