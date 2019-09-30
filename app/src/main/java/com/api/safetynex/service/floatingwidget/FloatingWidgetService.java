@@ -418,7 +418,9 @@ public class FloatingWidgetService extends Service  {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    mInpuAPI.getValueFromCsv(line);
+                    if(line != null){
+                        mInpuAPI.getValueFromCsv(line);
+                    }
                 }else{
                     mInpuAPI.setmTimeDiffGPS((System.currentTimeMillis() - mInpuAPI.getGpsTimeLong())/1000);
                 }

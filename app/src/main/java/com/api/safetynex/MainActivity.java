@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
             description.setText("Bilan de la conduite");
             barChart.setDescription(description);  // set the description
 
-            bardataset.setColors(getColor(R.color.greenCol), getColor(R.color.yellowCol),getColor(R.color.orangeCol), getColor(R.color.orCol),getColor(R.color.redCol) );
+            bardataset.setColors(getColor(R.color.greenCol), getColor(R.color.yellowCol),getColor(R.color.orCol), getColor(R.color.orangeCol),getColor(R.color.redCol) );
 
             barChart.animateY(5000);
            /* BarChart barChart = findViewById(R.id.barchart);
