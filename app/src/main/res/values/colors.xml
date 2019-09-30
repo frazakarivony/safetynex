@@ -13,4 +13,9 @@
     <color name="colorNSXTxtWhite">#FFFFFF</color>
     <color name="colorNSXTxtBlack">#000000</color>
     <color name="colorNSXTxtGrey">#676769</color>
+    <color name="redCol">#FF0000</color>
+    <color name="orangeCol">#FF9013</color>
+    <color name="orCol">#FFF92C</color>
+    <color name="yellowCol">#E9FF3E</color>
+    <color name="greenCol">#23FF51</color>
 </resources>

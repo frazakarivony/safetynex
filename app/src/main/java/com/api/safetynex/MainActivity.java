@@ -36,6 +36,7 @@ import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.github.mikephil.charting.components.Description;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -78,9 +79,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+
         if(appReceiver.isRestartOnlyActivity()){
-            SafetyNexAppiService safetyNexAppiService = SafetyNexAppiService.getInstance(getApplication());
-            SafetyStats stats = safetyNexAppiService.getStat();
+
 
 
             ProgressBar p = (ProgressBar) findViewById(R.id.profress);
@@ -89,6 +90,8 @@ public class MainActivity extends AppCompatActivity {
             textView.setText("");
 
             //TODO filtre infos + affichage
+            SafetyNexAppiService safetyNexAppiService = SafetyNexAppiService.getInstance(getApplication());
+            SafetyStats stats = safetyNexAppiService.getStat();
             BarChart barChart = findViewById(R.id.barchart);
 
             ArrayList<BarEntry> entries = new ArrayList<>();
@@ -97,6 +100,38 @@ public class MainActivity extends AppCompatActivity {
             entries.add(new BarEntry(3f, stats.getOutputStat().m_fRiskHist[2]));
             entries.add(new BarEntry(4f, stats.getOutputStat().m_fRiskHist[3]));
             entries.add(new BarEntry(5f, stats.getOutputStat().m_fRiskHist[4]));
+
+            BarDataSet bardataset = new BarDataSet(entries, "Risk");
+
+            // load data and animate it
+
+            String[] labels = new String[5];
+            labels[0]="0-20%";
+            labels[1]="20-40%";
+            labels[2]="40-60%";
+            labels[3]="60-80%";
+            labels[4]="80-100%";
+
+            bardataset.setStackLabels(labels);
+
+            BarData data = new BarData(bardataset);
+            barChart.setData(data); // set the data and list of lables into chart
+
+            Description description = new Description();
+            description.setText("Bilan de la conduite");
+            barChart.setDescription(description);  // set the description
+
+            bardataset.setColors(getColor(R.color.greenCol), getColor(R.color.yellowCol),getColor(R.color.orangeCol), getColor(R.color.orCol),getColor(R.color.redCol) );
+
+            barChart.animateY(5000);
+           /* BarChart barChart = findViewById(R.id.barchart);
+
+            ArrayList<BarEntry> entries = new ArrayList<>();
+            entries.add(new BarEntry(1f, stats.getOutputStat().m_fRiskHist[0]));
+            entries.add(new BarEntry(2f, stats.getOutputStat().m_fRiskHist[1]));
+            entries.add(new BarEntry(3f, stats.getOutputStat().m_fRiskHist[2]));
+            entries.add(new BarEntry(4f, stats.getOutputStat().m_fRiskHist[3]));
+            entries.add(new BarEntry(5f, stats.getOutputStat().m_fRiskHist[4], getDrawable(R.drawable.ic_red_24dp)));
 
             BarDataSet bardataset = new BarDataSet(entries, "Risk");
 
@@ -116,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
 
             bardataset.setColors(ColorTemplate.COLORFUL_COLORS);
 
-            barChart.animateY(5000);
+            barChart.animateY(5000);*/
 
 
             int idx = 0;
@@ -127,10 +162,10 @@ public class MainActivity extends AppCompatActivity {
             paramsTxtView.setMargins(50,10,0,10);
 
             for(CNxFullStat stat : stats.getStats()){
-                if(stat.m_iEnvConf != 3) {
+                if(stat.m_iEnvConf != 3 && stat.m_iRiskSlice != 0) {
                     TextView tv = new TextView(this);
                     tv.setLayoutParams(paramsTxtView);
-                    tv.setText(this.pointEnvironnement(stat.m_iEnvConf)+ "prise de risque : " + this.getPercentOfRisk(stat.m_iRiskSlice) + "%");
+                    tv.setText(this.pointEnvironnement(stat.m_iEnvConf)+ "prise de risque : " + this.getPercentOfRisk(stat.m_iRiskSlice));
                     tv.setCompoundDrawablesRelativeWithIntrinsicBounds(getPuceColor(stat.m_iRiskSlice), null, null, null);
 
                     tv.setId(View.generateViewId());
