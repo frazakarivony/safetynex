@@ -16,10 +16,7 @@ import android.support.v7.widget.LinearLayoutCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -33,10 +30,11 @@ import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.utils.ColorTemplate;
 import com.github.mikephil.charting.components.Description;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -124,35 +122,6 @@ public class MainActivity extends AppCompatActivity {
             bardataset.setColors(getColor(R.color.greenCol), getColor(R.color.yellowCol),getColor(R.color.orCol), getColor(R.color.orangeCol),getColor(R.color.redCol) );
 
             barChart.animateY(5000);
-           /* BarChart barChart = findViewById(R.id.barchart);
-
-            ArrayList<BarEntry> entries = new ArrayList<>();
-            entries.add(new BarEntry(1f, stats.getOutputStat().m_fRiskHist[0]));
-            entries.add(new BarEntry(2f, stats.getOutputStat().m_fRiskHist[1]));
-            entries.add(new BarEntry(3f, stats.getOutputStat().m_fRiskHist[2]));
-            entries.add(new BarEntry(4f, stats.getOutputStat().m_fRiskHist[3]));
-            entries.add(new BarEntry(5f, stats.getOutputStat().m_fRiskHist[4], getDrawable(R.drawable.ic_red_24dp)));
-
-            BarDataSet bardataset = new BarDataSet(entries, "Risk");
-
-            String[] labels = new String[3];
-            labels[0]="plip";
-            labels[1]="plop";
-            labels[2]="ploup";
-
-            bardataset.setStackLabels(labels);
-
-            BarData data = new BarData(bardataset);
-            barChart.setData(data); // set the data and list of lables into chart
-
-            Description description = new Description();
-            description.setText("Bilan de la conduite");
-            barChart.setDescription(description);  // set the description
-
-            bardataset.setColors(ColorTemplate.COLORFUL_COLORS);
-
-            barChart.animateY(5000);*/
-
 
             int idx = 0;
             int v = 50;
@@ -160,8 +129,9 @@ public class MainActivity extends AppCompatActivity {
             LinearLayoutCompat.LayoutParams paramsTxtView = new LinearLayoutCompat.LayoutParams(LinearLayoutCompat.LayoutParams.MATCH_PARENT, LinearLayoutCompat.LayoutParams.WRAP_CONTENT);
             paramsTxtView.gravity = Gravity.CENTER;
             paramsTxtView.setMargins(50,10,0,10);
+            List<CNxFullStat> cNxFullStatSorted = Arrays.stream(stats.getStats()).sorted((o1,o2)->Float.compare(o1.m_fDuration ,o2.m_fDuration)).collect(Collectors.toList());
 
-            for(CNxFullStat stat : stats.getStats()){
+            for(CNxFullStat stat : cNxFullStatSorted){
                 if(stat.m_iEnvConf != 3 && stat.m_iRiskSlice != 0) {
                     TextView tv = new TextView(this);
                     tv.setLayoutParams(paramsTxtView);
