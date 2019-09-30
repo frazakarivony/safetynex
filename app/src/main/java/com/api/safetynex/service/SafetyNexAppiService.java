@@ -34,6 +34,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -432,6 +433,7 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener{
         float duration = 0;
         float distance = 0;
         CNxFullStat[] FullStat = this.mJniFunction.GetCloudStat();
+        Arrays.sort(FullStat);
 
         SafetyStats stats = new SafetyStats();
         stats.setInputStat(InputUserStat);
