@@ -1,8 +1,14 @@
 <resources>
     <string name="app_name">SofteamNexiadAlerting</string>
     <string name="text_bubulle">Je suis une bubulle</string>
+    <string name="add_floating_button">Démarrer parcours</string>
+<!--
     <string name="add_floating_button">ADD FLOATING BUTTON</string>
+-->
+<!--
     <string name="close_app">CLOSE APP</string>
+-->
+    <string name="close_app">Quitter</string>
     <string name="loading">Récupération des licences et des cartes…</string>
     <string name="floating_view">Démarrage de l\'application. </string>
     <string name="init_app">Initialisation de l\'application en cours.</string>

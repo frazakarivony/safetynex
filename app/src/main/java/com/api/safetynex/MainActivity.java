@@ -76,8 +76,6 @@ public class MainActivity extends AppCompatActivity {
             this.sendBroadcast(new Intent("KILL"));
         });
 
-
-
         if(appReceiver.isRestartOnlyActivity()){
 
             ProgressBar p = (ProgressBar) findViewById(R.id.profress);
@@ -97,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
             entries.add(new BarEntry(4f, stats.getOutputStat().m_fRiskHist[3]));
             entries.add(new BarEntry(5f, stats.getOutputStat().m_fRiskHist[4]));
 
-            BarDataSet bardataset = new BarDataSet(entries, "Risk");
+            BarDataSet bardataset = new BarDataSet(entries, "Risque");
 
             // load data and animate it
 
@@ -118,9 +116,7 @@ public class MainActivity extends AppCompatActivity {
             barChart.setDescription(description);  // set the description
 
             bardataset.setColors(getColor(R.color.greenCol), getColor(R.color.yellowCol),getColor(R.color.orCol), getColor(R.color.orangeCol),getColor(R.color.redCol) );
-
             barChart.animateY(5000);
-
 
             int idx = 0;
             int v = 50;
