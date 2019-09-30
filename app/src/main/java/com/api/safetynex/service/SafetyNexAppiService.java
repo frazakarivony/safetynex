@@ -433,7 +433,6 @@ public class SafetyNexAppiService implements TextToSpeech.OnInitListener{
         float duration = 0;
         float distance = 0;
         CNxFullStat[] FullStat = this.mJniFunction.GetCloudStat();
-        Arrays.sort(FullStat);
 
         SafetyStats stats = new SafetyStats();
         stats.setInputStat(InputUserStat);

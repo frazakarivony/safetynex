@@ -23,7 +23,6 @@ import android.widget.TextView;
 import com.api.safetynex.receiver.AppReceiver;
 import com.api.safetynex.service.SafetyNexAppiService;
 import com.api.safetynex.service.floatingwidget.FloatingWidgetService;
-import com.github.mikephil.charting.components.Description;
 import com.nexiad.safetynexappsample.CONSTANTS;
 import com.nexyad.jndksafetynex.CNxFullStat;
 
@@ -31,6 +30,7 @@ import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.components.Description;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
             description.setText("Bilan de la conduite");
             barChart.setDescription(description);  // set the description
 
-            bardataset.setColors(getColor(R.color.greenCol), getColor(R.color.yellowCol), getColor(R.color.orCol), getColor(R.color.orangeCol),getColor(R.color.redCol) );
+            bardataset.setColors(getColor(R.color.greenCol), getColor(R.color.yellowCol),getColor(R.color.orCol), getColor(R.color.orangeCol),getColor(R.color.redCol) );
 
             barChart.animateY(5000);
 
@@ -128,7 +128,6 @@ public class MainActivity extends AppCompatActivity {
             LinearLayoutCompat.LayoutParams paramsTxtView = new LinearLayoutCompat.LayoutParams(LinearLayoutCompat.LayoutParams.MATCH_PARENT, LinearLayoutCompat.LayoutParams.WRAP_CONTENT);
             paramsTxtView.gravity = Gravity.CENTER;
             paramsTxtView.setMargins(50,10,0,10);
-            CNxFullStat[] fullS = stats.getStats();
             List<CNxFullStat> cNxFullStatSorted = Arrays.stream(stats.getStats()).sorted((o1,o2)->Float.compare(o1.m_fDuration ,o2.m_fDuration)).collect(Collectors.toList());
 
             for(CNxFullStat stat : cNxFullStatSorted){
